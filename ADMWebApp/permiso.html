@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Permiso</title>
+    <style>
+        /* Reset y estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header grande */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 180px;
+            display: flex;
+            align-items: center;
+            position: relative; /* Necesario para el posicionamiento absoluto del centro */
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        
+        .header-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50%;
+            height: 25%;
+            margin-bottom: 15px;
+            max-height: 25%;
+            max-width: 25%;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .menu-button {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 4px;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1; /* Asegura que esté por encima de otros elementos */
+            margin-bottom: 100px;
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        /* Contenedor principal */
+        .main-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        
+        /* Sección de saludo */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-message {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        /* Formulario */
+        .form-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-size: 22px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="date"],
+        input[type="time"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        textarea:focus {
+            border-color: #2c3e50;
+            outline: none;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .time-fields {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .time-fields .form-group {
+            flex: 1;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-button:hover {
+            background-color: #1a252f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="empleado.html">
+ <button class="menu-button">Menú Principal</button>
+            </a>
+           
+            <div class="header-center">
+                <img src="Media/logo.png" alt="Logo" class="logo">
+                <h1>Solicitud de Permiso</h1>
+            </div>
+            <!-- Espacio vacío para mantener el balance -->
+            <div style="width: 120px;"></div>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <div class="welcome-section">
+            <div class="welcome-message">¡Hola <span id="employee-name">Empleado</span>!</div>
+            <p>Por favor completa el siguiente formulario</p>
+        </div>
+        
+        <div class="form-container">
+            <h2 class="form-title">Detalles del permiso</h2>
+            <form action="#" method="post">
+                <div class="form-group">
+                    <label for="fecha">Dia Solicitado</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
+                
+                <div class="time-fields">
+                    <div class="form-group">
+                        <label for="hora-inicio">Hora de inicio del Permiso</label>
+                        <input type="time" id="hora-inicio" name="hora-inicio" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hora-fin">Hora de fin del Permiso</label>
+                        <input type="time" id="hora-fin" name="hora-fin" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="actividades">Descripción</label>
+                    <textarea id="actividades" name="actividades" placeholder="Describe en detalle el motivo de tu permiso..." required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-button">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Puedes personalizar el nombre del empleado aquí
+        // O obtenerlo de una sesión/login real
+        document.getElementById('employee-name').textContent = 'Juan Pérez';
+    </script>
+</body>
+</html>
