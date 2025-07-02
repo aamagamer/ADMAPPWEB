@@ -1,0 +1,25 @@
+
+COMMITS EN RAMA MAIN
+
+//Te posiciona en la carpeta de la APP
+cd ADMAPPWEB
+
+//Actualizar el código de la rama main en tu compu
+git pull origin main
+
+//Ver cambios
+git status
+
+//Prepara los archivos
+git add .
+
+//Guarda en local pero aun no esta en el repo
+git commit -m "Comentario"
+
+
+//Guarda los cambios en el repositorio online
+git push origin main
+
+
+//Cuando hay un commit encima o una madre asi
+git pull origin main --rebase
