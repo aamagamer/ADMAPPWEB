@@ -19,3 +19,7 @@ git commit -m "Comentario"
 
 //Guarda los cambios en el repositorio online
 git push origin main
+
+
+//Cuando hay un commit encima o una madre asi
+git pull origin main --rebase

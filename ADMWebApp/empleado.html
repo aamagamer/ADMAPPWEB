@@ -106,6 +106,7 @@
             padding: 20px;
             text-align: center;
             color: inherit; /* Hereda el color del texto */
+            padding-bottom: 150px;
         }
         
         .option-button:hover {
@@ -143,6 +144,11 @@
             font-size: 50px;
         }
         
+        .review-icon::before {
+            content: "🔍";
+            font-size: 50px;
+        }
+        
         /* Eliminar subrayado de los enlaces */
         a h2{
             text-decoration: none;
@@ -170,12 +176,20 @@
                 <h2>Solicitar Permiso</h2>
                 <p>Solicita un permiso por horas o días específicos</p>
             </a>
-            
+
             <a href="vacaciones.html" class="option-button">
                 <div class="vacation-icon"></div>
                 <h2>Solicitar Vacaciones</h2>
                 <p>Planifica y solicita tus días de vacaciones</p>
             </a>
+            
+            <a href="pendiente.html" class="option-button">
+                <div class="review-icon"></div>
+                <h2>Revisar Solicitudes</h2>
+                <p>Consulta el estado de tus solicitudes enviadas</p>
+            </a>
+            
+            
         </div>
     </div>
     
