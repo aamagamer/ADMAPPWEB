@@ -1,0 +1,14 @@
+
+COMMITS EN RAMA MAIN
+
+cd ADMAPPWEB
+
+git pull origin main
+
+git status
+
+git add .
+
+git commit -m "Comentario"
+
+git push origin main
