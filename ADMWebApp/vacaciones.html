@@ -1,302 +1,442 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Solicitud de Vacaciones</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        body {
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 40px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            height: 180px;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-        
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            width: 100%;
-        }
-        
-        .header-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .logo {
-            width: 50%;
-            height: 25%;
-            margin-bottom: 15px;
-            max-height: 25%;
-            max-width: 25%;
-        }
-        
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .menu-button {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-            border-radius: 4px;
-            padding: 8px 15px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 1;
-            margin-bottom: 100px;
-        }
-        
-        .menu-button:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        
-        .main-container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 20px;
-        }
-        
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .welcome-message {
-            font-size: 24px;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        
-        .form-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .form-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
-            font-size: 22px;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        input[type="date"],
-        textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="date"]:focus,
-        textarea:focus {
-            border-color: #2c3e50;
-            outline: none;
-        }
-        
-        textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-        
-        .date-fields {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .date-fields .form-group {
-            flex: 1;
-        }
-        
-        .submit-button {
-            width: 100%;
-            padding: 12px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .submit-button:hover {
-            background-color: #1a252f;
-        }
-        
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .vacation-counters {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .counter-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .counter-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .counter-label {
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .counter-value {
-            font-weight: 700;
-        }
-        
-        .available-days {
-            color: #27ae60;
-        }
-        
-        .used-days {
-            color: #e74c3c;
-        }
-        
-        .total-days {
-            color: #2c3e50;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 40px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 180px;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        width: 100%;
+      }
+
+      .header-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .logo {
+        width: 50%;
+        height: 25%;
+        margin-bottom: 15px;
+        max-height: 25%;
+        max-width: 25%;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .menu-button {
+        background-color: transparent;
+        color: white;
+        border: 2px solid white;
+        border-radius: 4px;
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        z-index: 1;
+        margin-bottom: 100px;
+      }
+
+      .menu-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .main-container {
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 0 20px;
+      }
+
+      .welcome-section {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .welcome-message {
+        font-size: 24px;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      .form-container {
+        background-color: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .form-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+        font-size: 22px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      input[type="date"],
+      textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input[type="date"]:focus,
+      textarea:focus {
+        border-color: #2c3e50;
+        outline: none;
+      }
+
+      textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      .date-fields {
+        display: flex;
+        gap: 20px;
+      }
+
+      .date-fields .form-group {
+        flex: 1;
+      }
+
+      .submit-button {
+        width: 100%;
+        padding: 12px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .submit-button:hover {
+        background-color: #1a252f;
+      }
+
+      .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .vacation-counters {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 1px solid #e0e0e0;
+      }
+
+      .counter-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .counter-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .counter-label {
+        font-weight: 600;
+        color: #555;
+      }
+
+      .counter-value {
+        font-weight: 700;
+      }
+
+      .available-days {
+        color: #27ae60;
+      }
+
+      .used-days {
+        color: #e74c3c;
+      }
+
+      .total-days {
+        color: #2c3e50;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <div class="header-container">
-            <a href="empleado.html">
-                <button class="menu-button">Menú Principal</button>
-            </a>
-           
-            <div class="header-center">
-                <img src="Media/logo.png" alt="Logo" class="logo">
-                <h1>Solicitud de Vacaciones</h1>
-            </div>
-            
-            <div style="width: 120px;"></div>
+      <div class="header-container">
+        <a href="empleado.html">
+          <button class="menu-button">Menú Principal</button>
+        </a>
+
+        <div class="header-center">
+          <img src="Media/logo.png" alt="Logo" class="logo" />
+          <h1>Solicitud de Vacaciones</h1>
         </div>
+
+        <div style="width: 120px"></div>
+      </div>
     </header>
-    
+
     <div class="main-container">
-        <div class="welcome-section">
-            <div class="welcome-message">¡Hola <span id="employee-name">Empleado</span>!</div>
-            <p>Por favor completa el siguiente formulario para solicitar tus vacaciones</p>
+      <div class="welcome-section">
+        <div class="welcome-message">
+          ¡Hola <span id="employee-name">Empleado</span>!
         </div>
-        
-        <div class="form-container">
-            <h2 class="form-title">Detalles de las vacaciones</h2>
-            
-            <!-- Contadores de días de vacaciones -->
-            <div class="vacation-counters">
-                <div class="counter-item">
-                    <span class="counter-label">Tienes <span class="total-days">15</span> días por ley de vacaciones este año</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">Has usado <span class="used-days">0</span> días este año</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">Tienes <span class="available-days">15</span> días disponibles este año</span>
-                </div>
+        <p>
+          Por favor completa el siguiente formulario para solicitar tus
+          vacaciones
+        </p>
+      </div>
+
+      <div class="form-container">
+        <h2 class="form-title">Detalles de las vacaciones</h2>
+
+        <!-- Contadores de días de vacaciones -->
+        <div class="vacation-counters">
+          <div class="counter-item">
+            <span class="counter-label"
+              >Tienes <span class="total-days">15</span> días por ley de
+              vacaciones este año</span
+            >
+          </div>
+          <div class="counter-item">
+            <span class="counter-label"
+              >Has usado <span class="used-days">0</span> días este año</span
+            >
+          </div>
+          <div class="counter-item">
+            <span class="counter-label"
+              >Tienes <span class="available-days">15</span> días disponibles
+              este año</span
+            >
+          </div>
+        </div>
+
+        <form id="vacation-form" action="#" method="post">
+          <div class="date-fields">
+            <div class="form-group">
+              <label for="fecha-inicio">Primer día de vacaciones</label>
+              <input
+                type="date"
+                id="fecha-inicio"
+                name="fecha-inicio"
+                required
+              />
+              <div id="start-date-error" class="error-message">
+                Las vacaciones deben solicitarse con al menos 7 días de
+                anticipación
+              </div>
             </div>
-            
-            <form id="vacation-form" action="#" method="post">
-                <div class="date-fields">
-                    <div class="form-group">
-                        <label for="fecha-inicio">Primer día de vacaciones</label>
-                        <input type="date" id="fecha-inicio" name="fecha-inicio" required>
-                        <div id="start-date-error" class="error-message">Las vacaciones deben solicitarse con al menos 7 días de anticipación</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="fecha-fin">Último día de vacaciones</label>
-                        <input type="date" id="fecha-fin" name="fecha-fin" required>
-                        <div id="end-date-error" class="error-message">La fecha final debe ser posterior a la fecha inicial</div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="motivo">Motivo de las vacaciones</label>
-                    <textarea id="motivo" name="motivo" placeholder="Describe el motivo de tus vacaciones..." required></textarea>
-                    <div id="reason-error" class="error-message">Por favor describe el motivo de tus vacaciones</div>
-                </div>
-                
-                <button type="submit" class="submit-button">Enviar Solicitud</button>
-            </form>
-        </div>
+
+            <div class="form-group">
+              <label for="fecha-fin">Último día de vacaciones</label>
+              <input type="date" id="fecha-fin" name="fecha-fin" required />
+              <div id="end-date-error" class="error-message">
+                La fecha final debe ser posterior a la fecha inicial
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="motivo">Motivo de las vacaciones</label>
+            <textarea
+              id="motivo"
+              name="motivo"
+              placeholder="Describe el motivo de tus vacaciones..."
+              required
+            ></textarea>
+            <div id="reason-error" class="error-message">
+              Por favor describe el motivo de tus vacaciones
+            </div>
+          </div>
+
+          <button type="submit" class="submit-button">Enviar Solicitud</button>
+        </form>
+      </div>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+    <!-- Modal de Confirmación -->
+    <!-- Modal de Confirmación Bonito -->
+    <div
+      id="confirm-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        font-family: Arial, sans-serif;
+      "
+    >
+      <div
+        style="
+          background-color: #ffffff;
+          padding: 30px 25px;
+          border-radius: 12px;
+          max-width: 400px;
+          width: 90%;
+          height: 400px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          text-align: center;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+          animation: fadeIn 0.3s ease-in-out;
+        "
+      >
+        <div>
+          <h2 style="margin-bottom: 10px; color: #333">Confirmar Solicitud</h2>
+          <p id="modal-text" style="font-size: 16px; color: #555"></p>
+        </div>
+        <div style="margin-bottom: 10px">
+          <button
+            id="confirm-btn"
+            style="
+              background-color: #4caf50;
+              color: white;
+              border: none;
+              padding: 14px 24px;
+              margin-bottom: 10px;
+              border-radius: 8px;
+              font-size: 17px;
+              width: 100%;
+              cursor: pointer;
+              transition: background-color 0.3s;
+            "
+          >
+            Confirmar
+          </button>
+          <button
+            id="cancel-btn"
+            style="
+              background-color: #f44336;
+              color: white;
+              border: none;
+              padding: 14px 24px;
+              border-radius: 8px;
+              font-size: 17px;
+              width: 100%;
+              cursor: pointer;
+              transition: background-color 0.3s;
+            "
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      #confirm-modal button:hover {
+        opacity: 0.92;
+      }
+
+      @keyframes fadeIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    </style>
+
+    <style>
+      #confirm-modal button:hover {
+        opacity: 0.9;
+      }
+
+      @keyframes fadeIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
         let totalVacationDays = 15;
         let usedVacationDays = 0;
         let availableDays = totalVacationDays - usedVacationDays;
 
         const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
         };
 
         const today = new Date();
@@ -305,32 +445,34 @@
         minDate.setDate(minDate.getDate() + 7);
         const formattedMinDate = formatDate(minDate);
 
-        const fechaInicioInput = document.getElementById('fecha-inicio');
-        const fechaFinInput = document.getElementById('fecha-fin');
+        const fechaInicioInput = document.getElementById("fecha-inicio");
+        const fechaFinInput = document.getElementById("fecha-fin");
 
         fechaInicioInput.min = formattedMinDate;
         fechaFinInput.min = formattedMinDate;
         fechaInicioInput.value = formattedMinDate;
 
         function contarDiasHabiles(fechaInicio, fechaFin) {
-            let count = 0;
-            let current = new Date(fechaInicio);
-            current.setHours(0, 0, 0, 0);
-            fechaFin = new Date(fechaFin);
-            fechaFin.setHours(0, 0, 0, 0);
+          let count = 0;
+          let current = new Date(fechaInicio);
+          current.setHours(0, 0, 0, 0);
+          fechaFin = new Date(fechaFin);
+          fechaFin.setHours(0, 0, 0, 0);
 
-            while (current <= fechaFin) {
-                const dia = current.getDay();
-                if (dia !== 0 && dia !== 6) {
-                    count++;
-                }
-                current.setDate(current.getDate() + 1);
+          while (current <= fechaFin) {
+            const dia = current.getDay();
+            if (dia !== 0 && dia !== 6) {
+              count++;
             }
-            return count;
+            current.setDate(current.getDate() + 1);
+          }
+          return count;
         }
 
         // Validación completa del formulario
-        document.getElementById('vacation-form').addEventListener('submit', function (e) {
+        document
+          .getElementById("vacation-form")
+          .addEventListener("submit", function (e) {
             e.preventDefault();
             let isValid = true;
 
@@ -344,92 +486,139 @@
             minStartDate.setDate(minStartDate.getDate() + 6);
 
             if (startDate < minStartDate) {
-                document.getElementById('start-date-error').style.display = 'block';
-                isValid = false;
+              document.getElementById("start-date-error").style.display =
+                "block";
+              isValid = false;
             } else {
-                document.getElementById('start-date-error').style.display = 'none';
+              document.getElementById("start-date-error").style.display =
+                "none";
             }
 
             if (endDate < startDate) {
-                document.getElementById('end-date-error').style.display = 'block';
-                isValid = false;
+              document.getElementById("end-date-error").style.display = "block";
+              isValid = false;
             } else {
-                document.getElementById('end-date-error').style.display = 'none';
+              document.getElementById("end-date-error").style.display = "none";
             }
 
-            if (document.getElementById('motivo').value.trim() === '') {
-                document.getElementById('reason-error').style.display = 'block';
-                isValid = false;
+            if (document.getElementById("motivo").value.trim() === "") {
+              document.getElementById("reason-error").style.display = "block";
+              isValid = false;
             } else {
-                document.getElementById('reason-error').style.display = 'none';
+              document.getElementById("reason-error").style.display = "none";
             }
 
             const daysDiff = contarDiasHabiles(startDate, endDate);
 
             if (daysDiff > availableDays) {
-                alert(`No tienes suficientes días disponibles. Estás solicitando ${daysDiff} días hábiles pero solo tienes ${availableDays} disponibles.`);
-                return false;
+              alert(
+                `No tienes suficientes días disponibles. Estás solicitando ${daysDiff} días hábiles pero solo tienes ${availableDays} disponibles.`
+              );
+              return false;
             }
 
             if (isValid) {
-                alert(`Solicitud de ${daysDiff} días hábiles enviada correctamente`);
-                // this.submit(); // Descomenta si deseas enviar al backend
+              const fechaInicioStr = startDate.toLocaleDateString("es-MX", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              });
+
+              const fechaFinStr = endDate.toLocaleDateString("es-MX", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              });
+
+              modalText.innerHTML = `
+    Estás solicitando <strong>${daysDiff}</strong> día(s) hábil(es) de vacaciones.<br><br>
+    Desde: <strong>${fechaInicioStr}</strong><br>
+    Hasta: <strong>${fechaFinStr}</strong><br><br>
+    ¿Deseas confirmar la solicitud?
+`;
+
+              modal.style.display = "flex";
             }
-        });
+          });
 
         // Actualizar min de fecha-fin y validar que no sea menor
-        fechaInicioInput.addEventListener('change', function () {
-            const selectedDate = this.value;
-            const day = new Date(selectedDate).getDay();
+        fechaInicioInput.addEventListener("change", function () {
+          const selectedDate = this.value;
+          const day = new Date(selectedDate).getDay();
 
-            // Bloquear sábado o domingo
-            if (day === 0 || day === 6) {
-                alert('No puedes seleccionar sábado o domingo como inicio de vacaciones.');
-                this.value = '';
-                return;
-            }
+          // Bloquear sábado o domingo
+          if (day === 0 || day === 6) {
+            alert(
+              "No puedes seleccionar sábado o domingo como inicio de vacaciones."
+            );
+            this.value = "";
+            return;
+          }
 
-            fechaFinInput.min = selectedDate;
-            if (fechaFinInput.value < selectedDate) {
-                fechaFinInput.value = selectedDate;
-            }
+          fechaFinInput.min = selectedDate;
+          if (fechaFinInput.value < selectedDate) {
+            fechaFinInput.value = selectedDate;
+          }
         });
 
         // Bloquear selección de sábado o domingo en fecha-fin
-        fechaFinInput.addEventListener('change', function () {
-            const selectedDate = this.value;
-            const day = new Date(selectedDate).getDay();
+        fechaFinInput.addEventListener("change", function () {
+          const selectedDate = this.value;
+          const day = new Date(selectedDate).getDay();
 
-            if (day === 0 || day === 6) {
-                alert('No puedes seleccionar sábado o domingo como fin de vacaciones.');
-                this.value = '';
-            }
+          if (day === 0 || day === 6) {
+            alert(
+              "No puedes seleccionar sábado o domingo como fin de vacaciones."
+            );
+            this.value = "";
+          }
         });
 
         // Simulación de carga de datos desde backend
         async function loadVacationData() {
-            try {
-                const response = await fetch('/api/vacation-days');
-                const data = await response.json();
+          try {
+            const response = await fetch("/api/vacation-days");
+            const data = await response.json();
 
-                totalVacationDays = data.totalDays || 15;
-                usedVacationDays = data.usedDays || 0;
-                availableDays = totalVacationDays - usedVacationDays;
+            totalVacationDays = data.totalDays || 15;
+            usedVacationDays = data.usedDays || 0;
+            availableDays = totalVacationDays - usedVacationDays;
 
-                document.querySelector('.total-days').textContent = totalVacationDays;
-                document.querySelector('.used-days').textContent = usedVacationDays;
-                document.querySelector('.available-days').textContent = availableDays;
-            } catch (error) {
-                console.error('Error al cargar datos de vacaciones:', error);
-                document.querySelector('.total-days').textContent = 15;
-                document.querySelector('.used-days').textContent = 0;
-                document.querySelector('.available-days').textContent = 15;
-            }
+            document.querySelector(".total-days").textContent =
+              totalVacationDays;
+            document.querySelector(".used-days").textContent = usedVacationDays;
+            document.querySelector(".available-days").textContent =
+              availableDays;
+          } catch (error) {
+            console.error("Error al cargar datos de vacaciones:", error);
+            document.querySelector(".total-days").textContent = 15;
+            document.querySelector(".used-days").textContent = 0;
+            document.querySelector(".available-days").textContent = 15;
+          }
         }
 
         loadVacationData();
-    });
-</script>
+      });
 
-</body>
+      // Modal de confirmación
+      const modal = document.getElementById("confirm-modal");
+      const modalText = document.getElementById("modal-text");
+      const confirmBtn = document.getElementById("confirm-btn");
+      const cancelBtn = document.getElementById("cancel-btn");
+
+      let solicitudConfirmada = false;
+
+      confirmBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+        alert("Solicitud registrada correctamente.");
+        window.location.href = "empleado.html"; // Redirige al menú principal
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+    </script>
+  </body>
 </html>
