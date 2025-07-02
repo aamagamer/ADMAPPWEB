@@ -286,121 +286,150 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Variables para los días de vacaciones (se actualizarán desde la BD)
-            let totalVacationDays = 15;
-            let usedVacationDays = 0;
-            let availableDays = totalVacationDays - usedVacationDays;
-            
-            // Establecer fecha mínima (7 días a partir de hoy)
-            const today = new Date();
-            const minDate = new Date();
-            minDate.setDate(today.getDate() + 7);
-            
-            // Formatear a YYYY-MM-DD
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            };
-            
-            // Establecer atributos min en los campos de fecha
-            document.getElementById('fecha-inicio').min = formatDate(minDate);
-            document.getElementById('fecha-fin').min = formatDate(minDate);
-            
-            // Validación del formulario
-            document.getElementById('vacation-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                let isValid = true;
-                
-                // Validar fecha de inicio
-                const startDate = new Date(document.getElementById('fecha-inicio').value);
-                const minStartDate = new Date();
-                minStartDate.setDate(minStartDate.getDate() + 7);
-                
-                if (startDate < minStartDate) {
-                    document.getElementById('start-date-error').style.display = 'block';
-                    isValid = false;
-                } else {
-                    document.getElementById('start-date-error').style.display = 'none';
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let totalVacationDays = 15;
+        let usedVacationDays = 0;
+        let availableDays = totalVacationDays - usedVacationDays;
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const minDate = new Date(today);
+        minDate.setDate(minDate.getDate() + 7);
+        const formattedMinDate = formatDate(minDate);
+
+        const fechaInicioInput = document.getElementById('fecha-inicio');
+        const fechaFinInput = document.getElementById('fecha-fin');
+
+        fechaInicioInput.min = formattedMinDate;
+        fechaFinInput.min = formattedMinDate;
+        fechaInicioInput.value = formattedMinDate;
+
+        function contarDiasHabiles(fechaInicio, fechaFin) {
+            let count = 0;
+            let current = new Date(fechaInicio);
+            current.setHours(0, 0, 0, 0);
+            fechaFin = new Date(fechaFin);
+            fechaFin.setHours(0, 0, 0, 0);
+
+            while (current <= fechaFin) {
+                const dia = current.getDay();
+                if (dia !== 0 && dia !== 6) {
+                    count++;
                 }
-                
-                // Validar fecha fin
-                const endDate = new Date(document.getElementById('fecha-fin').value);
-                if (endDate <= startDate) {
-                    document.getElementById('end-date-error').style.display = 'block';
-                    isValid = false;
-                } else {
-                    document.getElementById('end-date-error').style.display = 'none';
-                }
-                
-                // Validar motivo
-                if (document.getElementById('motivo').value.trim() === '') {
-                    document.getElementById('reason-error').style.display = 'block';
-                    isValid = false;
-                } else {
-                    document.getElementById('reason-error').style.display = 'none';
-                }
-                
-                // Validar que no exceda los días disponibles
-                const timeDiff = endDate - startDate;
-                const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1;
-                
-                if (daysDiff > availableDays) {
-                    alert(`No tienes suficientes días disponibles. Estás solicitando ${daysDiff} días pero solo tienes ${availableDays} disponibles.`);
-                    return false;
-                }
-                
-                // Si todo es válido, enviar el formulario
-                if (isValid) {
-                    alert(`Solicitud de ${daysDiff} días de vacaciones enviada correctamente`);
-                    // Aquí podrías agregar código para enviar los datos al servidor
-                    // this.submit();
-                }
-            });
-            
-            // Actualizar fecha mínima de fin cuando cambia la de inicio
-            document.getElementById('fecha-inicio').addEventListener('change', function() {
-                const startDate = this.value;
-                document.getElementById('fecha-fin').min = startDate;
-                
-                // Si la fecha fin actual es anterior a la nueva fecha inicio, resetearla
-                if (document.getElementById('fecha-fin').value < startDate) {
-                    document.getElementById('fecha-fin').value = startDate;
-                }
-            });
-            
-            // Función para cargar datos desde el backend
-            async function loadVacationData() {
-                try {
-                    // Simulamos una llamada a la API (reemplaza con tu endpoint real)
-                    const response = await fetch('/api/vacation-days');
-                    const data = await response.json();
-                    
-                    // Actualizamos las variables
-                    totalVacationDays = data.totalDays || 15;
-                    usedVacationDays = data.usedDays || 0;
-                    availableDays = totalVacationDays - usedVacationDays;
-                    
-                    // Actualizamos la UI
-                    document.querySelector('.total-days').textContent = totalVacationDays;
-                    document.querySelector('.used-days').textContent = usedVacationDays;
-                    document.querySelector('.available-days').textContent = availableDays;
-                } catch (error) {
-                    console.error('Error al cargar datos de vacaciones:', error);
-                    // Usamos valores por defecto si hay error
-                    document.querySelector('.total-days').textContent = 15;
-                    document.querySelector('.used-days').textContent = 0;
-                    document.querySelector('.available-days').textContent = 15;
-                }
+                current.setDate(current.getDate() + 1);
             }
-            
-            // Cargar datos al iniciar la página
-            loadVacationData();
+            return count;
+        }
+
+        // Validación completa del formulario
+        document.getElementById('vacation-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            let isValid = true;
+
+            const startDate = new Date(fechaInicioInput.value);
+            const endDate = new Date(fechaFinInput.value);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(0, 0, 0, 0);
+
+            const minStartDate = new Date();
+            minStartDate.setHours(0, 0, 0, 0);
+            minStartDate.setDate(minStartDate.getDate() + 6);
+
+            if (startDate < minStartDate) {
+                document.getElementById('start-date-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('start-date-error').style.display = 'none';
+            }
+
+            if (endDate < startDate) {
+                document.getElementById('end-date-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('end-date-error').style.display = 'none';
+            }
+
+            if (document.getElementById('motivo').value.trim() === '') {
+                document.getElementById('reason-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('reason-error').style.display = 'none';
+            }
+
+            const daysDiff = contarDiasHabiles(startDate, endDate);
+
+            if (daysDiff > availableDays) {
+                alert(`No tienes suficientes días disponibles. Estás solicitando ${daysDiff} días hábiles pero solo tienes ${availableDays} disponibles.`);
+                return false;
+            }
+
+            if (isValid) {
+                alert(`Solicitud de ${daysDiff} días hábiles enviada correctamente`);
+                // this.submit(); // Descomenta si deseas enviar al backend
+            }
         });
-    </script>
+
+        // Actualizar min de fecha-fin y validar que no sea menor
+        fechaInicioInput.addEventListener('change', function () {
+            const selectedDate = this.value;
+            const day = new Date(selectedDate).getDay();
+
+            // Bloquear sábado o domingo
+            if (day === 0 || day === 6) {
+                alert('No puedes seleccionar sábado o domingo como inicio de vacaciones.');
+                this.value = '';
+                return;
+            }
+
+            fechaFinInput.min = selectedDate;
+            if (fechaFinInput.value < selectedDate) {
+                fechaFinInput.value = selectedDate;
+            }
+        });
+
+        // Bloquear selección de sábado o domingo en fecha-fin
+        fechaFinInput.addEventListener('change', function () {
+            const selectedDate = this.value;
+            const day = new Date(selectedDate).getDay();
+
+            if (day === 0 || day === 6) {
+                alert('No puedes seleccionar sábado o domingo como fin de vacaciones.');
+                this.value = '';
+            }
+        });
+
+        // Simulación de carga de datos desde backend
+        async function loadVacationData() {
+            try {
+                const response = await fetch('/api/vacation-days');
+                const data = await response.json();
+
+                totalVacationDays = data.totalDays || 15;
+                usedVacationDays = data.usedDays || 0;
+                availableDays = totalVacationDays - usedVacationDays;
+
+                document.querySelector('.total-days').textContent = totalVacationDays;
+                document.querySelector('.used-days').textContent = usedVacationDays;
+                document.querySelector('.available-days').textContent = availableDays;
+            } catch (error) {
+                console.error('Error al cargar datos de vacaciones:', error);
+                document.querySelector('.total-days').textContent = 15;
+                document.querySelector('.used-days').textContent = 0;
+                document.querySelector('.available-days').textContent = 15;
+            }
+        }
+
+        loadVacationData();
+    });
+</script>
+
 </body>
 </html>
