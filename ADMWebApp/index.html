@@ -6,6 +6,33 @@
     <title>ADM</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
+<script>
+document.querySelector('form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    try {
+        const response = await fetch('http://localhost:5000/login', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('¡Bienvenido!');
+            window.location.href = 'dashboard.html';  // Redirige al dashboard
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al conectar con el servidor');
+    }
+});
+</script>
 <body>
    <header>
         <div class="header-container">
@@ -17,7 +44,7 @@
     <div class="main-container">
         <div class="login-container">
             <h2 class="login-title">Login</h2>
-            <form action="#" method="post">
+            <form action="http://localhost:5000/login" method="post">
                 <div class="form-group">
                     <label for="username">Usuario</label>
                     <input type="text" id="username" name="username" placeholder="Número de empleado" required>

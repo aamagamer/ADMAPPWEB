@@ -231,42 +231,7 @@
         </div>
     </div>
     
-    <script>
-        // Puedes personalizar el nombre del empleado aquí
-        // O obtenerlo de una sesión/login real
-        document.getElementById('employee-name').textContent = 'Juan Pérez';
-    </script>
-
-    <script>
-    // 1. Obtener fecha mínima: mañana
-    const hoy = new Date();
-    hoy.setDate(hoy.getDate() + 1);
-
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
-    const fechaMinima = `${yyyy}-${mm}-${dd}`;
-
-    // 2. Establecer en el campo de fecha
-    const fechaInput = document.getElementById('fecha');
-    fechaInput.setAttribute('min', fechaMinima);
-
-    // 3. Validar antes de enviar el formulario
-    const formulario = document.querySelector('form');
-    formulario.addEventListener('submit', function(e) {
-        const fechaSeleccionada = new Date(fechaInput.value);
-        const fechaMin = new Date(fechaMinima);
-
-        // Si la fecha seleccionada es menor a mañana, cancelar envío
-        if (fechaSeleccionada < fechaMin) {
-            e.preventDefault(); // Detiene el envío
-            alert("Los permisos deben solicitarse con al menos 24 horas de anticipación.");
-        }
-    });
-
-    // 4. Nombre del empleado
-    document.getElementById('employee-name').textContent = 'Juan Pérez';
-</script>
+    
 
 </body>
 </html>
