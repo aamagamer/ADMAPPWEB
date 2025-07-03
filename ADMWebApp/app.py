@@ -8,11 +8,12 @@ CORS(app)
 # Conexión a SQL Server
 conn = pyodbc.connect(
     'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=.\\SQLEXPRESS;'
+    'SERVER=192.168.0.76\\SQLEXPRESS;'
     'DATABASE=ADM;'
     'UID=ADM;'
     'PWD=ADMuser2025'
 )
+
 
 cursor = conn.cursor()
 
