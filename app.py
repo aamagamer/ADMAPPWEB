@@ -8,13 +8,11 @@ CORS(app)
 # Conexión a SQL Server
 conn = pyodbc.connect(
     'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=192.168.0.37,1433;'  # sin nombre de instancia, con puerto explícito
+    'SERVER=192.168.0.202,1433;'
     'DATABASE=ADM;'
     'UID=ADM;'
     'PWD=ADMuser2025'
 )
-
-
 cursor = conn.cursor()
 
 @app.route('/')
@@ -48,7 +46,7 @@ def login():
     else:
         return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
 
-@app.route('/api/empleados', methods=['GET'])  # 👈 ahora está en el lugar correcto
+@app.route('/api/empleados', methods=['GET'])
 def obtener_empleados():
     cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario")
     empleados = []
@@ -74,6 +72,19 @@ def obtener_empleado(id):
     else:
         return jsonify({"error": "Empleado no encontrado"}), 404
 
+# Nuevo endpoint: obtener roles para combobox
+@app.route('/api/roles', methods=['GET'])
+def obtener_roles():
+    cursor.execute("SELECT TipoRol FROM Rol")
+    roles = [row[0] for row in cursor.fetchall()]
+    return jsonify(roles)
+
+# Nuevo endpoint: obtener áreas para combobox
+@app.route('/api/areas', methods=['GET'])
+def obtener_areas():
+    cursor.execute("SELECT NombreArea FROM Area")
+    areas = [row[0] for row in cursor.fetchall()]
+    return jsonify(areas)
 
 @app.route('/<path:filename>')
 def serve_file(filename):
@@ -81,5 +92,3 @@ def serve_file(filename):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
-

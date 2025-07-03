@@ -444,25 +444,18 @@
         <div class="form-group">
           <label for="tipoRol">Tipo de Rol:</label>
           <select id="tipoRol" name="tipoRol" required>
-            <option value="">Seleccione un rol</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Empleado">Empleado</option>
-            <option value="Gerente">Gerente</option>
-            <option value="RH">Recursos Humanos</option>
-          </select>
+  <option value="">Cargando roles...</option>
+</select>
+
         </div>
         
         <!-- Campo 3 (Combobox) -->
         <div class="form-group">
           <label for="nombreArea">Área:</label>
-          <select id="nombreArea" name="nombreArea" required>
-            <option value="">Seleccione un área</option>
-            <option value="Ventas">Ventas</option>
-            <option value="Marketing">Marketing</option>
-            <option value="TI">Tecnologías de Información</option>
-            <option value="Finanzas">Finanzas</option>
-            <option value="RH">Recursos Humanos</option>
-          </select>
+         <select id="nombreArea" name="nombreArea" required>
+  <option value="">Cargando áreas...</option>
+</select>
+
         </div>
         
         <!-- Campo 4 -->
@@ -563,10 +556,16 @@
         
         
         <!-- Campo 20 -->
-        <div class="form-group">
-          <label for="confirmarContraseña">Contraseña:</label>
-          <input type="password" id="confirmarContraseña" name="confirmarContraseña" required>
-        </div>
+<div class="form-group">
+  <label for="contraseña">Contraseña:</label>
+  <input type="password" id="contraseña" name="contraseña" required>
+</div>
+
+<!-- Campo 21 -->
+<div class="form-group">
+  <label for="confirmarContraseña">Confirmar Contraseña:</label>
+  <input type="password" id="confirmarContraseña" name="confirmarContraseña" required>
+</div>
         
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="cerrarModalAltaEmpleado()">Cancelar</button>
@@ -655,8 +654,39 @@
     }
 
     function abrirModalAltaEmpleado() {
-      document.getElementById('add-employee-modal').classList.remove('hidden');
-    }
+  document.getElementById('add-employee-modal').classList.remove('hidden');
+
+  // Llenar roles
+  fetch('/api/roles')
+    .then(response => response.json())
+    .then(data => {
+      const selectRol = document.getElementById('tipoRol');
+      selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+      data.forEach(rol => {
+        const option = document.createElement('option');
+        option.value = rol;
+        option.textContent = rol;
+        selectRol.appendChild(option);
+      });
+    })
+    .catch(error => console.error('Error al cargar roles:', error));
+
+  // Llenar áreas
+  fetch('/api/areas')
+    .then(response => response.json())
+    .then(data => {
+      const selectArea = document.getElementById('nombreArea');
+      selectArea.innerHTML = '<option value="">Seleccione un área</option>';
+      data.forEach(area => {
+        const option = document.createElement('option');
+        option.value = area;
+        option.textContent = area;
+        selectArea.appendChild(option);
+      });
+    })
+    .catch(error => console.error('Error al cargar áreas:', error));
+}
+
 
     function cerrarModalAltaEmpleado() {
       document.getElementById('add-employee-modal').classList.add('hidden');
