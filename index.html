@@ -52,7 +52,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('¡Bienvenido!');
+                    
                     window.location.href = data.redirect;  // Redirige a la página correspondiente al rol
                 } else {
                     alert(data.message);

@@ -78,6 +78,9 @@
   .employee-table-container h2 {
     margin-bottom: 15px;
     color: #2c3e50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .employee-table {
@@ -245,6 +248,99 @@
     font-size: 13px;
   }
 
+  /* Estilos para el modal de alta de empleado */
+  .add-employee-modal {
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .add-employee-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 15px;
+  }
+
+  .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #1a252f;
+  }
+
+  .btn-secondary {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+  }
+
+  .btn-secondary:hover {
+    background-color: #e0e0e0;
+  }
+
+  .add-employee-btn {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .add-employee-btn:hover {
+    background-color: #1a252f;
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -294,7 +390,10 @@
 
   <div class="content-wrapper">
     <div class="employee-table-container">
-      <h2>Empleados Registrados</h2>
+      <h2>
+        Empleados Registrados
+        <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">Dar de alta empleado</button>
+      </h2>
       <table class="employee-table">
         <thead>
           <tr>
@@ -320,12 +419,160 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal para ver detalles del empleado -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <span class="close" onclick="cerrarModal()">&times;</span>
       <h2>Detalle del Empleado</h2>
       <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal para dar de alta empleado -->
+  <div id="add-employee-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalAltaEmpleado()">&times;</span>
+      <h2>Dar de alta nuevo empleado</h2>
+      <form id="employee-form" class="add-employee-form">
+        <!-- Campo 1 -->
+        <div class="form-group">
+          <label for="idUsuario">ID Usuario:</label>
+          <input type="text" id="idUsuario" name="idUsuario" required>
+        </div>
+        
+        <!-- Campo 2 (Combobox) -->
+        <div class="form-group">
+          <label for="tipoRol">Tipo de Rol:</label>
+          <select id="tipoRol" name="tipoRol" required>
+            <option value="">Seleccione un rol</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Empleado">Empleado</option>
+            <option value="Gerente">Gerente</option>
+            <option value="RH">Recursos Humanos</option>
+          </select>
+        </div>
+        
+        <!-- Campo 3 (Combobox) -->
+        <div class="form-group">
+          <label for="nombreArea">Área:</label>
+          <select id="nombreArea" name="nombreArea" required>
+            <option value="">Seleccione un área</option>
+            <option value="Ventas">Ventas</option>
+            <option value="Marketing">Marketing</option>
+            <option value="TI">Tecnologías de Información</option>
+            <option value="Finanzas">Finanzas</option>
+            <option value="RH">Recursos Humanos</option>
+          </select>
+        </div>
+        
+        <!-- Campo 4 -->
+        <div class="form-group">
+          <label for="nombres">Nombres:</label>
+          <input type="text" id="nombres" name="nombres" required>
+        </div>
+        
+        <!-- Campo 5 -->
+        <div class="form-group">
+          <label for="paterno">Apellido Paterno:</label>
+          <input type="text" id="paterno" name="paterno" required>
+        </div>
+        
+        <!-- Campo 6 -->
+        <div class="form-group">
+          <label for="materno">Apellido Materno:</label>
+          <input type="text" id="materno" name="materno">
+        </div>
+        
+        <!-- Campo 7 -->
+        <div class="form-group">
+          <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+          <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+        </div>
+        
+        <!-- Campo 8 -->
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" required>
+        </div>
+        
+        <!-- Campo 9 -->
+        <div class="form-group">
+          <label for="codigoPostal">Código Postal:</label>
+          <input type="text" id="codigoPostal" name="codigoPostal" required>
+        </div>
+        
+        <!-- Campo 10 -->
+        <div class="form-group">
+          <label for="correo">Correo Electrónico:</label>
+          <input type="email" id="correo" name="correo" required>
+        </div>
+        
+        <!-- Campo 11 -->
+        <div class="form-group">
+          <label for="nss">Número de Seguro Social (NSS):</label>
+          <input type="text" id="nss" name="nss" required>
+        </div>
+        
+        <!-- Campo 12 -->
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" name="telefono" required>
+        </div>
+        
+        <!-- Campo 13 -->
+        <div class="form-group">
+          <label for="fechaIngreso">Fecha de Ingreso:</label>
+          <input type="date" id="fechaIngreso" name="fechaIngreso" required>
+        </div>
+        
+        <!-- Campo 14 -->
+        <div class="form-group">
+          <label for="rfc">RFC:</label>
+          <input type="text" id="rfc" name="rfc" required>
+        </div>
+        
+        <!-- Campo 15 -->
+        <div class="form-group">
+          <label for="curp">CURP:</label>
+          <input type="text" id="curp" name="curp" required>
+        </div>
+        
+        <!-- Campo 16 -->
+        <div class="form-group">
+          <label for="puesto">Puesto:</label>
+          <input type="text" id="puesto" name="puesto" required>
+        </div>
+        
+        <!-- Campo 17 -->
+        <div class="form-group">
+          <label for="nombreContactoEmergencia">Nombre Contacto Emergencia:</label>
+          <input type="text" id="nombreContactoEmergencia" name="nombreContactoEmergencia" required>
+        </div>
+        
+        <!-- Campo 18 -->
+        <div class="form-group">
+          <label for="telefonoEmergencia">Teléfono Emergencia:</label>
+          <input type="tel" id="telefonoEmergencia" name="telefonoEmergencia" required>
+        </div>
+        
+        <!-- Campo 19 -->
+        <div class="form-group">
+          <label for="parentesco">Parentesco:</label>
+          <input type="text" id="parentesco" name="parentesco" required>
+        </div>
+        
+        
+        <!-- Campo 20 -->
+        <div class="form-group">
+          <label for="confirmarContraseña">Contraseña:</label>
+          <input type="password" id="confirmarContraseña" name="confirmarContraseña" required>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModalAltaEmpleado()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Empleado</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -407,6 +654,14 @@
       document.getElementById('modal').classList.add('hidden');
     }
 
+    function abrirModalAltaEmpleado() {
+      document.getElementById('add-employee-modal').classList.remove('hidden');
+    }
+
+    function cerrarModalAltaEmpleado() {
+      document.getElementById('add-employee-modal').classList.add('hidden');
+    }
+
     function editarEmpleado(id) {
       alert("Función editar aún no implementada (ID " + id + ")");
     }
@@ -431,6 +686,36 @@
         });
       }
     }
+
+    // Manejar el envío del formulario de alta de empleado
+    document.getElementById('employee-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Validar que las contraseñas coincidan
+      const contraseña = document.getElementById('contraseña').value;
+      const confirmarContraseña = document.getElementById('confirmarContraseña').value;
+      
+      if (contraseña !== confirmarContraseña) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+      
+      // Recopilar todos los datos del formulario
+      const formData = new FormData(this);
+      const empleadoData = {};
+      formData.forEach((value, key) => {
+        empleadoData[key] = value;
+      });
+      
+      // Aquí iría la llamada a la API para guardar el nuevo empleado
+      console.log('Datos del empleado a guardar:', empleadoData);
+      
+      // Simular envío a la API
+      alert('Empleado dado de alta correctamente (simulación)');
+      cerrarModalAltaEmpleado();
+      // Recargar la lista de empleados
+      location.reload();
+    });
   </script>
 </body>
 </html>
