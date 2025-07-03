@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal de Administrador</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Arial", sans-serif;
+      text-decoration: none;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 40px 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      height: 180px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      width: 100%;
+    }
+
+    .logo {
+      width: 50%;
+      height: 25%;
+      margin-bottom: 15px;
+      max-height: 25%;
+      max-width: 25%;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .welcome-section {
+      text-align: center;
+      margin: 30px auto;
+    }
+
+    .welcome-message {
+      font-size: 32px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .content-wrapper {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      gap: 40px;
+    }
+
+    .employee-table-container {
+      flex: 5;
+    }
+
+    .employee-table-container h2 {
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+
+    .employee-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .employee-table th,
+    .employee-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .employee-table th {
+      background-color: #2c3e50;
+      color: white;
+    }
+
+    .options-container {
+      flex: 3;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .option-button {
+      background-color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 15px;
+      height: 120px;
+      color: inherit;
+      text-align: center;
+    }
+
+    .option-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .option-button h2 {
+      font-size: 16px;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .option-button p {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .option-button div::before {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* Iconos con Unicode */
+    .permission-icon::before { content: "📋"; }
+    .vacation-icon::before { content: "🏖️"; }
+    .review-icon::before { content: "🔍"; }
+    .incapacidad-icon::before { content: "🤒"; }
+    .role-icon::before { content: "👥"; }
+    .report-icon::before { content: "📊"; }
+    .area-icon::before { content: "🏢"; }
+    .vacancy-icon::before { content: "📌"; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <img src="Media/logo.png" alt="Logo" class="logo" />
+      <h1>Portal De Administrador</h1>
+    </div>
+  </header>
+
+  <div class="welcome-section">
+    <div class="welcome-message">
+      ¡Hola <span id="employee-name">Juan Pérez</span>!
+    </div>
+    <p>¿Qué deseas hacer hoy?</p>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Sección empleados -->
+    <div class="employee-table-container">
+      <h2>Empleados Registrados</h2>
+      <table class="employee-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Nombre</th>
+            <th>Puesto</th>
+          </tr>
+        </thead>
+        <tbody id="empleados-body">
+  <!-- Aquí se insertarán los datos -->
+</tbody>
+
+      </table>
+    </div>
+
+    <!-- Sección botones -->
+    <div class="options-container">
+      <a href="pendiente.html" class="option-button">
+        <div class="review-icon"></div>
+        <h2>Revisar Solicitudes</h2>
+        <p>Consulta tus solicitudes</p>
+      </a>
+
+      <a href="pendiente.html" class="option-button">
+        <div class="incapacidad-icon"></div>
+        <h2>Incapacidades</h2>
+        <p>Autoriza incapacidades</p>
+      </a>
+
+      <a href="permiso.html" class="option-button">
+        <div class="permission-icon"></div>
+        <h2>Permiso</h2>
+        <p>Solicita un permiso</p>
+      </a>
+
+      <a href="vacaciones.html" class="option-button">
+        <div class="vacation-icon"></div>
+        <h2>Vacaciones</h2>
+        <p>Solicita vacaciones</p>
+      </a>
+
+      <a href="pendiente.html" class="option-button">
+        <div class="role-icon"></div>
+        <h2>Agregar Rol</h2>
+        <p>Agrega un rol</p>
+      </a>
+
+      <a href="pendiente.html" class="option-button">
+        <div class="report-icon"></div>
+        <h2>Reportes</h2>
+        <p>Ver reportes</p>
+      </a>
+
+      <a href="pendiente.html" class="option-button">
+        <div class="area-icon"></div>
+        <h2>Agregar Área</h2>
+        <p>Agrega una nueva área</p>
+      </a>
+
+      <a href="pendiente.html" class="option-button">
+        <div class="vacancy-icon"></div>
+        <h2>Agregar Vacante</h2>
+        <p>Administra vacantes</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById("employee-name").textContent = "Juan Pérez";
+
+  // Cargar empleados desde el backend
+  fetch('/api/empleados')
+    .then(response => response.json())
+    .then(data => {
+      const tbody = document.getElementById('empleados-body');
+      tbody.innerHTML = '';
+
+      data.forEach(emp => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${emp.id}</td>
+          <td>${emp.nombre}</td>
+          <td>${emp.puesto}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Error al cargar empleados:', error);
+    });
+</script>
+
+</body>
+</html>

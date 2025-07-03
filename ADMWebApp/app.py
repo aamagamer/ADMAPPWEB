@@ -47,6 +47,20 @@ def login():
     else:
         return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
 
+@app.route('/api/empleados', methods=['GET'])  # 👈 ahora está en el lugar correcto
+def obtener_empleados():
+    cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario")
+    empleados = []
+
+    for row in cursor.fetchall():
+        empleados.append({
+            "id": row.idUsuario,
+            "nombre": f"{row.nombres} {row.paterno} {row.materno}",
+            "puesto": row.puesto
+        })
+
+    return jsonify(empleados)
+
 @app.route('/<path:filename>')
 def serve_file(filename):
     return send_from_directory('.', filename)
