@@ -5,15 +5,18 @@ from flask_cors import CORS
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
-# Conexión a SQL Server
-conn = pyodbc.connect(
-    'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=192.168.0.202,1433;'
-    'DATABASE=ADM;'
-    'UID=ADM;'
-    'PWD=ADMuser2025'
-)
-cursor = conn.cursor()
+# Función para obtener una nueva conexión a SQL Server
+def get_connection():
+    return pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'SERVER=tcp:192.168.0.202,1433;'
+        'DATABASE=ADM;'
+        'UID=ADM;'
+        'PWD=ADMuser2025;'
+        'Trusted_Connection=no;'
+        'Encrypt=no;'
+        'Connection Timeout=10;'
+    )
 
 @app.route('/')
 def index():
@@ -24,66 +27,85 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    cursor.execute("""
-        SELECT u.clave, r.TipoRol
-        FROM Usuario u
-        JOIN Rol r ON u.Rol_idRol = r.idRol
-        WHERE u.idUsuario = ?
-    """, username)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    row = cursor.fetchone()
+        cursor.execute("""
+            SELECT u.clave, r.TipoRol
+            FROM Usuario u
+            JOIN Rol r ON u.Rol_idRol = r.idRol
+            WHERE u.idUsuario = ?
+        """, username)
 
-    if row and row.clave == password:
-        rol = row.TipoRol.strip()
-        if rol == 'Empleado':
-            return jsonify({"success": True, "redirect": "empleado.html"})
-        elif rol == 'RH':
-            return jsonify({"success": True, "redirect": "rh.html"})
-        elif rol == 'Administrador':
-            return jsonify({"success": True, "redirect": "admin.html"})
+        row = cursor.fetchone()
+        conn.close()
+
+        if row and row.clave == password:
+            rol = row.TipoRol.strip()
+            if rol == 'Empleado':
+                return jsonify({"success": True, "redirect": "empleado.html"})
+            elif rol == 'RH':
+                return jsonify({"success": True, "redirect": "rh.html"})
+            elif rol == 'Administrador':
+                return jsonify({"success": True, "redirect": "admin.html"})
+            else:
+                return jsonify({"success": True, "redirect": "index.html"})
         else:
-            return jsonify({"success": True, "redirect": "index.html"})
-    else:
-        return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
+            return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al conectar: {e}"})
 
 @app.route('/api/empleados', methods=['GET'])
 def obtener_empleados():
-    cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario")
-    empleados = []
+    conn = get_connection()
+    cursor = conn.cursor()
 
-    for row in cursor.fetchall():
-        empleados.append({
+    cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario")
+    empleados = [
+        {
             "id": row.idUsuario,
             "nombre": f"{row.nombres} {row.paterno} {row.materno}",
             "puesto": row.puesto
-        })
-
+        }
+        for row in cursor.fetchall()
+    ]
+    conn.close()
     return jsonify(empleados)
 
 @app.route('/api/empleado/<int:id>', methods=['GET'])
 def obtener_empleado(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
     cursor.execute("SELECT * FROM Usuario WHERE idUsuario = ?", id)
     row = cursor.fetchone()
+    columns = [column[0] for column in cursor.description]
+    conn.close()
 
     if row:
-        columns = [column[0] for column in cursor.description]
         empleado = dict(zip(columns, row))
         return jsonify(empleado)
     else:
         return jsonify({"error": "Empleado no encontrado"}), 404
 
-# Nuevo endpoint: obtener roles para combobox
 @app.route('/api/roles', methods=['GET'])
 def obtener_roles():
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute("SELECT TipoRol FROM Rol")
     roles = [row[0] for row in cursor.fetchall()]
+    conn.close()
     return jsonify(roles)
 
-# Nuevo endpoint: obtener áreas para combobox
 @app.route('/api/areas', methods=['GET'])
 def obtener_areas():
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute("SELECT NombreArea FROM Area")
     areas = [row[0] for row in cursor.fetchall()]
+    conn.close()
     return jsonify(areas)
 
 @app.route('/<path:filename>')

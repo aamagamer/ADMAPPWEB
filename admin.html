@@ -620,27 +620,29 @@
             return `<p><strong>${label}:</strong> ${value}</p>`;
           };
           
-          modalBody.innerHTML = `
-            ${renderField('ID', data.idUsuario)}
-            ${renderField('Rol', data.TipoRol)}
-            ${renderField('Área', data.NombreArea)}
-            ${renderField('Nombre', `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
-            ${renderField('Fecha Nacimiento', data.FechaNacimiento)}
-            ${renderField('Dirección', data.Direccion)}
-            ${renderField('CP', data.CodigoPostal)}
-            ${renderField('Correo', data.Correo)}
-            ${renderField('NSS', data.NSS)}
-            ${renderField('Teléfono', data.Telefono)}
-            ${renderField('Ingreso', data.FechaIngreso)}
-            ${renderField('RFC', data.RFC)}
-            ${renderField('CURP', data.Curp)}
-            ${renderField('Puesto', data.Puesto)}
-            ${renderField('Emergencia', data.NombreContactoEmergencia)}
-            ${renderField('Tel. Emergencia', data.TelefonoEmergencia)}
-            ${renderField('Parentesco', data.Parentesco)}
-            ${renderField('Fecha Baja', data.FechaBaja || 'N/A')}
-            ${renderField('Comentario Salida', data.ComentarioSalida || 'N/A')}
-          `;
+         modalBody.innerHTML = `
+  ${renderField('ID', data.idUsuario)}
+  ${renderField('Rol', data.TipoRol)}
+  ${renderField('Área', data.NombreArea)}
+  ${renderField('Nombre', `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
+  ${renderField('Fecha Nacimiento', data.FechaNacimiento)}
+  ${renderField('Dirección', data.Direccion)}
+  ${renderField('CP', data.CodigoPostal)}
+  ${renderField('Correo', data.Correo)}
+  ${renderField('NSS', data.NSS)}
+  ${renderField('Teléfono', data.Telefono)}
+  ${renderField('Ingreso', data.FechaIngreso)}
+  ${renderField('RFC', data.RFC)}
+  ${renderField('CURP', data.Curp)}
+  ${renderField('Puesto', data.Puesto)}
+  ${renderField('Emergencia', data.NombreContactoEmergencia)}
+  ${renderField('Tel. Emergencia', data.TelefonoEmergencia)}
+  ${renderField('Parentesco', data.Parentesco)}
+  ${renderField('Fecha Baja', data.FechaBaja || 'N/A')}
+  ${renderField('Comentario Salida', data.ComentarioSalida || 'N/A')}
+  ${renderField('Estado', data.Estado || 'N/A')}  <!-- Aquí agregas el nuevo campo -->
+`;
+
           document.getElementById('modal').classList.remove('hidden');
         })
         .catch(error => {
