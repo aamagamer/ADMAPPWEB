@@ -5,160 +5,277 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portal de Administrador</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Arial", sans-serif;
-      text-decoration: none;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+  }
 
-    body {
-      background-color: #f5f5f5;
-      color: #333;
-    }
+  body {
+    background-color: #f5f5f5;
+    color: #333;
+  }
 
-    header {
-      background-color: #2c3e50;
-      color: white;
-      padding: 40px 0;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      height: 180px;
-      display: flex;
-      align-items: center;
-    }
+  header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 40px 0;
+    height: 180px;
+    display: flex;
+    align-items: center;
+  }
 
-    .header-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      width: 100%;
-    }
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+  }
 
-    .logo {
-      width: 50%;
-      height: 25%;
-      margin-bottom: 15px;
-      max-height: 25%;
-      max-width: 25%;
-    }
+  .logo {
+    width: 50%;
+    height: 25%;
+    margin-bottom: 15px;
+    max-height: 25%;
+    max-width: 25%;
+  }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 600;
-      text-align: center;
-    }
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+  }
 
-    .welcome-section {
-      text-align: center;
-      margin: 30px auto;
-    }
+  .welcome-section {
+    text-align: center;
+    margin: 30px auto;
+  }
 
-    .welcome-message {
-      font-size: 32px;
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
+  .welcome-message {
+    font-size: 32px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
 
+  .content-wrapper {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 30px;
+  }
+
+  .employee-table-container {
+    flex: 7;
+  }
+
+  .employee-table-container h2 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+  }
+
+  .employee-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .employee-table th,
+  .employee-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .employee-table th {
+    background-color: #2c3e50;
+    color: white;
+  }
+
+  .options-container {
+    flex: 2.5;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .option-button {
+    background-color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 10px;
+    height: 100px;
+    color: inherit;
+    text-align: center;
+  }
+
+  .option-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .option-button h2 {
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 4px;
+  }
+
+  .option-button p {
+    color: #666;
+    font-size: 12px;
+  }
+
+  .option-button div::before {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .permission-icon::before { content: "📋"; }
+  .vacation-icon::before { content: "🏖️"; }
+  .review-icon::before { content: "🔍"; }
+  .incapacidad-icon::before { content: "🤒"; }
+  .role-icon::before { content: "👥"; }
+  .report-icon::before { content: "📊"; }
+  .area-icon::before { content: "🏢"; }
+  .vacancy-icon::before { content: "📌"; }
+
+  .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 2px;
+    padding: 3px;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 25px 30px;
+    width: 90%;
+    max-width: 850px;
+    border-radius: 12px;
+    position: relative;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-content h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 24px;
+    border-bottom: 2px solid #2c3e50;
+    padding-bottom: 10px;
+  }
+
+  .modal-content span.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .modal-content span.close:hover {
+    color: #e74c3c;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  #modal-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+    align-items: start;
+  }
+
+  #modal-body p {
+    background: #f9f9f9;
+    padding: 10px 12px;
+    border-left: 4px solid #2c3e50;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0;
+    word-break: break-word;
+  }
+
+  #modal-body strong {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #2c3e50;
+    font-size: 13px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
     .content-wrapper {
-      display: flex;
-      justify-content: space-between;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      gap: 40px;
-    }
-
-    .employee-table-container {
-      flex: 5;
-    }
-
-    .employee-table-container h2 {
-      margin-bottom: 15px;
-      color: #2c3e50;
-    }
-
-    .employee-table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .employee-table th,
-    .employee-table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .employee-table th {
-      background-color: #2c3e50;
-      color: white;
-    }
-
-    .options-container {
-      flex: 3;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 15px;
-    }
-
-    .option-button {
-      background-color: white;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      padding: 15px;
-      height: 120px;
-      color: inherit;
-      text-align: center;
     }
-
-    .option-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    
+    .modal-content {
+      padding: 20px;
+      width: 95%;
     }
-
-    .option-button h2 {
-      font-size: 16px;
-      color: #2c3e50;
-      margin-bottom: 5px;
+    
+    #modal-body {
+      grid-template-columns: 1fr;
     }
-
-    .option-button p {
-      color: #666;
-      font-size: 13px;
-    }
-
-    .option-button div::before {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    /* Iconos con Unicode */
-    .permission-icon::before { content: "📋"; }
-    .vacation-icon::before { content: "🏖️"; }
-    .review-icon::before { content: "🔍"; }
-    .incapacidad-icon::before { content: "🤒"; }
-    .role-icon::before { content: "👥"; }
-    .report-icon::before { content: "📊"; }
-    .area-icon::before { content: "🏢"; }
-    .vacancy-icon::before { content: "📌"; }
-  </style>
+  }
+</style>
 </head>
 <body>
   <header>
@@ -176,7 +293,6 @@
   </div>
 
   <div class="content-wrapper">
-    <!-- Sección empleados -->
     <div class="employee-table-container">
       <h2>Empleados Registrados</h2>
       <table class="employee-table">
@@ -185,91 +301,136 @@
             <th>Número</th>
             <th>Nombre</th>
             <th>Puesto</th>
+            <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="empleados-body">
-  <!-- Aquí se insertarán los datos -->
-</tbody>
-
+        <tbody id="empleados-body"></tbody>
       </table>
     </div>
 
-    <!-- Sección botones -->
     <div class="options-container">
-      <a href="pendiente.html" class="option-button">
-        <div class="review-icon"></div>
-        <h2>Revisar Solicitudes</h2>
-        <p>Consulta tus solicitudes</p>
-      </a>
+      <a href="pendiente.html" class="option-button"><div class="review-icon"></div><h2>Revisar</h2><p>Solicitudes</p></a>
+      <a href="pendiente.html" class="option-button"><div class="incapacidad-icon"></div><h2>Incapacidades</h2><p>Autorizaciones</p></a>
+      <a href="permiso.html" class="option-button"><div class="permission-icon"></div><h2>Permiso</h2><p>Solicítalo</p></a>
+      <a href="vacaciones.html" class="option-button"><div class="vacation-icon"></div><h2>Vacaciones</h2><p>Solicítalas</p></a>
+      <a href="pendiente.html" class="option-button"><div class="role-icon"></div><h2>Agregar Rol</h2><p>Nuevos roles</p></a>
+      <a href="pendiente.html" class="option-button"><div class="report-icon"></div><h2>Reportes</h2><p>Ver</p></a>
+      <a href="pendiente.html" class="option-button"><div class="area-icon"></div><h2>Área</h2><p>Agregar</p></a>
+      <a href="pendiente.html" class="option-button"><div class="vacancy-icon"></div><h2>Vacante</h2><p>Administra</p></a>
+    </div>
+  </div>
 
-      <a href="pendiente.html" class="option-button">
-        <div class="incapacidad-icon"></div>
-        <h2>Incapacidades</h2>
-        <p>Autoriza incapacidades</p>
-      </a>
-
-      <a href="permiso.html" class="option-button">
-        <div class="permission-icon"></div>
-        <h2>Permiso</h2>
-        <p>Solicita un permiso</p>
-      </a>
-
-      <a href="vacaciones.html" class="option-button">
-        <div class="vacation-icon"></div>
-        <h2>Vacaciones</h2>
-        <p>Solicita vacaciones</p>
-      </a>
-
-      <a href="pendiente.html" class="option-button">
-        <div class="role-icon"></div>
-        <h2>Agregar Rol</h2>
-        <p>Agrega un rol</p>
-      </a>
-
-      <a href="pendiente.html" class="option-button">
-        <div class="report-icon"></div>
-        <h2>Reportes</h2>
-        <p>Ver reportes</p>
-      </a>
-
-      <a href="pendiente.html" class="option-button">
-        <div class="area-icon"></div>
-        <h2>Agregar Área</h2>
-        <p>Agrega una nueva área</p>
-      </a>
-
-      <a href="pendiente.html" class="option-button">
-        <div class="vacancy-icon"></div>
-        <h2>Agregar Vacante</h2>
-        <p>Administra vacantes</p>
-      </a>
+  <!-- Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h2>Detalle del Empleado</h2>
+      <div id="modal-body"></div>
     </div>
   </div>
 
   <script>
-  document.getElementById("employee-name").textContent = "Juan Pérez";
+    document.getElementById("employee-name").textContent = "Juan Pérez";
 
-  // Cargar empleados desde el backend
-  fetch('/api/empleados')
-    .then(response => response.json())
-    .then(data => {
-      const tbody = document.getElementById('empleados-body');
-      tbody.innerHTML = '';
-
-      data.forEach(emp => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${emp.id}</td>
-          <td>${emp.nombre}</td>
-          <td>${emp.puesto}</td>
-        `;
-        tbody.appendChild(row);
+    // Cargar lista de empleados desde tu API
+    fetch('/api/empleados')
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.getElementById('empleados-body');
+        tbody.innerHTML = '';
+        data.forEach(emp => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${emp.id}</td>
+            <td>${emp.nombre}</td>
+            <td>${emp.puesto}</td>
+            <td>
+              <button class="action-btn" onclick="verEmpleado(${emp.id})">👁️</button>
+              <button class="action-btn" onclick="editarEmpleado(${emp.id})">✏️</button>
+              <button class="action-btn" onclick="eliminarEmpleado(${emp.id})">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error('Error al cargar empleados:', error);
       });
-    })
-    .catch(error => {
-      console.error('Error al cargar empleados:', error);
-    });
-</script>
 
+    function verEmpleado(id) {
+      fetch(`/api/empleado/${id}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Error al cargar datos del empleado');
+          }
+          return res.json();
+        })
+        .then(data => {
+          const modalBody = document.getElementById('modal-body');
+          
+          // Función auxiliar para mostrar solo datos con valor
+          const renderField = (label, value) => {
+            if (!value || value === "N/A" || value === "null") return '';
+            return `<p><strong>${label}:</strong> ${value}</p>`;
+          };
+          
+          modalBody.innerHTML = `
+            ${renderField('ID', data.idUsuario)}
+            ${renderField('Rol', data.TipoRol)}
+            ${renderField('Área', data.NombreArea)}
+            ${renderField('Nombre', `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
+            ${renderField('Fecha Nacimiento', data.FechaNacimiento)}
+            ${renderField('Dirección', data.Direccion)}
+            ${renderField('CP', data.CodigoPostal)}
+            ${renderField('Correo', data.Correo)}
+            ${renderField('NSS', data.NSS)}
+            ${renderField('Teléfono', data.Telefono)}
+            ${renderField('Ingreso', data.FechaIngreso)}
+            ${renderField('RFC', data.RFC)}
+            ${renderField('CURP', data.Curp)}
+            ${renderField('Puesto', data.Puesto)}
+            ${renderField('Emergencia', data.NombreContactoEmergencia)}
+            ${renderField('Tel. Emergencia', data.TelefonoEmergencia)}
+            ${renderField('Parentesco', data.Parentesco)}
+            ${renderField('Fecha Baja', data.FechaBaja || 'N/A')}
+            ${renderField('Comentario Salida', data.ComentarioSalida || 'N/A')}
+          `;
+          document.getElementById('modal').classList.remove('hidden');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error al cargar los datos del empleado');
+        });
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function editarEmpleado(id) {
+      alert("Función editar aún no implementada (ID " + id + ")");
+    }
+
+    function eliminarEmpleado(id) {
+      if (confirm(`¿Estás seguro de que deseas eliminar al empleado con ID ${id}?`)) {
+        fetch(`/api/empleado/${id}`, {
+          method: 'DELETE'
+        })
+        .then(response => {
+          if (response.ok) {
+            alert("Empleado eliminado correctamente");
+            // Recargar la lista de empleados
+            location.reload();
+          } else {
+            throw new Error('Error al eliminar empleado');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error al eliminar el empleado');
+        });
+      }
+    }
+  </script>
 </body>
 </html>

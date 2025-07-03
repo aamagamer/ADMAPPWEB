@@ -8,12 +8,11 @@ CORS(app)
 # Conexión a SQL Server
 conn = pyodbc.connect(
     'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=192.168.0.76\\SQLEXPRESS;'
+    'SERVER=.\\SQLEXPRESS;'
     'DATABASE=ADM;'
     'UID=ADM;'
     'PWD=ADMuser2025'
 )
-
 
 cursor = conn.cursor()
 
@@ -62,9 +61,24 @@ def obtener_empleados():
 
     return jsonify(empleados)
 
+@app.route('/api/empleado/<int:id>', methods=['GET'])
+def obtener_empleado(id):
+    cursor.execute("SELECT * FROM Usuario WHERE idUsuario = ?", id)
+    row = cursor.fetchone()
+
+    if row:
+        columns = [column[0] for column in cursor.description]
+        empleado = dict(zip(columns, row))
+        return jsonify(empleado)
+    else:
+        return jsonify({"error": "Empleado no encontrado"}), 404
+
+
 @app.route('/<path:filename>')
 def serve_file(filename):
     return send_from_directory('.', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
