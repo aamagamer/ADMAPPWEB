@@ -9,6 +9,11 @@
     />
     <title>Portal del Empleado</title>
     <style>
+      :root {
+        --primary: #2c3e50;
+        --secondary: #666;
+      }
+
       /* Reset y estilos generales */
       * {
         margin: 0;
@@ -62,7 +67,7 @@
       /* Contenedor principal */
       .main-container {
         max-width: 1200px;
-        margin: 70px auto 50px;
+        margin: 20px auto 50px;
         padding: 0 20px;
       }
 
@@ -89,13 +94,13 @@
 
       /* Botones grandes */
       .option-button {
-        background-color: var(--card-bg);
+        background-color: rgb(255, 255, 255);
         color: inherit;
         border-radius: 16px;
         padding: 35px 20px;
         width: 100%;
         max-width: 300px;
-        box-shadow: 0 8px 20px var(--shadow);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); 
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -105,8 +110,8 @@
       }
 
       .option-button:hover {
-        transform: translateY(-6px) scale(1.02);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
       }
 
       .option-button i {
@@ -159,7 +164,7 @@
         <div class="welcome-message">
           ¡Hola <span id="employee-name">Empleado</span>!
         </div>
-        <p>¿Qué deseas hacer hoy?</p>
+        <p>¿Qué deseas hacer hoy? <br /><br /></p>
       </div>
 
       <div class="options-container">
