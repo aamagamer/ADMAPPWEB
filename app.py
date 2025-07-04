@@ -39,7 +39,6 @@ def login():
         """, username)
 
         row = cursor.fetchone()
-        conn.close()
 
         if row and row.clave == password:
             rol = row.TipoRol.strip()
@@ -53,9 +52,12 @@ def login():
                 return jsonify({"success": True, "redirect": "index.html"})
         else:
             return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
-    
+
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al conectar: {e}"})
+
+    finally:
+        conn.close()
 
 @app.route('/api/empleados', methods=['GET'])
 def obtener_empleados():
@@ -107,6 +109,89 @@ def obtener_areas():
     areas = [row[0] for row in cursor.fetchall()]
     conn.close()
     return jsonify(areas)
+
+@app.route('/api/empleado', methods=['POST'])
+def agregar_empleado():
+    data = request.get_json()
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Validar si el idUsuario ya existe
+        cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", (data['idUsuario'],))
+        if cursor.fetchone():
+            return jsonify({"error": "El ID de usuario ya existe"}), 400
+
+        # Validar si el correo ya existe
+        cursor.execute("SELECT 1 FROM Usuario WHERE Correo = ?", (data['correo'],))
+        if cursor.fetchone():
+            return jsonify({"error": "El correo ya está registrado"}), 400
+
+        # Obtener idRol
+        cursor.execute("SELECT idRol FROM Rol WHERE TipoRol = ?", data['tipoRol'])
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Rol no encontrado"}), 400
+        idRol = rol_row[0]
+
+        # Obtener idArea
+        cursor.execute("SELECT idArea FROM Area WHERE nombreArea = ?", data['nombreArea'])
+        area_row = cursor.fetchone()
+        if not area_row:
+            return jsonify({"error": "Área no encontrada"}), 400
+        idArea = area_row[0]
+
+        # Validar tipos numéricos
+        try:
+            idUsuario = int(data['idUsuario'])
+            nss = int(data['nss'])
+            telefono = int(data['telefono'])
+            telEmergencia = int(data['telefonoEmergencia'])
+        except ValueError:
+            return jsonify({"error": "NSS, teléfono y ID deben ser numéricos"}), 400
+
+        # Insertar nuevo empleado
+        cursor.execute("""
+            INSERT INTO Usuario (
+                idUsuario, Rol_idRol, Area_idArea, Nombres, Paterno, Materno,
+                FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
+                FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
+                TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida, clave
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)
+        """, (
+            idUsuario,
+            idRol,
+            idArea,
+            data['nombres'],
+            data['paterno'],
+            data.get('materno'),
+            data['fechaNacimiento'],
+            data['direccion'],
+            data['codigoPostal'],
+            data['correo'],
+            nss,
+            telefono,
+            data['fechaIngreso'],
+            data['rfc'],
+            data['curp'],
+            data['puesto'],
+            data['nombreContactoEmergencia'],
+            telEmergencia,
+            data['parentesco'],
+            data['contraseña']
+        ))
+
+        conn.commit()
+        return jsonify({"mensaje": "Empleado insertado correctamente"}), 201
+
+    except Exception as e:
+        print("Error al insertar empleado:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        conn.close()
 
 @app.route('/<path:filename>')
 def serve_file(filename):

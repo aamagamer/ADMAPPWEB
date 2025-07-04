@@ -437,7 +437,7 @@
         <!-- Campo 1 -->
         <div class="form-group">
           <label for="idUsuario">ID Usuario:</label>
-          <input type="text" id="idUsuario" name="idUsuario" required>
+          <input type="number" id="idUsuario" name="idUsuario" required>
         </div>
         
         <!-- Campo 2 (Combobox) -->
@@ -641,6 +641,7 @@
   ${renderField('Fecha Baja', data.FechaBaja || 'N/A')}
   ${renderField('Comentario Salida', data.ComentarioSalida || 'N/A')}
   ${renderField('Estado', data.Estado || 'N/A')}  <!-- Aquí agregas el nuevo campo -->
+  ${renderField('Clave', data.clave)}
 `;
 
           document.getElementById('modal').classList.remove('hidden');
@@ -721,33 +722,61 @@
 
     // Manejar el envío del formulario de alta de empleado
     document.getElementById('employee-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Validar que las contraseñas coincidan
-      const contraseña = document.getElementById('contraseña').value;
-      const confirmarContraseña = document.getElementById('confirmarContraseña').value;
-      
-      if (contraseña !== confirmarContraseña) {
-        alert('Las contraseñas no coinciden');
-        return;
-      }
-      
-      // Recopilar todos los datos del formulario
-      const formData = new FormData(this);
-      const empleadoData = {};
-      formData.forEach((value, key) => {
-        empleadoData[key] = value;
-      });
-      
-      // Aquí iría la llamada a la API para guardar el nuevo empleado
-      console.log('Datos del empleado a guardar:', empleadoData);
-      
-      // Simular envío a la API
-      alert('Empleado dado de alta correctamente (simulación)');
-      cerrarModalAltaEmpleado();
-      // Recargar la lista de empleados
-      location.reload();
-    });
+  e.preventDefault();
+
+  const contraseña = document.getElementById('contraseña').value;
+  const confirmarContraseña = document.getElementById('confirmarContraseña').value;
+
+  if (contraseña !== confirmarContraseña) {
+    alert('Las contraseñas no coinciden');
+    return;
+  }
+
+  const formData = new FormData(this);
+  const empleadoData = {};
+  formData.forEach((value, key) => {
+    empleadoData[key] = value;
+  });
+
+  // Convertir campos numéricos a número
+  empleadoData.idUsuario = Number(empleadoData.idUsuario);
+  empleadoData.nss = Number(empleadoData.nss);
+  empleadoData.telefono = Number(empleadoData.telefono);
+  empleadoData.telefonoEmergencia = Number(empleadoData.telefonoEmergencia);
+
+  // Validar que no sean NaN
+  if (
+    isNaN(empleadoData.idUsuario) ||
+    isNaN(empleadoData.nss) ||
+    isNaN(empleadoData.telefono) ||
+    isNaN(empleadoData.telefonoEmergencia)
+  ) {
+    alert('Por favor, ingresa valores numéricos válidos en ID Usuario, NSS y Teléfonos');
+    return;
+  }
+
+  fetch('/api/empleado', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(empleadoData)
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Error al guardar el empleado');
+    return response.json();
+  })
+  .then(data => {
+    alert(data.mensaje);
+    cerrarModalAltaEmpleado();
+    location.reload();
+  })
+  .catch(error => {
+    console.error('Error al insertar:', error);
+    alert('Hubo un error al guardar el empleado');
+  });
+});
+
+
+
   </script>
 </body>
 </html>
