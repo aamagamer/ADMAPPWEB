@@ -65,7 +65,13 @@ def obtener_empleados():
 def obtener_empleado(id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Usuario WHERE idUsuario = ?", id)
+    cursor.execute("""
+        SELECT u.*, r.TipoRol, a.NombreArea
+        FROM Usuario u
+        LEFT JOIN Rol r ON u.Rol_idRol = r.idRol
+        LEFT JOIN Area a ON u.Area_idArea = a.idArea
+        WHERE u.idUsuario = ?
+    """, id)
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Empleado no encontrado"}), 404
@@ -123,14 +129,12 @@ def actualizar_empleado(id):
 def agregar_empleado():
     data = request.get_json()
     try:
-        # Validar campos obligatorios de sueldo
         if any(k not in data or not str(data[k]).isdigit() for k in ['SueldoDiario', 'SueldoSemanal', 'BonoSemanal']):
             return jsonify({"error": "Faltan datos de sueldo o no son válidos"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Validar existencia previa
         cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", (data['idUsuario'],))
         if cursor.fetchone():
             return jsonify({"error": "El ID de usuario ya existe"}), 400
@@ -139,7 +143,6 @@ def agregar_empleado():
         if cursor.fetchone():
             return jsonify({"error": "El correo ya está registrado"}), 400
 
-        # Validar rol y área
         cursor.execute("SELECT idRol FROM Rol WHERE idRol = ?", data['rol_id'])
         if not cursor.fetchone():
             return jsonify({"error": "Rol no válido"}), 400
@@ -148,7 +151,6 @@ def agregar_empleado():
         if not cursor.fetchone():
             return jsonify({"error": "Área no válida"}), 400
 
-        # Insertar empleado
         cursor.execute("""
             INSERT INTO Usuario (
                 idUsuario, Rol_idRol, Area_idArea, Nombres, Paterno, Materno,
@@ -192,7 +194,6 @@ def agregar_empleado():
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
-
 
 @app.route('/api/empleado/<int:id>', methods=['DELETE'])
 def eliminar_empleado(id):
