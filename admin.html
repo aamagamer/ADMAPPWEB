@@ -1,628 +1,589 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal de Administrador</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Arial", sans-serif;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal de Administrador</title>
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+  }
 
-      body {
-        background-color: #f5f5f5;
-        color: #333;
-      }
+  body {
+    background-color: #f5f5f5;
+    color: #333;
+  }
 
-      header {
-        background-color: #2c3e50;
-        color: white;
-        padding: 40px 0;
-        height: 180px;
-        display: flex;
-        align-items: center;
-      }
+  header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 40px 0;
+    height: 180px;
+    display: flex;
+    align-items: center;
+  }
 
-      .header-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-        width: 100%;
-      }
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+  }
 
-      .logo {
-        width: 50%;
-        height: 25%;
-        margin-bottom: 15px;
-        max-height: 25%;
-        max-width: 25%;
-      }
+  .logo {
+    width: 50%;
+    height: 25%;
+    margin-bottom: 15px;
+    max-height: 25%;
+    max-width: 25%;
+  }
 
-      h1 {
-        font-size: 28px;
-        font-weight: 600;
-        text-align: center;
-      }
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+  }
 
-      .welcome-section {
-        text-align: center;
-        margin: 30px auto;
-      }
+  .welcome-section {
+    text-align: center;
+    margin: 30px auto;
+  }
 
-      .welcome-message {
-        font-size: 32px;
-        color: #2c3e50;
-        margin-bottom: 10px;
-      }
+  .welcome-message {
+    font-size: 32px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
 
-      .content-wrapper {
-        display: flex;
-        justify-content: space-between;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-        gap: 30px;
-      }
+  .content-wrapper {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 30px;
+  }
 
-      .employee-table-container {
-        flex: 7;
-      }
+  .employee-table-container {
+    flex: 7;
+  }
 
-      .employee-table-container h2 {
-        margin-bottom: 15px;
-        color: #2c3e50;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+  .employee-table-container h2 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-      .employee-table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
+  .employee-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
 
-      .employee-table th,
-      .employee-table td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-      }
+  .employee-table th,
+  .employee-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
 
-      .employee-table th {
-        background-color: #2c3e50;
-        color: white;
-      }
+  .employee-table th {
+    background-color: #2c3e50;
+    color: white;
+  }
 
-      .options-container {
-        flex: 2.5;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
+  .options-container {
+    flex: 2.5;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 
-      .option-button {
-        background-color: white;
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        padding: 10px;
-        height: 100px;
-        color: inherit;
-        text-align: center;
-      }
+  .option-button {
+    background-color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 10px;
+    height: 100px;
+    color: inherit;
+    text-align: center;
+  }
 
-      .option-button i {
-  font-size: 28px;
-  margin-bottom: 6px;
-  color: #2c3e50;
-}
+  .option-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
 
+  .option-button h2 {
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 4px;
+  }
 
-      .option-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      }
+  .option-button p {
+    color: #666;
+    font-size: 12px;
+  }
 
-      .option-button h2 {
-        font-size: 14px;
-        color: #2c3e50;
-        margin-bottom: 4px;
-      }
+  .option-button div::before {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 4px;
+  }
 
-      .option-button p {
-        color: #666;
-        font-size: 12px;
-      }
+  .permission-icon::before { content: "📋"; }
+  .vacation-icon::before { content: "🏖️"; }
+  .review-icon::before { content: "🔍"; }
+  .incapacidad-icon::before { content: "🤒"; }
+  .role-icon::before { content: "👥"; }
+  .report-icon::before { content: "📊"; }
+  .area-icon::before { content: "🏢"; }
+  .vacancy-icon::before { content: "📌"; }
 
-      .option-button div::before {
-        font-size: 24px;
-        display: block;
-        margin-bottom: 4px;
-      }
+  .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 2px;
+    padding: 3px;
+  }
 
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+  }
 
-      .action-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  margin: 0 5px;
-  cursor: pointer;
-  color: #2c3e50;
-  transition: color 0.2s ease, transform 0.2s ease;
-}
+  .modal-content {
+    background: white;
+    padding: 25px 30px;
+    width: 90%;
+    max-width: 850px;
+    border-radius: 12px;
+    position: relative;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+  }
 
-.action-btn:hover {
-  color: #007bff;
-  transform: scale(1.2);
-}
+  .modal-content h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 24px;
+    border-bottom: 2px solid #2c3e50;
+    padding-bottom: 10px;
+  }
 
-.action-btn i {
-  pointer-events: none; /* Evita que el ícono interfiera con el click */
-}
+  .modal-content span.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
 
+  .modal-content span.close:hover {
+    color: #e74c3c;
+  }
 
-      .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999;
-        animation: fadeIn 0.3s ease;
-      }
+  .hidden {
+    display: none;
+  }
 
-      .modal-content {
-        background: white;
-        padding: 25px 30px;
-        width: 90%;
-        max-width: 850px;
-        border-radius: 12px;
-        position: relative;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-      }
+  #modal-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+    align-items: start;
+  }
 
-      .modal-content h2 {
-        margin-bottom: 20px;
-        color: #2c3e50;
-        font-size: 24px;
-        border-bottom: 2px solid #2c3e50;
-        padding-bottom: 10px;
-      }
+  #modal-body p {
+    background: #f9f9f9;
+    padding: 10px 12px;
+    border-left: 4px solid #2c3e50;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0;
+    word-break: break-word;
+  }
 
-      .modal-content span.close {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        font-size: 30px;
-        font-weight: bold;
-        color: #aaa;
-        cursor: pointer;
-        transition: color 0.3s ease;
-      }
+  #modal-body strong {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #2c3e50;
+    font-size: 13px;
+  }
 
-      .modal-content span.close:hover {
-        color: #e74c3c;
-      }
+  /* Estilos para el modal de alta de empleado */
+  .add-employee-modal {
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
 
-      .hidden {
-        display: none;
-      }
+  .add-employee-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+  }
 
-      #modal-body {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 12px;
-        margin-top: 15px;
-        align-items: start;
-      }
+  .form-group {
+    margin-bottom: 10px;
+  }
 
-      #modal-body p {
-        background: #f9f9f9;
-        padding: 10px 12px;
-        border-left: 4px solid #2c3e50;
-        border-radius: 6px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        font-size: 13px;
-        line-height: 1.4;
-        margin: 0;
-        word-break: break-word;
-      }
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 14px;
+  }
 
-      #modal-body strong {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 3px;
-        color: #2c3e50;
-        font-size: 13px;
-      }
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
 
-      /* Estilos para el modal de alta de empleado */
-      .add-employee-modal {
-        max-width: 900px;
-        max-height: 90vh;
-        overflow-y: auto;
-      }
+  .form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 15px;
+  }
 
-      .add-employee-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 15px;
-      }
+  .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
 
-      .form-group {
-        margin-bottom: 10px;
-      }
+  .btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
 
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #2c3e50;
-        font-size: 14px;
-      }
+  .btn-primary {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+  }
 
-      .form-group input,
-      .form-group select {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-      }
+  .btn-primary:hover {
+    background-color: #1a252f;
+  }
 
-      .form-group select {
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        background-size: 15px;
-      }
+  .btn-secondary {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+  }
 
-      .form-actions {
-        grid-column: 1 / -1;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 20px;
-      }
+  .btn-secondary:hover {
+    background-color: #e0e0e0;
+  }
 
-      .btn {
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.3s ease;
-      }
+  .add-employee-btn {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
 
-      .btn-primary {
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-      }
+  .add-employee-btn:hover {
+    background-color: #1a252f;
+  }
 
-      .btn-primary:hover {
-        background-color: #1a252f;
-      }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
-      .btn-secondary {
-        background-color: #f5f5f5;
-        color: #333;
-        border: 1px solid #ddd;
-      }
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-      .btn-secondary:hover {
-        background-color: #e0e0e0;
-      }
+  @media (max-width: 768px) {
+    .content-wrapper {
+      flex-direction: column;
+    }
+    
+    .modal-content {
+      padding: 20px;
+      width: 95%;
+    }
+    
+    #modal-body {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <img src="Media/logo.png" alt="Logo" class="logo" />
+      <h1>Portal De Administrador</h1>
+    </div>
+  </header>
 
-      .add-employee-btn {
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.3s ease;
-      }
+  <div class="welcome-section">
+    <div class="welcome-message">
+      ¡Hola <span id="employee-name">Juan Pérez</span>!
+    </div>
+    <p>¿Qué deseas hacer hoy?</p>
+  </div>
 
-      .add-employee-btn:hover {
-        background-color: #1a252f;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @media (max-width: 768px) {
-        .content-wrapper {
-          flex-direction: column;
-        }
-
-        .modal-content {
-          padding: 20px;
-          width: 95%;
-        }
-
-        #modal-body {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="header-container">
-        <img src="Media/logo.png" alt="Logo" class="logo" />
-        <h1>Portal De Administrador</h1>
-      </div>
-    </header>
-
-    <div class="welcome-section">
-      <div class="welcome-message">
-        ¡Hola <span id="employee-name">Juan Pérez</span>!
-      </div>
-      <p>¿Qué deseas hacer hoy?</p>
+  <div class="content-wrapper">
+    <div class="employee-table-container">
+      <h2>
+        Empleados Registrados
+        <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">Agregar empleado +</button>
+      </h2>
+      <table class="employee-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Nombre</th>
+            <th>Puesto</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="empleados-body"></tbody>
+      </table>
     </div>
 
-    <div class="content-wrapper">
-      <div class="employee-table-container">
-        <h2>
-          Empleados Registrados
-          <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">
-            Agregar empleado +
-          </button>
-        </h2>
-        <table class="employee-table">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Nombre</th>
-              <th>Puesto</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="empleados-body"></tbody>
-        </table>
-      </div>
+    <div class="options-container">
+      <a href="pendiente.html" class="option-button"><div class="review-icon"></div><h2>Revisar</h2><p>Solicitudes</p></a>
+      <a href="pendiente.html" class="option-button"><div class="incapacidad-icon"></div><h2>Incapacidades</h2><p>Autorizaciones</p></a>
+      <a href="pendiente.html" class="option-button"><div class="role-icon"></div><h2>Agregar Rol</h2><p>Nuevos roles</p></a>
+      <a href="pendiente.html" class="option-button"><div class="report-icon"></div><h2>Reportes</h2><p>Ver</p></a>
+      <a href="pendiente.html" class="option-button"><div class="area-icon"></div><h2>Área</h2><p>Agregar</p></a>
+      <a href="pendiente.html" class="option-button"><div class="vacancy-icon"></div><h2>Vacante</h2><p>Administra</p></a>
+    </div>
+  </div>
 
-      <div class="options-container">
-  <a href="pendiente.html" class="option-button">
-    <i class="bi bi-search"></i>
-    <h2>Revisar</h2>
-    <p>Solicitudes</p>
-  </a>
-  <a href="pendiente.html" class="option-button">
-    <i class="bi bi-person-exclamation"></i>
-    <h2>Incapacidades</h2>
-    <p>Autorizaciones</p>
-  </a>
-  <a href="pendiente.html" class="option-button">
-    <i class="bi bi-person-plus"></i>
-    <h2>Agregar Rol</h2>
-    <p>Nuevos roles</p>
-  </a>
-  <a href="pendiente.html" class="option-button">
-    <i class="bi bi-bar-chart"></i>
-    <h2>Reportes</h2>
-    <p>Ver</p>
-  </a>
-  <a href="pendiente.html" class="option-button">
-    <i class="bi bi-building"></i>
-    <h2>Área</h2>
-    <p>Agregar</p>
-  </a>
-  <a href="pendiente.html" class="option-button">
-    <i class="bi bi-pin"></i>
-    <h2>Vacante</h2>
-    <p>Administra</p>
-  </a>
+  <!-- Modal para ver detalles del empleado -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h2>Detalle del Empleado</h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal para dar de alta empleado -->
+  <div id="add-employee-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalAltaEmpleado()">&times;</span>
+      <h2>Dar de alta nuevo empleado</h2>
+      <form id="employee-form" class="add-employee-form">
+        <!-- Campo 1 -->
+        <div class="form-group">
+          <label for="idUsuario">ID Usuario:</label>
+          <input type="number" id="idUsuario" name="idUsuario" required>
+        </div>
+        
+        <!-- Campo 2 (Combobox) -->
+        <div class="form-group">
+          <label for="tipoRol">Tipo de Rol:</label>
+          <select id="tipoRol" name="tipoRol" required>
+  <option value="">Cargando roles...</option>
+</select>
+
+        </div>
+        
+        <!-- Campo 3 (Combobox) -->
+        <div class="form-group">
+          <label for="nombreArea">Área:</label>
+         <select id="nombreArea" name="nombreArea" required>
+  <option value="">Cargando áreas...</option>
+</select>
+
+        </div>
+        
+        <!-- Campo 4 -->
+        <div class="form-group">
+          <label for="nombres">Nombres:</label>
+          <input type="text" id="nombres" name="nombres" required>
+        </div>
+        
+        <!-- Campo 5 -->
+        <div class="form-group">
+          <label for="paterno">Apellido Paterno:</label>
+          <input type="text" id="paterno" name="paterno" required>
+        </div>
+        
+        <!-- Campo 6 -->
+        <div class="form-group">
+          <label for="materno">Apellido Materno:</label>
+          <input type="text" id="materno" name="materno">
+        </div>
+        
+        <!-- Campo 7 -->
+        <div class="form-group">
+          <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+          <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+        </div>
+        
+        <!-- Campo 8 -->
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" required>
+        </div>
+        
+        <!-- Campo 9 -->
+        <div class="form-group">
+          <label for="codigoPostal">Código Postal:</label>
+          <input type="text" id="codigoPostal" name="codigoPostal" required>
+        </div>
+        
+        <!-- Campo 10 -->
+        <div class="form-group">
+          <label for="correo">Correo Electrónico:</label>
+          <input type="email" id="correo" name="correo" required>
+        </div>
+        
+        <!-- Campo 11 -->
+        <div class="form-group">
+          <label for="nss">Número de Seguro Social (NSS):</label>
+          <input type="text" id="nss" name="nss" required>
+        </div>
+        
+        <!-- Campo 12 -->
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" name="telefono" required>
+        </div>
+        
+        <!-- Campo 13 -->
+        <div class="form-group">
+          <label for="fechaIngreso">Fecha de Ingreso:</label>
+          <input type="date" id="fechaIngreso" name="fechaIngreso" required>
+        </div>
+        
+        <!-- Campo 14 -->
+        <div class="form-group">
+          <label for="rfc">RFC:</label>
+          <input type="text" id="rfc" name="rfc" required>
+        </div>
+        
+        <!-- Campo 15 -->
+        <div class="form-group">
+          <label for="curp">CURP:</label>
+          <input type="text" id="curp" name="curp" required>
+        </div>
+        
+        <!-- Campo 16 -->
+        <div class="form-group">
+          <label for="puesto">Puesto:</label>
+          <input type="text" id="puesto" name="puesto" required>
+        </div>
+        
+        <!-- Campo 17 -->
+        <div class="form-group">
+          <label for="nombreContactoEmergencia">Nombre Contacto Emergencia:</label>
+          <input type="text" id="nombreContactoEmergencia" name="nombreContactoEmergencia" required>
+        </div>
+        
+        <!-- Campo 18 -->
+        <div class="form-group">
+          <label for="telefonoEmergencia">Teléfono Emergencia:</label>
+          <input type="tel" id="telefonoEmergencia" name="telefonoEmergencia" required>
+        </div>
+        
+        <!-- Campo 19 -->
+        <div class="form-group">
+          <label for="parentesco">Parentesco:</label>
+          <input type="text" id="parentesco" name="parentesco" required>
+        </div>
+        
+        
+        <!-- Campo 20 -->
+<div class="form-group">
+  <label for="contraseña">Contraseña:</label>
+  <input type="password" id="contraseña" name="contraseña" required>
 </div>
-
-    </div>
-
-    <!-- Modal para ver detalles del empleado -->
-    <div id="modal" class="modal hidden">
-      <div class="modal-content">
-        <span class="close" onclick="cerrarModal()">&times;</span>
-        <h2>Detalle del Empleado</h2>
-        <div id="modal-body"></div>
-      </div>
-    </div>
-
-    <!-- Modal para dar de alta empleado -->
-    <div id="add-employee-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalAltaEmpleado()">&times;</span>
-        <h2>Dar de alta nuevo empleado</h2>
-        <form id="employee-form" class="add-employee-form">
-          <!-- Campo 1 -->
-          <div class="form-group">
-            <label for="idUsuario">ID Usuario:</label>
-            <input type="number" id="idUsuario" name="idUsuario" required />
-          </div>
-
-          <!-- Campo 2 (Combobox) -->
-          <div class="form-group">
-            <label for="tipoRol">Tipo de Rol:</label>
-            <select id="tipoRol" name="tipoRol" required>
-              <option value="">Cargando roles...</option>
-            </select>
-          </div>
-
-          <!-- Campo 3 (Combobox) -->
-          <div class="form-group">
-            <label for="nombreArea">Área:</label>
-            <select id="nombreArea" name="nombreArea" required>
-              <option value="">Cargando áreas...</option>
-            </select>
-          </div>
-
-          <!-- Campo 4 -->
-          <div class="form-group">
-            <label for="nombres">Nombres:</label>
-            <input type="text" id="nombres" name="nombres" required />
-          </div>
-
-          <!-- Campo 5 -->
-          <div class="form-group">
-            <label for="paterno">Apellido Paterno:</label>
-            <input type="text" id="paterno" name="paterno" required />
-          </div>
-
-          <!-- Campo 6 -->
-          <div class="form-group">
-            <label for="materno">Apellido Materno:</label>
-            <input type="text" id="materno" name="materno" />
-          </div>
-
-          <!-- Campo 7 -->
-          <div class="form-group">
-            <label for="fechaNacimiento">Fecha de Nacimiento:</label>
-            <input
-              type="date"
-              id="fechaNacimiento"
-              name="fechaNacimiento"
-              required
-            />
-          </div>
-
-          <!-- Campo 8 -->
-          <div class="form-group">
-            <label for="direccion">Dirección:</label>
-            <input type="text" id="direccion" name="direccion" required />
-          </div>
-
-          <!-- Campo 9 -->
-          <div class="form-group">
-            <label for="codigoPostal">Código Postal:</label>
-            <input type="text" id="codigoPostal" name="codigoPostal" required />
-          </div>
-
-          <!-- Campo 10 -->
-          <div class="form-group">
-            <label for="correo">Correo Electrónico:</label>
-            <input type="email" id="correo" name="correo" required />
-          </div>
-
-          <!-- Campo 11 -->
-          <div class="form-group">
-            <label for="nss">Número de Seguro Social (NSS):</label>
-            <input type="text" id="nss" name="nss" required />
-          </div>
-
-          <!-- Campo 12 -->
-          <div class="form-group">
-            <label for="telefono">Teléfono:</label>
-            <input type="tel" id="telefono" name="telefono" required />
-          </div>
-
-          <!-- Campo 13 -->
-          <div class="form-group">
-            <label for="fechaIngreso">Fecha de Ingreso:</label>
-            <input type="date" id="fechaIngreso" name="fechaIngreso" required />
-          </div>
-
-          <!-- Campo 14 -->
-          <div class="form-group">
-            <label for="rfc">RFC:</label>
-            <input type="text" id="rfc" name="rfc" required />
-          </div>
-
-          <!-- Campo 15 -->
-          <div class="form-group">
-            <label for="curp">CURP:</label>
-            <input type="text" id="curp" name="curp" required />
-          </div>
-
-          <!-- Campo 16 -->
-          <div class="form-group">
-            <label for="puesto">Puesto:</label>
-            <input type="text" id="puesto" name="puesto" required />
-          </div>
-
-          <!-- Campo 17 -->
-          <div class="form-group">
-            <label for="nombreContactoEmergencia"
-              >Nombre Contacto Emergencia:</label
-            >
-            <input
-              type="text"
-              id="nombreContactoEmergencia"
-              name="nombreContactoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Campo 18 -->
-          <div class="form-group">
-            <label for="telefonoEmergencia">Teléfono Emergencia:</label>
-            <input
-              type="tel"
-              id="telefonoEmergencia"
-              name="telefonoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Campo 19 -->
-          <div class="form-group">
-            <label for="parentesco">Parentesco:</label>
-            <input type="text" id="parentesco" name="parentesco" required />
-          </div>
-
-          <!-- Campo 20 -->
-          <div class="form-group">
-            <label for="contraseña">Contraseña:</label>
-            <input type="password" id="contraseña" name="contraseña" required />
-          </div>
 
 <!-- Campo 21 -->
 <div class="form-group">
   <label for="confirmarContraseña">Confirmar Contraseña:</label>
   <input type="password" id="confirmarContraseña" name="confirmarContraseña" required>
 </div>
+
+<!-- Campo Sueldo Diario -->
+<div class="form-group">
+  <label for="sueldoDiario">Sueldo Diario:</label>
+  <input type="number" id="sueldoDiario" name="SueldoDiario" required>
+</div>
+
+<!-- Campo Sueldo Semanal -->
+<div class="form-group">
+  <label for="sueldoSemanal">Sueldo Semanal:</label>
+  <input type="number" id="sueldoSemanal" name="SueldoSemanal" required>
+</div>
+
+<!-- Campo Bono Semanal -->
+<div class="form-group">
+  <label for="bonoSemanal">Bono Semanal:</label>
+  <input type="number" id="bonoSemanal" name="BonoSemanal" required>
+</div>
+
+
         
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="cerrarModalAltaEmpleado()">Cancelar</button>
@@ -631,6 +592,7 @@
       </form>
     </div>
   </div>
+
 
   <!-- Modal para editar empleado -->
 <div id="edit-employee-modal" class="modal hidden">
@@ -641,163 +603,126 @@
       <!-- Campo 1 -->
       <div class="form-group">
         <label for="edit-idUsuario">ID Usuario:</label>
-        <input type="number" id="edit-idUsuario" name="idUsuario" readonly>
+        <input type="number" id="edit-idUsuario" name="idUsuario" >
       </div>
 
-          <!-- Campo 2 -->
-          <div class="form-group">
-            <label for="edit-tipoRol">Tipo de Rol:</label>
-            <select id="edit-tipoRol" name="tipoRol" required>
-              <option value="">Cargando roles...</option>
-            </select>
-          </div>
+      <!-- Campo 2 -->
+      <div class="form-group">
+        <label for="edit-tipoRol">Tipo de Rol:</label>
+        <select id="edit-tipoRol" name="tipoRol" required>
+          <option value="">Cargando roles...</option>
+        </select>
+      </div>
 
-          <!-- Campo 3 -->
-          <div class="form-group">
-            <label for="edit-nombreArea">Área:</label>
-            <select id="edit-nombreArea" name="nombreArea" required>
-              <option value="">Cargando áreas...</option>
-            </select>
-          </div>
+      <!-- Campo 3 -->
+      <div class="form-group">
+        <label for="edit-nombreArea">Área:</label>
+        <select id="edit-nombreArea" name="nombreArea" required>
+          <option value="">Cargando áreas...</option>
+        </select>
+      </div>
 
-          <!-- Campo 4 -->
-          <div class="form-group">
-            <label for="edit-nombres">Nombres:</label>
-            <input type="text" id="edit-nombres" name="nombres" required />
-          </div>
+      <!-- Campo 4 -->
+      <div class="form-group">
+        <label for="edit-nombres">Nombres:</label>
+        <input type="text" id="edit-nombres" name="nombres" required>
+      </div>
 
-          <!-- Campo 5 -->
-          <div class="form-group">
-            <label for="edit-paterno">Apellido Paterno:</label>
-            <input type="text" id="edit-paterno" name="paterno" required />
-          </div>
+      <!-- Campo 5 -->
+      <div class="form-group">
+        <label for="edit-paterno">Apellido Paterno:</label>
+        <input type="text" id="edit-paterno" name="paterno" required>
+      </div>
 
-          <!-- Campo 6 -->
-          <div class="form-group">
-            <label for="edit-materno">Apellido Materno:</label>
-            <input type="text" id="edit-materno" name="materno" />
-          </div>
+      <!-- Campo 6 -->
+      <div class="form-group">
+        <label for="edit-materno">Apellido Materno:</label>
+        <input type="text" id="edit-materno" name="materno">
+      </div>
 
-          <!-- Campo 7 -->
-          <div class="form-group">
-            <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
-            <input
-              type="date"
-              id="edit-fechaNacimiento"
-              name="fechaNacimiento"
-              required
-            />
-          </div>
+      <!-- Campo 7 -->
+      <div class="form-group">
+        <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
+        <input type="date" id="edit-fechaNacimiento" name="fechaNacimiento" required>
+      </div>
 
-          <!-- Campo 8 -->
-          <div class="form-group">
-            <label for="edit-direccion">Dirección:</label>
-            <input type="text" id="edit-direccion" name="direccion" required />
-          </div>
+      <!-- Campo 8 -->
+      <div class="form-group">
+        <label for="edit-direccion">Dirección:</label>
+        <input type="text" id="edit-direccion" name="direccion" required>
+      </div>
 
-          <!-- Campo 9 -->
-          <div class="form-group">
-            <label for="edit-codigoPostal">Código Postal:</label>
-            <input
-              type="text"
-              id="edit-codigoPostal"
-              name="codigoPostal"
-              required
-            />
-          </div>
+      <!-- Campo 9 -->
+      <div class="form-group">
+        <label for="edit-codigoPostal">Código Postal:</label>
+        <input type="text" id="edit-codigoPostal" name="codigoPostal" required>
+      </div>
 
-          <!-- Campo 10 -->
-          <div class="form-group">
-            <label for="edit-correo">Correo Electrónico:</label>
-            <input type="email" id="edit-correo" name="correo" required />
-          </div>
+      <!-- Campo 10 -->
+      <div class="form-group">
+        <label for="edit-correo">Correo Electrónico:</label>
+        <input type="email" id="edit-correo" name="correo" required>
+      </div>
 
-          <!-- Campo 11 -->
-          <div class="form-group">
-            <label for="edit-nss">Número de Seguro Social (NSS):</label>
-            <input type="text" id="edit-nss" name="nss" required />
-          </div>
+      <!-- Campo 11 -->
+      <div class="form-group">
+        <label for="edit-nss">Número de Seguro Social (NSS):</label>
+        <input type="text" id="edit-nss" name="nss" required>
+      </div>
 
-          <!-- Campo 12 -->
-          <div class="form-group">
-            <label for="edit-telefono">Teléfono:</label>
-            <input type="tel" id="edit-telefono" name="telefono" required />
-          </div>
+      <!-- Campo 12 -->
+      <div class="form-group">
+        <label for="edit-telefono">Teléfono:</label>
+        <input type="tel" id="edit-telefono" name="telefono" required>
+      </div>
 
-          <!-- Campo 13 -->
-          <div class="form-group">
-            <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
-            <input
-              type="date"
-              id="edit-fechaIngreso"
-              name="fechaIngreso"
-              required
-            />
-          </div>
+      <!-- Campo 13 -->
+      <div class="form-group">
+        <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
+        <input type="date" id="edit-fechaIngreso" name="fechaIngreso" required>
+      </div>
 
-          <!-- Campo 14 -->
-          <div class="form-group">
-            <label for="edit-rfc">RFC:</label>
-            <input type="text" id="edit-rfc" name="rfc" required />
-          </div>
+      <!-- Campo 14 -->
+      <div class="form-group">
+        <label for="edit-rfc">RFC:</label>
+        <input type="text" id="edit-rfc" name="rfc" required>
+      </div>
 
-          <!-- Campo 15 -->
-          <div class="form-group">
-            <label for="edit-curp">CURP:</label>
-            <input type="text" id="edit-curp" name="curp" required />
-          </div>
+      <!-- Campo 15 -->
+      <div class="form-group">
+        <label for="edit-curp">CURP:</label>
+        <input type="text" id="edit-curp" name="curp" required>
+      </div>
 
-          <!-- Campo 16 -->
-          <div class="form-group">
-            <label for="edit-puesto">Puesto:</label>
-            <input type="text" id="edit-puesto" name="puesto" required />
-          </div>
+      <!-- Campo 16 -->
+      <div class="form-group">
+        <label for="edit-puesto">Puesto:</label>
+        <input type="text" id="edit-puesto" name="puesto" required>
+      </div>
 
-          <!-- Campo 17 -->
-          <div class="form-group">
-            <label for="edit-nombreContactoEmergencia"
-              >Nombre Contacto Emergencia:</label
-            >
-            <input
-              type="text"
-              id="edit-nombreContactoEmergencia"
-              name="nombreContactoEmergencia"
-              required
-            />
-          </div>
+      <!-- Campo 17 -->
+      <div class="form-group">
+        <label for="edit-nombreContactoEmergencia">Nombre Contacto Emergencia:</label>
+        <input type="text" id="edit-nombreContactoEmergencia" name="nombreContactoEmergencia" required>
+      </div>
 
-          <!-- Campo 18 -->
-          <div class="form-group">
-            <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
-            <input
-              type="tel"
-              id="edit-telefonoEmergencia"
-              name="telefonoEmergencia"
-              required
-            />
-          </div>
+      <!-- Campo 18 -->
+      <div class="form-group">
+        <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
+        <input type="tel" id="edit-telefonoEmergencia" name="telefonoEmergencia" required>
+      </div>
 
-          <!-- Campo 19 -->
-          <div class="form-group">
-            <label for="edit-parentesco">Parentesco:</label>
-            <input
-              type="text"
-              id="edit-parentesco"
-              name="parentesco"
-              required
-            />
-          </div>
+      <!-- Campo 19 -->
+      <div class="form-group">
+        <label for="edit-parentesco">Parentesco:</label>
+        <input type="text" id="edit-parentesco" name="parentesco" required>
+      </div>
 
-          <!-- Campo 20 -->
-          <div class="form-group">
-            <label for="edit-contraseña">Contraseña:</label>
-            <input
-              type="password"
-              id="edit-contraseña"
-              name="contraseña"
-              required
-            />
-          </div>
+      <!-- Campo 20 -->
+      <div class="form-group">
+        <label for="edit-contraseña">Contraseña:</label>
+        <input type="password" id="edit-contraseña" name="contraseña" required>
+      </div>
 
       <!-- Campo 21 -->
       <div class="form-group">
@@ -805,200 +730,209 @@
         <input type="password" id="edit-confirmarContraseña" name="confirmarContraseña" required>
       </div>
 
-          <!-- Botones -->
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalEditarEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Actualizar Empleado
-            </button>
-          </div>
-        </form>
+      <!-- Campo Sueldo Diario -->
+<div class="form-group">
+  <label for="edit-sueldoDiario">Sueldo Diario:</label>
+  <input type="number" id="edit-sueldoDiario" name="SueldoDiario" required>
+</div>
+
+<!-- Campo Sueldo Semanal -->
+<div class="form-group">
+  <label for="edit-sueldoSemanal">Sueldo Semanal:</label>
+  <input type="number" id="edit-sueldoSemanal" name="SueldoSemanal" required>
+</div>
+
+<!-- Campo Bono Semanal -->
+<div class="form-group">
+  <label for="edit-bonoSemanal">Bono Semanal:</label>
+  <input type="number" id="edit-bonoSemanal" name="BonoSemanal" required>
+</div>
+
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="cerrarModalEditarEmpleado()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Actualizar Empleado</button>
       </div>
-    </div>
+    </form>
+  </div>
+</div>
 
-  <script>
-    document.getElementById("employee-name").textContent = "Juan Pérez";
 
-    // Cargar lista de empleados desde tu API
-    fetch('/api/empleados')
-      .then(response => response.json())
-      .then(data => {
-        const tbody = document.getElementById('empleados-body');
-        tbody.innerHTML = '';
-        data.forEach(emp => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${emp.id}</td>
-            <td>${emp.nombre}</td>
-            <td>${emp.puesto}</td>
-            <td>
-              <button class="action-btn" onclick="verEmpleado(${emp.id})">👁️</button>
-              <button class="action-btn" onclick="editarEmpleado(${emp.id})">✏️</button>
-              <button class="action-btn" onclick="eliminarEmpleado(${emp.id})">🗑️</button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(error => {
-        console.error('Error al cargar empleados:', error);
-      });
+ <script>
+  document.getElementById("employee-name").textContent = "Juan Pérez";
 
-    function verEmpleado(id) {
-      fetch(`/api/empleado/${id}`)
-        .then(res => {
-          if (!res.ok) {
-            throw new Error('Error al cargar datos del empleado');
-          }
-          return res.json();
-        })
-        .then(data => {
-          const modalBody = document.getElementById('modal-body');
-          
-          // Función auxiliar para mostrar solo datos con valor
-          const renderField = (label, value) => {
-            if (!value || value === "N/A" || value === "null") return '';
-            return `<p><strong>${label}:</strong> ${value}</p>`;
-          };
-          
-         modalBody.innerHTML = `
-  ${renderField('ID', data.idUsuario)}
-  ${renderField('Rol', data.TipoRol)}
-  ${renderField('Área', data.NombreArea)}
-  ${renderField('Nombre', `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
-  ${renderField('Fecha Nacimiento', data.FechaNacimiento)}
-  ${renderField('Dirección', data.Direccion)}
-  ${renderField('CP', data.CodigoPostal)}
-  ${renderField('Correo', data.Correo)}
-  ${renderField('NSS', data.NSS)}
-  ${renderField('Teléfono', data.Telefono)}
-  ${renderField('Ingreso', data.FechaIngreso)}
-  ${renderField('RFC', data.RFC)}
-  ${renderField('CURP', data.Curp)}
-  ${renderField('Puesto', data.Puesto)}
-  ${renderField('Emergencia', data.NombreContactoEmergencia)}
-  ${renderField('Tel. Emergencia', data.TelefonoEmergencia)}
-  ${renderField('Parentesco', data.Parentesco)}
-  ${renderField('Fecha Baja', data.FechaBaja || 'N/A')}
-  ${renderField('Comentario Salida', data.ComentarioSalida || 'N/A')}
-  ${renderField('Estado', data.Estado || 'N/A')}  <!-- Aquí agregas el nuevo campo -->
-  ${renderField('Clave', data.clave)}
-`;
-
-          document.getElementById('modal').classList.remove('hidden');
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Error al cargar los datos del empleado');
-        });
-    }
-
-    function cerrarModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
-
-    function abrirModalAltaEmpleado() {
-  document.getElementById('add-employee-modal').classList.remove('hidden');
-
-  // Llenar roles
-  fetch('/api/roles')
+  // Cargar lista de empleados
+  fetch('/api/empleados')
     .then(response => response.json())
     .then(data => {
-      const selectRol = document.getElementById('tipoRol');
-      selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-      data.forEach(rol => {
-        const option = document.createElement('option');
-        option.value = rol;
-        option.textContent = rol;
-        selectRol.appendChild(option);
+      const tbody = document.getElementById('empleados-body');
+      tbody.innerHTML = '';
+      data.forEach(emp => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${emp.id}</td>
+          <td>${emp.nombre}</td>
+          <td>${emp.puesto}</td>
+          <td>
+            <button class="action-btn" onclick="verEmpleado(${emp.id})">👁️</button>
+            <button class="action-btn" onclick="editarEmpleado(${emp.id})">✏️</button>
+            <button class="action-btn" onclick="eliminarEmpleado(${emp.id})">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(row);
       });
     })
-    .catch(error => console.error('Error al cargar roles:', error));
+    .catch(error => {
+      console.error('Error al cargar empleados:', error);
+    });
 
-  // Llenar áreas
-  fetch('/api/areas')
-    .then(response => response.json())
-    .then(data => {
-      const selectArea = document.getElementById('nombreArea');
-      selectArea.innerHTML = '<option value="">Seleccione un área</option>';
-      data.forEach(area => {
-        const option = document.createElement('option');
-        option.value = area;
-        option.textContent = area;
-        selectArea.appendChild(option);
-      });
+  function verEmpleado(id) {
+  fetch(`/api/empleado/${id}`)
+    .then(res => {
+      if (!res.ok) throw new Error('Error al cargar datos del empleado');
+      return res.json();
     })
-    .catch(error => console.error('Error al cargar áreas:', error));
+    .then(data => {
+      const modalBody = document.getElementById('modal-body');
+
+      const renderField = (label, value) => {
+        const texto = (value === null || value === undefined || value === '' || value === 'null')
+          ? 'Sin información'
+          : value;
+        return `<p><strong>${label}:</strong> ${texto}</p>`;
+      };
+
+      modalBody.innerHTML = `
+        ${renderField('ID', data.idUsuario)}
+        ${renderField('Rol', data.TipoRol)}
+        ${renderField('Área', data.NombreArea)}
+        ${renderField('Nombre Completo', `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
+        ${renderField('Fecha Nacimiento', data.FechaNacimiento)}
+        ${renderField('Dirección', data.Direccion)}
+        ${renderField('Código Postal', data.CodigoPostal)}
+        ${renderField('Correo', data.Correo)}
+        ${renderField('NSS', data.NSS)}
+        ${renderField('Teléfono', data.Telefono)}
+        ${renderField('Fecha Ingreso', data.FechaIngreso)}
+        ${renderField('RFC', data.RFC)}
+        ${renderField('CURP', data.Curp)}
+        ${renderField('Puesto', data.Puesto)}
+        ${renderField('Contacto Emergencia', data.NombreContactoEmergencia)}
+        ${renderField('Teléfono Emergencia', data.TelefonoEmergencia)}
+        ${renderField('Parentesco', data.Parentesco)}
+        ${renderField('Fecha Baja', data.FechaBaja)}
+        ${renderField('Comentario Salida', data.ComentarioSalida)}
+        ${renderField('Estado', data.Estado)}
+        ${renderField('Sueldo Diario', data.SueldoDiario)}
+        ${renderField('Sueldo Semanal', data.SueldoSemanal)}
+        ${renderField('Bono Semanal', data.BonoSemanal)}
+      `;
+
+      document.getElementById('modal').classList.remove('hidden');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al cargar los datos del empleado');
+    });
 }
 
 
-    function cerrarModalAltaEmpleado() {
-      document.getElementById('add-employee-modal').classList.add('hidden');
-    }
+  function cerrarModal() {
+    document.getElementById('modal').classList.add('hidden');
+  }
 
-    
+  function abrirModalAltaEmpleado() {
+    document.getElementById('add-employee-modal').classList.remove('hidden');
 
-    function eliminarEmpleado(id) {
-      if (confirm(`¿Estás seguro de que deseas eliminar al empleado con ID ${id}?`)) {
-        fetch(`/api/empleado/${id}`, {
-          method: 'DELETE'
-        })
-        .then(response => {
-          if (response.ok) {
-            alert("Empleado eliminado correctamente");
-            // Recargar la lista de empleados
-            location.reload();
-          } else {
-            throw new Error('Error al eliminar empleado');
-          }
+    // Llenar roles
+    fetch('/api/roles')
+      .then(res => res.json())
+      .then(data => {
+        const selectRol = document.getElementById('tipoRol');
+        selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+        data.forEach(rol => {
+          const option = document.createElement('option');
+          option.value = rol.idRol;
+          option.textContent = rol.TipoRol;
+          selectRol.appendChild(option);
+        });
+      });
+
+    // Llenar áreas
+    fetch('/api/areas')
+      .then(res => res.json())
+      .then(data => {
+        const selectArea = document.getElementById('nombreArea');
+        selectArea.innerHTML = '<option value="">Seleccione un área</option>';
+        data.forEach(area => {
+          const option = document.createElement('option');
+          option.value = area.idArea;
+          option.textContent = area.NombreArea;
+          selectArea.appendChild(option);
+        });
+      });
+  }
+
+  function cerrarModalAltaEmpleado() {
+    document.getElementById('add-employee-modal').classList.add('hidden');
+  }
+
+  function eliminarEmpleado(id) {
+    if (confirm(`¿Estás seguro de que deseas eliminar al empleado con ID ${id}?`)) {
+      fetch(`/api/empleado/${id}`, { method: 'DELETE' })
+        .then(res => {
+          if (!res.ok) throw new Error('Error al eliminar empleado');
+          alert("Empleado eliminado correctamente");
+          location.reload();
         })
         .catch(error => {
           console.error('Error:', error);
           alert('Error al eliminar el empleado');
         });
-      }
     }
+  }
 
-    // Manejar el envío del formulario de alta de empleado
-    document.getElementById('employee-form').addEventListener('submit', function(e) {
+  document.getElementById('employee-form').addEventListener('submit', function (e) {
   e.preventDefault();
 
-          const contraseña = document.getElementById("contraseña").value;
-          const confirmarContraseña = document.getElementById(
-            "confirmarContraseña"
-          ).value;
+  const contraseña = document.getElementById('contraseña').value;
+  const confirmarContraseña = document.getElementById('confirmarContraseña').value;
 
-          if (contraseña !== confirmarContraseña) {
-            alert("Las contraseñas no coinciden");
-            return;
-          }
+  if (contraseña !== confirmarContraseña) {
+    alert('Las contraseñas no coinciden');
+    return;
+  }
 
   const formData = new FormData(this);
   const empleadoData = {};
-  formData.forEach((value, key) => {
-    empleadoData[key] = value;
-  });
+  formData.forEach((value, key) => { empleadoData[key] = value; });
 
-  // Convertir campos numéricos a número
+  // Mapear tipoRol y nombreArea a rol_id y area_id
+  empleadoData.rol_id = empleadoData.tipoRol;
+  empleadoData.area_id = empleadoData.nombreArea;
+  delete empleadoData.tipoRol;
+  delete empleadoData.nombreArea;
+
+  // Convertir números
   empleadoData.idUsuario = Number(empleadoData.idUsuario);
   empleadoData.nss = Number(empleadoData.nss);
   empleadoData.telefono = Number(empleadoData.telefono);
   empleadoData.telefonoEmergencia = Number(empleadoData.telefonoEmergencia);
+  empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
+  empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
+  empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
 
-  // Validar que no sean NaN
   if (
     isNaN(empleadoData.idUsuario) ||
     isNaN(empleadoData.nss) ||
     isNaN(empleadoData.telefono) ||
-    isNaN(empleadoData.telefonoEmergencia)
+    isNaN(empleadoData.telefonoEmergencia) ||
+    isNaN(empleadoData.SueldoDiario) ||
+    isNaN(empleadoData.SueldoSemanal) ||
+    isNaN(empleadoData.BonoSemanal)
   ) {
-    alert('Por favor, ingresa valores numéricos válidos en ID Usuario, NSS y Teléfonos');
+    alert('Por favor, ingresa valores numéricos válidos en ID Usuario, NSS, Teléfonos y Sueldos');
     return;
   }
 
@@ -1007,9 +941,9 @@
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(empleadoData)
   })
-  .then(response => {
-    if (!response.ok) throw new Error('Error al guardar el empleado');
-    return response.json();
+  .then(res => {
+    if (!res.ok) return res.json().then(data => { throw new Error(data.error || 'Error al guardar el empleado') });
+    return res.json();
   })
   .then(data => {
     alert(data.mensaje);
@@ -1018,85 +952,76 @@
   })
   .catch(error => {
     console.error('Error al insertar:', error);
-    alert('Hubo un error al guardar el empleado');
+    alert('Hubo un error al guardar el empleado: ' + error.message);
   });
 });
 
-function editarEmpleado(id) {
-  // Abrir el modal de edición
-  document.getElementById('edit-employee-modal').classList.remove('hidden');
 
-  // Cargar datos del empleado
-  fetch(`/api/empleado/${id}`)
-    .then(res => {
-      if (!res.ok) throw new Error('Error al obtener datos del empleado');
-      return res.json();
-    })
-    .then(data => {
-      // Primero cargamos roles y áreas (como tienen IDs, debemos esperar a que terminen)
-      Promise.all([
-        fetch('/api/roles').then(res => res.json()),
-        fetch('/api/areas').then(res => res.json())
-      ]).then(([roles, areas]) => {
-       const selectRol = document.getElementById('edit-tipoRol');
-const selectArea = document.getElementById('edit-nombreArea');
+  function editarEmpleado(id) {
+    document.getElementById('edit-employee-modal').classList.remove('hidden');
 
+    fetch(`/api/empleado/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Error al obtener datos del empleado');
+        return res.json();
+      })
+      .then(data => {
+        Promise.all([
+          fetch('/api/roles').then(res => res.json()),
+          fetch('/api/areas').then(res => res.json())
+        ]).then(([roles, areas]) => {
+          const selectRol = document.getElementById('edit-tipoRol');
+          const selectArea = document.getElementById('edit-nombreArea');
 
-        // Llenar roles
-        selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-        roles.forEach(rol => {
-          const option = document.createElement('option');
-          option.value = rol.idRol; // ← usa el id
-          option.textContent = rol.TipoRol;
-          selectRol.appendChild(option);
+          selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+          roles.forEach(rol => {
+            const option = document.createElement('option');
+            option.value = rol.idRol;
+            option.textContent = rol.TipoRol;
+            selectRol.appendChild(option);
+          });
+
+          selectArea.innerHTML = '<option value="">Seleccione un área</option>';
+          areas.forEach(area => {
+            const option = document.createElement('option');
+            option.value = area.idArea;
+            option.textContent = area.NombreArea;
+            selectArea.appendChild(option);
+          });
+
+          document.getElementById('edit-idUsuario').value = data.idUsuario || '';
+          document.getElementById('edit-tipoRol').value = data.Rol_idRol || '';
+          document.getElementById('edit-nombreArea').value = data.Area_idArea || '';
+          document.getElementById('edit-nombres').value = data.Nombres || '';
+          document.getElementById('edit-paterno').value = data.Paterno || '';
+          document.getElementById('edit-materno').value = data.Materno || '';
+          document.getElementById('edit-fechaNacimiento').value = data.FechaNacimiento || '';
+          document.getElementById('edit-direccion').value = data.Direccion || '';
+          document.getElementById('edit-codigoPostal').value = data.CodigoPostal || '';
+          document.getElementById('edit-correo').value = data.Correo || '';
+          document.getElementById('edit-nss').value = data.NSS || '';
+          document.getElementById('edit-telefono').value = data.Telefono || '';
+          document.getElementById('edit-fechaIngreso').value = data.FechaIngreso || '';
+          document.getElementById('edit-rfc').value = data.RFC || '';
+          document.getElementById('edit-curp').value = data.Curp || '';
+          document.getElementById('edit-puesto').value = data.Puesto || '';
+          document.getElementById('edit-nombreContactoEmergencia').value = data.NombreContactoEmergencia || '';
+          document.getElementById('edit-telefonoEmergencia').value = data.TelefonoEmergencia || '';
+          document.getElementById('edit-parentesco').value = data.Parentesco || '';
+          document.getElementById('edit-contraseña').value = data.clave || '';
+          document.getElementById('edit-confirmarContraseña').value = data.clave || '';
         });
-
-        // Llenar áreas
-        selectArea.innerHTML = '<option value="">Seleccione un área</option>';
-        areas.forEach(area => {
-          const option = document.createElement('option');
-          option.value = area.idArea; // ← usa el id
-          option.textContent = area.NombreArea;
-          selectArea.appendChild(option);
-        });
-
-        // Una vez llenos los selects, establecer los valores del empleado
-        document.getElementById('edit-idUsuario').value = data.idUsuario || '';
-document.getElementById('edit-tipoRol').value = data.Rol_idRol || '';
-document.getElementById('edit-nombreArea').value = data.Area_idArea || '';
-document.getElementById('edit-nombres').value = data.Nombres || '';
-document.getElementById('edit-paterno').value = data.Paterno || '';
-document.getElementById('edit-materno').value = data.Materno || '';
-document.getElementById('edit-fechaNacimiento').value = data.FechaNacimiento || '';
-document.getElementById('edit-direccion').value = data.Direccion || '';
-document.getElementById('edit-codigoPostal').value = data.CodigoPostal || '';
-document.getElementById('edit-correo').value = data.Correo || '';
-document.getElementById('edit-nss').value = data.NSS || '';
-document.getElementById('edit-telefono').value = data.Telefono || '';
-document.getElementById('edit-fechaIngreso').value = data.FechaIngreso || '';
-document.getElementById('edit-rfc').value = data.RFC || '';
-document.getElementById('edit-curp').value = data.Curp || '';
-document.getElementById('edit-puesto').value = data.Puesto || '';
-document.getElementById('edit-nombreContactoEmergencia').value = data.NombreContactoEmergencia || '';
-document.getElementById('edit-telefonoEmergencia').value = data.TelefonoEmergencia || '';
-document.getElementById('edit-parentesco').value = data.Parentesco || '';
-document.getElementById('edit-contraseña').value = data.clave || '';
-document.getElementById('edit-confirmarContraseña').value = data.clave || '';
-
+      })
+      .catch(error => {
+        console.error('Error al cargar datos del empleado:', error);
+        alert('No se pudieron cargar los datos del empleado.');
       });
-    })
-    .catch(error => {
-      console.error('Error al cargar datos del empleado:', error);
-      alert('No se pudieron cargar los datos del empleado.');
-    });
-}
+  }
 
-function cerrarModalEditarEmpleado() {
-  document.getElementById('edit-employee-modal').classList.add('hidden');
-}
+  function cerrarModalEditarEmpleado() {
+    document.getElementById('edit-employee-modal').classList.add('hidden');
+  }
+</script>
 
-
-
-  </script>
 </body>
 </html>
