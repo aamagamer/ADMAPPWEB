@@ -110,6 +110,30 @@ def obtener_areas():
     conn.close()
     return jsonify(areas)
 
+@app.route('/api/empleado/<int:id>', methods=['DELETE'])
+def eliminar_empleado(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Verificar si el empleado existe
+        cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", id)
+        if not cursor.fetchone():
+            return jsonify({"error": "Empleado no encontrado"}), 404
+
+        # Eliminar el empleado
+        cursor.execute("DELETE FROM Usuario WHERE idUsuario = ?", id)
+        conn.commit()
+
+        return jsonify({"mensaje": "Empleado eliminado correctamente"}), 200
+
+    except Exception as e:
+        print("Error al eliminar empleado:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        conn.close()
+
 @app.route('/api/empleado', methods=['POST'])
 def agregar_empleado():
     data = request.get_json()
@@ -192,6 +216,8 @@ def agregar_empleado():
 
     finally:
         conn.close()
+
+        
 
 @app.route('/<path:filename>')
 def serve_file(filename):
