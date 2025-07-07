@@ -100,7 +100,7 @@ def actualizar_empleado(id):
                 FechaNacimiento = ?, Direccion = ?, CodigoPostal = ?, Correo = ?, NSS = ?, Telefono = ?,
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
                 TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
-                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?
+                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Vacaciones = ?
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
@@ -125,6 +125,7 @@ def actualizar_empleado(id):
             int(data['SueldoDiario']),
             int(data['SueldoSemanal']),
             int(data['BonoSemanal']),
+            int(data['Vacaciones']),
             id
         ))
         conn.commit()
@@ -167,10 +168,10 @@ def agregar_empleado():
                 FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
                 FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
                 TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida,
-                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal
+                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Vacaciones
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
-                    ?, 'Activo', ?, ?, ?)
+                    ?, 'Activo', ?, ?, ?, ?)
         """, (
             int(data['idUsuario']),
             data['rol_id'],

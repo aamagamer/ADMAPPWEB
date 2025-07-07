@@ -355,6 +355,34 @@
         margin-right: 8px;
       }
 
+      .fields-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 10px;
+        margin-top: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+      }
+
+      .fields-grid div {
+        padding: 8px;
+        background: #f9f9f9;
+        border-radius: 4px;
+      }
+
+      #paso-empleados {
+        display: none;
+      }
+
+      #paso-empleados.visible {
+        display: block;
+      }
+
+      #paso-campos.oculto {
+        display: none;
+      }
+
       .modal-confirmacion {
         position: fixed;
         top: 0;
@@ -403,8 +431,6 @@
       .btn:hover {
         opacity: 0.9;
       }
-
-      
 
       @keyframes fadeIn {
         from {
@@ -999,6 +1025,16 @@
             />
           </div>
 
+          <!-- Campo Comentario de Salida -->
+          <div class="form-group">
+            <label for="edit-comentarioSalida">Vacaciones:</label>
+            <input
+              type="text"
+              id="edit-comentarioSalida"
+              name="comentarioSalida"
+            />
+          </div>
+
           <!-- Botones -->
           <div class="form-actions">
             <button
@@ -1016,29 +1052,55 @@
       </div>
     </div>
 
-    <!-- Modal para exportar a Excel -->
+    <!-- Modal para exportar a Excel (actualizado) -->
     <div id="export-excel-modal" class="modal hidden">
       <div class="modal-content add-employee-modal">
         <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
-        <h2>Exportar datos a Excel</h2>
-        <div id="export-excel-body">
+
+        <!-- Paso 1: Selección de campos -->
+        <div id="paso-campos">
+          <h2>Exportar datos (1/2)</h2>
           <p>Selecciona los campos que deseas incluir en el reporte:</p>
-          <div
-            id="export-fields-container"
-            style="
-              display: grid;
-              grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-              gap: 10px;
-              margin-top: 20px;
-            "
-          ></div>
-          <div class="form-actions" style="margin-top: 20px">
+          <div id="export-fields-container" class="fields-grid"></div>
+          <div class="form-actions">
             <button
               type="button"
               class="btn btn-secondary"
               onclick="cerrarModalExportarExcel()"
             >
               Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="mostrarPasoEmpleados()"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+
+        <!-- Paso 2: Selección de empleados -->
+        <div id="paso-empleados" class="hidden">
+          <h2>Exportar datos (2/2)</h2>
+          <p>Selecciona los empleados a incluir en el reporte:</p>
+          <div style="margin-bottom: 10px">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="toggleSeleccionarTodos()"
+            >
+              <i class="bi bi-check-all"></i> Seleccionar todos
+            </button>
+          </div>
+          <div id="export-employees-container" class="fields-grid"></div>
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="mostrarPasoCampos()"
+            >
+              Anterior
             </button>
             <button
               type="button"
@@ -1063,52 +1125,50 @@
     </div>
 
     <div id="modal-confirmacion" class="modal-confirmacion hidden">
-  <div class="modal-contenido">
-    <p id="modal-texto">¿Quieres eliminar este empleado?</p>
-    <div class="modal-botones">
-      <button id="modal-cancelar" class="btn">Cancelar</button>
-      <button id="modal-confirmar" class="btn btn-danger">Eliminar</button>
+      <div class="modal-contenido">
+        <p id="modal-texto">¿Quieres eliminar este empleado?</p>
+        <div class="modal-botones">
+          <button id="modal-cancelar" class="btn">Cancelar</button>
+          <button id="modal-confirmar" class="btn btn-danger">Eliminar</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div id="modal-exito" class="modal-exito hidden">
-  <div class="modal-contenido-exito">
-    <p>Actualización correcta</p>
-    <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
-  </div>
-</div>
-
+    <div id="modal-exito" class="modal-exito hidden">
+      <div class="modal-contenido-exito">
+        <p>Actualización correcta</p>
+        <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
+      </div>
+    </div>
 
     <script>
-      
-// Verificar si el usuario está logueado
-function verificarSesion() {
-    const idUsuario = localStorage.getItem('idUsuario');
-    if (!idUsuario) {
-        window.location.href = 'index.html'; // Redirigir al login si no hay sesión
-    }
-    return idUsuario;
-}
+      // Verificar si el usuario está logueado
+      function verificarSesion() {
+        const idUsuario = localStorage.getItem("idUsuario");
+        if (!idUsuario) {
+          window.location.href = "index.html"; // Redirigir al login si no hay sesión
+        }
+        return idUsuario;
+      }
 
-// Uso en tu página:
-document.addEventListener('DOMContentLoaded', function() {
-    // Verificar sesión y obtener ID de usuario
-    const idUsuario = verificarSesion();
-    
-    // Cargar datos del usuario
-    if (idUsuario) {
-        cargarNombreUsuario(idUsuario);
-        
-        // Cargar lista de empleados
-        fetch("/api/empleados")
+      // Uso en tu página:
+      document.addEventListener("DOMContentLoaded", function () {
+        // Verificar sesión y obtener ID de usuario
+        const idUsuario = verificarSesion();
+
+        // Cargar datos del usuario
+        if (idUsuario) {
+          cargarNombreUsuario(idUsuario);
+
+          // Cargar lista de empleados
+          fetch("/api/empleados")
             .then((response) => response.json())
             .then((data) => {
-                const tbody = document.getElementById("empleados-body");
-                tbody.innerHTML = "";
-                data.forEach((emp) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
+              const tbody = document.getElementById("empleados-body");
+              tbody.innerHTML = "";
+              data.forEach((emp) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
                         <td>${emp.id}</td>
                         <td>${emp.nombre}</td>
                         <td>${emp.puesto}</td>
@@ -1124,49 +1184,50 @@ document.addEventListener('DOMContentLoaded', function() {
                             </button>
                         </td>
                     `;
-                    tbody.appendChild(row);
-                });
+                tbody.appendChild(row);
+              });
             })
             .catch((error) => {
-                console.error("Error al cargar empleados:", error);
+              console.error("Error al cargar empleados:", error);
             });
-    }
-});
+        }
+      });
 
-function cargarNombreUsuario(idUsuario) {
-    fetch('/api/usuario/nombre', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idUsuario: idUsuario })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al obtener el nombre del usuario');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.error) {
-            console.error(data.error);
-            document.getElementById("employee-name").textContent = "Administrador";
-        } else {
-            // Formatear el nombre completo manejando casos donde falte materno
-            let nombreCompleto = data.nombres || '';
-            if (data.paterno) nombreCompleto += ` ${data.paterno}`;
-            if (data.materno) nombreCompleto += ` ${data.materno}`;
-            
-            document.getElementById("employee-name").textContent = nombreCompleto.trim() || "Administrador";
-        }
-    })
-    .catch(error => {
-        console.error('Error al cargar nombre:', error);
-        document.getElementById("employee-name").textContent = "Administrador";
-    });
-}
-      
-      
+      function cargarNombreUsuario(idUsuario) {
+        fetch("/api/usuario/nombre", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idUsuario: idUsuario }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error al obtener el nombre del usuario");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.error) {
+              console.error(data.error);
+              document.getElementById("employee-name").textContent =
+                "Administrador";
+            } else {
+              // Formatear el nombre completo manejando casos donde falte materno
+              let nombreCompleto = data.nombres || "";
+              if (data.paterno) nombreCompleto += ` ${data.paterno}`;
+              if (data.materno) nombreCompleto += ` ${data.materno}`;
+
+              document.getElementById("employee-name").textContent =
+                nombreCompleto.trim() || "Administrador";
+            }
+          })
+          .catch((error) => {
+            console.error("Error al cargar nombre:", error);
+            document.getElementById("employee-name").textContent =
+              "Administrador";
+          });
+      }
 
       // Cargar lista de empleados
       fetch("/api/empleados")
@@ -1248,6 +1309,7 @@ function cargarNombreUsuario(idUsuario) {
         ${renderField("Sueldo Diario", data.SueldoDiario)}
         ${renderField("Sueldo Semanal", data.SueldoSemanal)}
         ${renderField("Bono Semanal", data.BonoSemanal)}
+        ${renderField("Vacaciones", data.Vacaciones)}
       `;
 
             document.getElementById("modal").classList.remove("hidden");
@@ -1674,10 +1736,19 @@ function cargarNombreUsuario(idUsuario) {
         { id: "BonoSemanal", nombre: "Bono Semanal" },
       ];
 
+      let camposSeleccionados = [];
+      let empleadosSeleccionados = [];
+
       function abrirModalExportarExcel() {
         document
           .getElementById("export-excel-modal")
           .classList.remove("hidden");
+        mostrarPasoCampos();
+      }
+
+      function mostrarPasoCampos() {
+        document.getElementById("paso-empleados").classList.remove("visible");
+        document.getElementById("paso-campos").classList.remove("oculto");
 
         const container = document.getElementById("export-fields-container");
         container.innerHTML = "";
@@ -1704,210 +1775,197 @@ function cargarNombreUsuario(idUsuario) {
         });
       }
 
-      function cerrarModalExportarExcel() {
-        document.getElementById("export-excel-modal").classList.add("hidden");
-      }
-
-      function exportarExcel() {
-        // Obtener campos seleccionados
+      function mostrarPasoEmpleados() {
+        // Guardar los campos seleccionados
         const checkboxes = document.querySelectorAll(
           '#export-fields-container input[type="checkbox"]:checked'
         );
-        const camposSeleccionados = Array.from(checkboxes).map(
-          (cb) => cb.value
-        );
+        camposSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
 
         if (camposSeleccionados.length === 0) {
           alert("Por favor selecciona al menos un campo para exportar");
           return;
         }
 
-        // Mostrar feedback de carga
-        const exportBtn = document.querySelector(
-          "#export-excel-modal .btn-primary"
-        );
-        const originalText = exportBtn.textContent;
-        exportBtn.textContent = "Generando...";
-        exportBtn.disabled = true;
+        document.getElementById("paso-campos").classList.add("oculto");
+        document.getElementById("paso-empleados").classList.add("visible");
 
-        // Obtener datos de empleados
+        // Cargar lista de empleados
         fetch("/api/empleados")
           .then((response) => response.json())
           .then((empleados) => {
-            if (!Array.isArray(empleados)) {
-              throw new Error("La respuesta de /api/empleados no es válida");
-            }
-
-            // Obtener detalles completos de cada empleado
-            const promises = empleados.map((emp) =>
-              fetch(`/api/empleado/${emp.id}`).then((res) => res.json())
+            const container = document.getElementById(
+              "export-employees-container"
             );
-            return Promise.all(promises);
-          })
-          .then((empleadosCompletos) => {
-            // Preparar datos para Excel
-            const datosExcel = empleadosCompletos.map((empleado) => {
-              const fila = {};
-              camposSeleccionados.forEach((campo) => {
-                // Obtener valor
-                let valor = empleado[campo];
+            container.innerHTML = "";
 
-                // Mapear campos especiales
-                if (campo === "TipoRol") valor = empleado["TipoRol"] || "";
-                if (campo === "NombreArea")
-                  valor = empleado["NombreArea"] || "";
+            empleados.forEach((emp) => {
+              const div = document.createElement("div");
+              div.style.display = "flex";
+              div.style.alignItems = "center";
+              div.style.gap = "8px";
 
-                // Formatear fechas
-                if (
-                  valor &&
-                  (campo.includes("Fecha") ||
-                    campo === "FechaNacimiento" ||
-                    campo === "FechaIngreso" ||
-                    campo === "FechaBaja")
-                ) {
-                  valor = new Date(valor).toLocaleDateString("es-MX");
-                }
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.id = `emp-${emp.id}`;
+              checkbox.value = emp.id;
+              checkbox.checked = false;
 
-                // Buscar nombre de columna
-                const campoObj = camposExportacion.find((c) => c.id === campo);
-                fila[campoObj ? campoObj.nombre : campo] = valor || "";
-              });
-              return fila;
+              const label = document.createElement("label");
+              label.htmlFor = `emp-${emp.id}`;
+              label.textContent = `${emp.id} - ${emp.nombre}`;
+
+              div.appendChild(checkbox);
+              div.appendChild(label);
+              container.appendChild(div);
             });
-
-            // Crear libro de Excel
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(datosExcel);
-
-            // Calcular anchos de columna
-            const calcularAnchosColumnas = (worksheet) => {
-              const range = XLSX.utils.decode_range(worksheet["!ref"]);
-              const columnWidths = [];
-
-              for (let C = range.s.c; C <= range.e.c; ++C) {
-                let maxLength = 0;
-
-                // Encabezado
-                const headerCell =
-                  worksheet[XLSX.utils.encode_cell({ r: range.s.r, c: C })];
-                if (headerCell && headerCell.v) {
-                  maxLength = headerCell.v.toString().length;
-                }
-
-                // Datos
-                for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-                  const cell =
-                    worksheet[XLSX.utils.encode_cell({ r: R, c: C })];
-                  if (cell && cell.v) {
-                    const cellLength = cell.v.toString().length;
-                    if (cellLength > maxLength) {
-                      maxLength = cellLength;
-                    }
-                  }
-                }
-
-                columnWidths.push({
-                  wch: Math.min(Math.max(maxLength, 10), 50), // entre 10 y 50 caracteres
-                });
-              }
-
-              return columnWidths;
-            };
-
-            ws["!cols"] = calcularAnchosColumnas(ws);
-
-            // Estilo de encabezado
-            const headerStyle = {
-              font: { bold: true, color: { rgb: "FFFFFF" } },
-              fill: { fgColor: { rgb: "2C3E50" } },
-              alignment: { horizontal: "center" },
-            };
-
-            // Aplicar estilo a encabezados
-            const range = XLSX.utils.decode_range(ws["!ref"]);
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-              const cellAddress = XLSX.utils.encode_cell({
-                r: range.s.r,
-                c: C,
-              });
-              if (!ws[cellAddress].s) ws[cellAddress].s = {};
-              Object.assign(ws[cellAddress].s, headerStyle);
-            }
-
-            // Agregar hoja y generar archivo
-            XLSX.utils.book_append_sheet(wb, ws, "Empleados");
-
-            const fecha = new Date()
-              .toLocaleDateString("es-MX", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })
-              .replace(/\//g, "-");
-
-            XLSX.writeFile(wb, `Reporte_Empleados_${fecha}.xlsx`);
-
-            cerrarModalExportarExcel();
           })
           .catch((error) => {
-            console.error("Error al exportar a Excel:", error);
-            alert(
-              "Ocurrió un error al generar el archivo Excel: " + error.message
-            );
-          })
-          .finally(() => {
-            exportBtn.textContent = originalText || "Exportar a Excel";
-            exportBtn.disabled = false;
+            console.error("Error al cargar empleados:", error);
+            alert("Error al cargar la lista de empleados");
           });
       }
 
-      function mostrarModalConfirmacion({ 
-  texto, 
-  textoBotonConfirmar = 'Confirmar', 
-  claseBotonConfirmar = 'btn-danger', 
-  onConfirmar, 
-  onCancelar 
-}) {
-  const modal = document.getElementById('modal-confirmacion');
-  const modalTexto = document.getElementById('modal-texto');
-  const btnConfirmar = document.getElementById('modal-confirmar');
-  const btnCancelar = document.getElementById('modal-cancelar');
+      function toggleSeleccionarTodos() {
+        const checkboxes = document.querySelectorAll(
+          '#export-employees-container input[type="checkbox"]'
+        );
+        const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
 
-  modalTexto.textContent = texto;
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = !allChecked;
+        });
+      }
 
-  // Cambiar texto y clases del botón confirmar
-  btnConfirmar.textContent = textoBotonConfirmar;
-  btnConfirmar.className = 'btn ' + claseBotonConfirmar;
+      function exportarExcel() {
+  const checkboxes = document.querySelectorAll('#export-employees-container input[type="checkbox"]:checked');
+  empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
 
-  modal.classList.remove('hidden');
+  if (empleadosSeleccionados.length === 0) {
+    alert("Por favor selecciona al menos un empleado para exportar");
+    return;
+  }
 
-  // Remover listeners previos
-  btnConfirmar.onclick = null;
-  btnCancelar.onclick = null;
+  const exportBtn = document.querySelector("#paso-empleados .btn-primary");
+  const originalText = exportBtn.textContent;
+  exportBtn.textContent = "Generando...";
+  exportBtn.disabled = true;
 
-  btnConfirmar.onclick = () => {
-    if (typeof onConfirmar === 'function') onConfirmar();
-    modal.classList.add('hidden');
-  };
+  const promises = empleadosSeleccionados.map((id) =>
+    fetch(`/api/empleado/${id}`).then((res) => res.json())
+  );
 
-  btnCancelar.onclick = () => {
-    if (typeof onCancelar === 'function') onCancelar();
-    modal.classList.add('hidden');
-  };
+  Promise.all(promises)
+    .then((empleadosCompletos) => {
+      const datosExcel = empleadosCompletos.map((empleado) => {
+        const fila = {};
+        camposSeleccionados.forEach((campo) => {
+          fila[campo] = empleado[campo] !== undefined ? empleado[campo] : "";
+        });
+        return fila;
+      });
+
+      // Crear hoja Excel
+      const worksheet = XLSX.utils.json_to_sheet(datosExcel, { header: camposSeleccionados });
+
+      // Agregar estilos de encabezado (fondo amarillo)
+      const range = XLSX.utils.decode_range(worksheet['!ref']);
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell_address = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!worksheet[cell_address]) continue;
+
+        worksheet[cell_address].s = {
+          fill: {
+            patternType: "solid",
+            fgColor: { rgb: "FFFF00" }, // Amarillo
+          },
+          font: {
+            bold: true
+          },
+          alignment: {
+            horizontal: "center"
+          }
+        };
+      }
+
+      // Ajustar automáticamente el ancho de las columnas
+      worksheet['!cols'] = camposSeleccionados.map(campo => {
+        const maxLength = Math.max(
+          campo.length,
+          ...datosExcel.map(row => (row[campo] ? row[campo].toString().length : 0))
+        );
+        return { wch: maxLength + 2 };
+      });
+
+      // Crear libro y exportar
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Empleados");
+
+      XLSX.writeFile(workbook, "empleados_exportados.xlsx");
+    })
+    .catch((error) => {
+      console.error("Error al exportar a Excel:", error);
+      alert("Ocurrió un error al generar el archivo Excel: " + error.message);
+    })
+    .finally(() => {
+      exportBtn.textContent = originalText;
+      exportBtn.disabled = false;
+      cerrarModalExportarExcel();
+    });
 }
 
-function mostrarModalExito() {
-  const modal = document.getElementById('modal-exito');
-  const btnCerrar = document.getElementById('btn-cerrar-exito');
 
-  modal.classList.remove('hidden');
+      function cerrarModalExportarExcel() {
+        document.getElementById("export-excel-modal").classList.add("hidden");
+        camposSeleccionados = [];
+        empleadosSeleccionados = [];
+      }
 
-  btnCerrar.onclick = () => {
-    modal.classList.add('hidden');
-  };
-}
+      function mostrarModalConfirmacion({
+        texto,
+        textoBotonConfirmar = "Confirmar",
+        claseBotonConfirmar = "btn-danger",
+        onConfirmar,
+        onCancelar,
+      }) {
+        const modal = document.getElementById("modal-confirmacion");
+        const modalTexto = document.getElementById("modal-texto");
+        const btnConfirmar = document.getElementById("modal-confirmar");
+        const btnCancelar = document.getElementById("modal-cancelar");
 
+        modalTexto.textContent = texto;
 
+        // Cambiar texto y clases del botón confirmar
+        btnConfirmar.textContent = textoBotonConfirmar;
+        btnConfirmar.className = "btn " + claseBotonConfirmar;
+
+        modal.classList.remove("hidden");
+
+        // Remover listeners previos
+        btnConfirmar.onclick = null;
+        btnCancelar.onclick = null;
+
+        btnConfirmar.onclick = () => {
+          if (typeof onConfirmar === "function") onConfirmar();
+          modal.classList.add("hidden");
+        };
+
+        btnCancelar.onclick = () => {
+          if (typeof onCancelar === "function") onCancelar();
+          modal.classList.add("hidden");
+        };
+      }
+
+      function mostrarModalExito() {
+        const modal = document.getElementById("modal-exito");
+        const btnCerrar = document.getElementById("btn-cerrar-exito");
+
+        modal.classList.remove("hidden");
+
+        btnCerrar.onclick = () => {
+          modal.classList.add("hidden");
+        };
+      }
     </script>
   </body>
 </html>
