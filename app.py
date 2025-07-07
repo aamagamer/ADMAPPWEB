@@ -30,7 +30,7 @@ def login():
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT u.clave, r.TipoRol
+            SELECT u.idUsuario, u.clave, r.TipoRol
             FROM Usuario u
             JOIN Rol r ON u.Rol_idRol = r.idRol
             WHERE u.idUsuario = ?
@@ -39,7 +39,11 @@ def login():
         if row and row.clave == password:
             rol = row.TipoRol.strip()
             rutas = {'Empleado': 'empleado.html', 'RH': 'rh.html', 'Administrador': 'admin.html'}
-            return jsonify({"success": True, "redirect": rutas.get(rol, "index.html")})
+            return jsonify({
+                "success": True,
+                "redirect": rutas.get(rol, "index.html"),
+                "idUsuario": row.idUsuario  # <-- Añade esta línea
+            })
         return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al conectar: {e}"})
@@ -78,6 +82,8 @@ def obtener_empleado(id):
     columns = [col[0] for col in cursor.description]
     conn.close()
     return jsonify(dict(zip(columns, row)))
+
+
 @app.route('/api/empleado/<int:id>', methods=['PUT'])
 def actualizar_empleado(id):
     data = request.get_json()

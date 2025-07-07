@@ -53,6 +53,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
 
             if (data.success) {
+                // Guardar el ID del usuario en localStorage
+                localStorage.setItem('idUsuario', data.idUsuario);
+                
+                // Redirigir a la página correspondiente
                 window.location.href = data.redirect;
             } else {
                 alert(data.message);
