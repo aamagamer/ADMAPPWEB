@@ -233,6 +233,40 @@ def obtener_areas():
     conn.close()
     return jsonify(areas)
 
+@app.route('/api/usuario/nombre', methods=['POST'])
+def obtener_nombre_usuario():
+    data = request.json
+    id_usuario = data.get("idUsuario")
+
+    if not id_usuario:
+        return jsonify({"error": "Falta el ID del usuario"}), 400
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT nombres, paterno, materno
+            FROM Usuario
+            WHERE idUsuario = ?
+        """, id_usuario)
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return jsonify({
+                "nombres": row[0],
+                "paterno": row[1],
+                "materno": row[2]
+            })
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+
+
 @app.route('/<path:filename>')
 def serve_file(filename):
     return send_from_directory('.', filename)
