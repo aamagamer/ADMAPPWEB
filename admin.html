@@ -396,13 +396,41 @@
           </button>
         </h2>
 
-        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
-  <input type="text" id="busquedaEmpleado" oninput="buscarEmpleado()" placeholder="Buscar por ID o nombre" 
- style="padding: 8px; width: 250px; margin-right: 8px; border-radius: 4px; border: 1px solid #ccc;">
-  <button onclick="buscarEmpleado()" style="background-color: #2c3e50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">
-    <i class="bi bi-search"></i>
-  </button>
-</div>
+        <div
+          style="
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 10px;
+          "
+        >
+          <input
+            type="text"
+            id="busquedaEmpleado"
+            oninput="buscarEmpleado()"
+            placeholder="Buscar por ID o nombre"
+            style="
+              padding: 8px;
+              width: 250px;
+              margin-right: 8px;
+              border-radius: 4px;
+              border: 1px solid #ccc;
+            "
+          />
+          <button
+            onclick="buscarEmpleado()"
+            style="
+              background-color: #2c3e50;
+              color: white;
+              padding: 8px 12px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            "
+          >
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
 
         <table class="employee-table">
           <thead>
@@ -877,6 +905,22 @@
             />
           </div>
 
+          <!-- Campo Fecha de Baja -->
+          <div class="form-group">
+            <label for="edit-fechaBaja">Fecha de Baja:</label>
+            <input type="date" id="edit-fechaBaja" name="fechaBaja" />
+          </div>
+
+          <!-- Campo Comentario de Salida -->
+          <div class="form-group">
+            <label for="edit-comentarioSalida">Comentario de Salida:</label>
+            <input
+              type="text"
+              id="edit-comentarioSalida"
+              name="comentarioSalida"
+            />
+          </div>
+
           <!-- Botones -->
           <div class="form-actions">
             <button
@@ -1124,6 +1168,23 @@
             });
         });
 
+     // Alternativa para manejar zona horaria
+function formatoFechaParaInput(fecha) {
+    if (!fecha) return "";
+    
+    // Si ya está en formato YYYY-MM-DD
+    if (typeof fecha === 'string' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return fecha;
+    }
+    
+    // Parsear fecha y ajustar por zona horaria
+    const date = new Date(fecha);
+    const offset = date.getTimezoneOffset();
+    date.setMinutes(date.getMinutes() + offset);
+    
+    return date.toISOString().split('T')[0];
+}
+
       function editarEmpleado(id) {
         document
           .getElementById("edit-employee-modal")
@@ -1173,7 +1234,7 @@
               document.getElementById("edit-materno").value =
                 data.Materno || "";
               document.getElementById("edit-fechaNacimiento").value =
-                data.FechaNacimiento || "";
+                formatoFechaParaInput(data.FechaNacimiento);
               document.getElementById("edit-direccion").value =
                 data.Direccion || "";
               document.getElementById("edit-codigoPostal").value =
@@ -1183,7 +1244,7 @@
               document.getElementById("edit-telefono").value =
                 data.Telefono || "";
               document.getElementById("edit-fechaIngreso").value =
-                data.FechaIngreso || "";
+                formatoFechaParaInput(data.FechaIngreso);
               document.getElementById("edit-rfc").value = data.RFC || "";
               document.getElementById("edit-curp").value = data.Curp || "";
               document.getElementById("edit-puesto").value = data.Puesto || "";
@@ -1203,6 +1264,10 @@
                 data.SueldoSemanal || "";
               document.getElementById("edit-bonoSemanal").value =
                 data.BonoSemanal || "";
+              document.getElementById("edit-fechaBaja").value =
+                formatoFechaParaInput(data.FechaBaja);
+              document.getElementById("edit-comentarioSalida").value =
+                data.ComentarioSalida || "";
             });
           })
           .catch((error) => {
@@ -1216,25 +1281,28 @@
       }
 
       function buscarEmpleado() {
-  const termino = document.getElementById("busquedaEmpleado").value.toLowerCase();
+        const termino = document
+          .getElementById("busquedaEmpleado")
+          .value.toLowerCase();
 
-  fetch("/api/empleados")
-    .then((res) => res.json())
-    .then((empleados) => {
-      const resultados = empleados.filter(emp =>
-        emp.id.toString().includes(termino) ||
-        emp.nombre.toLowerCase().includes(termino)
-      );
+        fetch("/api/empleados")
+          .then((res) => res.json())
+          .then((empleados) => {
+            const resultados = empleados.filter(
+              (emp) =>
+                emp.id.toString().includes(termino) ||
+                emp.nombre.toLowerCase().includes(termino)
+            );
 
-      const tbody = document.getElementById("empleados-body");
-      tbody.innerHTML = "";
+            const tbody = document.getElementById("empleados-body");
+            tbody.innerHTML = "";
 
-      if (resultados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
-      } else {
-        resultados.forEach((emp) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
+            if (resultados.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
+            } else {
+              resultados.forEach((emp) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
             <td>${emp.id}</td>
             <td>${emp.nombre}</td>
             <td>${emp.puesto}</td>
@@ -1250,15 +1318,89 @@
               </button>
             </td>
           `;
-          tbody.appendChild(row);
-        });
+                tbody.appendChild(row);
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error en búsqueda:", error);
+          });
       }
-    })
-    .catch((error) => {
-      console.error("Error en búsqueda:", error);
-    });
-}
 
+      document
+        .getElementById("edit-employee-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const contraseña = document.getElementById("edit-contraseña").value;
+          const confirmar = document.getElementById(
+            "edit-confirmarContraseña"
+          ).value;
+
+          if (contraseña !== confirmar) {
+            alert("Las contraseñas no coinciden");
+            return;
+          }
+
+          const empleadoData = {
+            idUsuario: Number(document.getElementById("edit-idUsuario").value),
+            rol_id: document.getElementById("edit-tipoRol").value,
+            area_id: document.getElementById("edit-nombreArea").value,
+            nombres: document.getElementById("edit-nombres").value,
+            paterno: document.getElementById("edit-paterno").value,
+            materno: document.getElementById("edit-materno").value,
+            fechaNacimiento: document.getElementById("edit-fechaNacimiento")
+              .value,
+            direccion: document.getElementById("edit-direccion").value,
+            codigoPostal: document.getElementById("edit-codigoPostal").value,
+            correo: document.getElementById("edit-correo").value,
+            nss: Number(document.getElementById("edit-nss").value),
+            telefono: Number(document.getElementById("edit-telefono").value),
+            fechaIngreso: document.getElementById("edit-fechaIngreso").value,
+            rfc: document.getElementById("edit-rfc").value,
+            curp: document.getElementById("edit-curp").value,
+            puesto: document.getElementById("edit-puesto").value,
+            nombreContactoEmergencia: document.getElementById(
+              "edit-nombreContactoEmergencia"
+            ).value,
+            telefonoEmergencia: Number(
+              document.getElementById("edit-telefonoEmergencia").value
+            ),
+            parentesco: document.getElementById("edit-parentesco").value,
+            contraseña: contraseña,
+            SueldoDiario: Number(
+              document.getElementById("edit-sueldoDiario").value
+            ),
+            SueldoSemanal: Number(
+              document.getElementById("edit-sueldoSemanal").value
+            ),
+            BonoSemanal: Number(
+              document.getElementById("edit-bonoSemanal").value
+            ),
+            fechaBaja: document.getElementById("edit-fechaBaja").value || null,
+            comentarioSalida:
+              document.getElementById("edit-comentarioSalida").value || null,
+          };
+
+          fetch(`/api/empleado/${empleadoData.idUsuario}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(empleadoData),
+          })
+            .then((res) => {
+              if (!res.ok) throw new Error("Error al actualizar el empleado");
+              return res.json();
+            })
+            .then((data) => {
+              alert(data.mensaje);
+              cerrarModalEditarEmpleado();
+              location.reload();
+            })
+            .catch((err) => {
+              console.error("Error:", err);
+              alert("Hubo un error al actualizar: " + err.message);
+            });
+        });
     </script>
   </body>
 </html>

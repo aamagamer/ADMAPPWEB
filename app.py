@@ -78,7 +78,6 @@ def obtener_empleado(id):
     columns = [col[0] for col in cursor.description]
     conn.close()
     return jsonify(dict(zip(columns, row)))
-
 @app.route('/api/empleado/<int:id>', methods=['PUT'])
 def actualizar_empleado(id):
     data = request.get_json()
@@ -94,7 +93,8 @@ def actualizar_empleado(id):
                 Rol_idRol = ?, Area_idArea = ?, Nombres = ?, Paterno = ?, Materno = ?,
                 FechaNacimiento = ?, Direccion = ?, CodigoPostal = ?, Correo = ?, NSS = ?, Telefono = ?,
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
-                TelefonoEmergencia = ?, Parentesco = ?, clave = ?
+                TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
+                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
@@ -116,6 +116,9 @@ def actualizar_empleado(id):
             int(data['telefonoEmergencia']),
             data['parentesco'],
             data['contraseña'],
+            int(data['SueldoDiario']),
+            int(data['SueldoSemanal']),
+            int(data['BonoSemanal']),
             id
         ))
         conn.commit()
@@ -124,6 +127,7 @@ def actualizar_empleado(id):
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
 
 @app.route('/api/empleado', methods=['POST'])
 def agregar_empleado():
