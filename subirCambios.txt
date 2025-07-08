@@ -23,3 +23,6 @@ git push origin main
 
 //Cuando hay un commit encima o una madre asi
 git pull origin main --rebase
+
+//Borra cambios locales, te regresa a tu ultimo commit
+git reset --hard origin/main

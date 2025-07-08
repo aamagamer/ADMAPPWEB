@@ -18,6 +18,65 @@ def get_connection():
         'Connection Timeout=10;'
     )
 
+@app.route('/api/solicitarVacaciones', methods=['POST'])
+def solicitar_vacaciones():
+    try:
+        data = request.json
+        id_usuario = data.get('idUsuario')
+        fecha_salida = data.get('fechaInicio')
+        fecha_regreso = data.get('fechaFin')
+        motivo = data.get('motivo')  # NUEVO
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener área del usuario
+        cursor.execute("SELECT Area_idArea FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        result = cursor.fetchone()
+        if not result:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        area_id = result[0]
+
+        # Mapeo de área a estado de solicitud
+        estado_por_area = {
+            2: 3,
+            11: 6,
+            12: 7,
+            13: 8,
+            14: 9,
+            15: 11,
+            16: 12,
+            17: 13,
+            18: 14,
+            19: 15,
+            20: 16,
+            21: 17
+        }
+
+        estado_id = estado_por_area.get(area_id, 3)
+
+        # DEBUG opcional
+        print("INSERTAR:", id_usuario, estado_id, fecha_salida, fecha_regreso, motivo)
+
+        # INSERT actualizado
+        cursor.execute("""
+            INSERT INTO Vacaciones (Usuario_idUsuario, EstadoSolicitud, FechaSalida, FechaRegreso, Motivo)
+            VALUES (?, ?, ?, ?, ?)
+        """, (id_usuario, estado_id, fecha_salida, fecha_regreso, motivo))
+
+        conn.commit()
+        return jsonify({"mensaje": "Solicitud registrada correctamente"}), 201
+
+    except Exception as e:
+        print("ERROR EN SOLICITAR VACACIONES:", e)
+        return jsonify({"error": "Error al registrar solicitud"}), 500
+    finally:
+        conn.close()
+
+
+
+
 def calcular_dias_vacaciones(fecha_ingreso_str):
     hoy = datetime.now().date()
     fecha_ingreso = datetime.strptime(fecha_ingreso_str, '%Y-%m-%d').date()
@@ -48,6 +107,37 @@ def calcular_dias_vacaciones(fecha_ingreso_str):
         return 28
     else:
         return 30
+    
+@app.route('/api/diafestivo', methods=['POST'])
+def insertar_dia_festivo():
+    data = request.get_json()
+
+    fecha = data.get('fecha')
+    descripcion = data.get('descripcion')
+    anio = data.get('anio')
+
+    if not fecha or not descripcion or not anio:
+        return jsonify({'error': 'Todos los campos son obligatorios'}), 400
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO DiasFestivos (Fecha, Descripcion, Anio)
+            VALUES (?, ?, ?)
+        """, (fecha, descripcion, anio))
+        conn.commit()
+        return jsonify({'mensaje': 'Día festivo insertado correctamente'}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+        
+
 
 @app.route('/')
 def index():
@@ -298,6 +388,8 @@ def obtener_compensaciones():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
 
 
 @app.route('/api/usuario/nombre', methods=['POST'])
@@ -330,6 +422,56 @@ def obtener_nombre_usuario():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/festivos', methods=['GET'])
+def obtener_festivos():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT Fecha FROM DiasFestivos")
+        resultados = cursor.fetchall()
+        fechas = [row[0].strftime('%Y-%m-%d') for row in resultados]
+        return jsonify(fechas)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/vacacionesUsuario/<int:idUsuario>', methods=['GET'])
+def obtener_vacaciones(idUsuario):
+    try: 
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Consulta con parámetro para obtener vacaciones solo del usuario con idUsuario dado
+        cursor.execute("""
+            SELECT idUsuario, nombres, paterno, materno, vacaciones 
+            FROM Usuario 
+            WHERE idUsuario = ?
+        """, (idUsuario,))
+
+        row = cursor.fetchone()
+
+        if row:
+            vacaciones = {
+                "idUsuario": row[0],
+                "nombreCompleto": f"{row[1]} {row[2]} {row[3]}",
+                "vacaciones": row[4]
+            }
+            return jsonify(vacaciones), 200
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+        
+
     
 
     

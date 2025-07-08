@@ -3,224 +3,382 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css"
+/>
     <title>Solicitud de Vacaciones</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Arial", sans-serif;
-      }
+  /* Reset y estilos base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+  }
 
-      body {
-        background-color: #f5f5f5;
-        color: #333;
-      }
+  body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+  }
 
-      header {
-        background-color: #2c3e50;
-        color: white;
-        padding: 40px 0;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        height: 180px;
-        display: flex;
-        align-items: center;
-        position: relative;
-      }
+  /* Header */
+  header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 40px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 180px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
 
-      .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-        width: 100%;
-      }
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+  }
 
-      .header-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
+  .header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-      .logo {
-        width: 50%;
-        height: 25%;
-        margin-bottom: 15px;
-        max-height: 25%;
-        max-width: 25%;
-      }
+  .logo {
+    width: 50%;
+    height: 25%;
+    margin-bottom: 15px;
+    max-height: 25%;
+    max-width: 25%;
+  }
 
-      h1 {
-        font-size: 28px;
-        font-weight: 600;
-        text-align: center;
-      }
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+  }
 
-      .menu-button {
-        background-color: transparent;
-        color: white;
-        border: 2px solid white;
-        border-radius: 4px;
-        padding: 8px 15px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        z-index: 1;
-        margin-bottom: 100px;
-      }
+  .menu-button {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    border-radius: 4px;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 1;
+    margin-bottom: 100px;
+  }
 
-      .menu-button:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-      }
+  .menu-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 
-      .main-container {
-        max-width: 1200px;
-        margin: 50px auto;
-        padding: 0 20px;
-      }
+  /* Contenido principal */
+  .main-container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 0 20px;
+  }
 
-      .welcome-section {
-        text-align: center;
-        margin-bottom: 30px;
-      }
+  .welcome-section {
+    text-align: center;
+    margin-bottom: 30px;
+  }
 
-      .welcome-message {
-        font-size: 24px;
-        color: #2c3e50;
-        margin-bottom: 20px;
-      }
+  .welcome-message {
+    font-size: 24px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+  }
 
-      .form-container {
-        background-color: white;
-        padding: 40px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-      }
+  /* Formulario */
+  .form-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
 
-      .form-title {
-        text-align: center;
-        margin-bottom: 30px;
-        color: #2c3e50;
-        font-size: 22px;
-      }
+  .form-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    font-size: 22px;
+  }
 
-      .form-group {
-        margin-bottom: 25px;
-      }
+  .form-group {
+    margin-bottom: 25px;
+  }
 
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #555;
-      }
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+  }
 
-      input[type="date"],
-      textarea {
-        width: 100%;
-        padding: 12px 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-      }
+  textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    min-height: 150px;
+    resize: vertical;
+  }
 
-      input[type="date"]:focus,
-      textarea:focus {
-        border-color: #2c3e50;
-        outline: none;
-      }
+  textarea:focus {
+    border-color: #2c3e50;
+    outline: none;
+  }
 
-      textarea {
-        min-height: 150px;
-        resize: vertical;
-      }
+  /* Campos de fecha */
+  input[type="date"] {
+    visibility: hidden;
+    position: absolute;
+    pointer-events: none;
+  }
 
-      .date-fields {
-        display: flex;
-        gap: 20px;
-      }
+  .flatpickr-input {
+    visibility: visible !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 2px solid #2c3e50;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    background-color: #fefefe;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
 
-      .date-fields .form-group {
-        flex: 1;
-      }
+  .flatpickr-input:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+    outline: none;
+  }
 
-      .submit-button {
-        width: 100%;
-        padding: 12px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
+  .input-calendar-wrapper {
+    position: relative;
+    width: 100%;
+    display: inline-block;
+  }
 
-      .submit-button:hover {
-        background-color: #1a252f;
-      }
+  .input-calendar-wrapper .calendar-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    width: 24px;
+    height: 24px;
+    fill: #2c3e50;
+    opacity: 0.7;
+    user-select: none;
+    transition: opacity 0.3s;
+  }
 
-      .error-message {
-        color: #e74c3c;
-        font-size: 14px;
-        margin-top: 5px;
-        display: none;
-      }
+  .input-calendar-wrapper:hover .calendar-icon {
+    opacity: 1;
+  }
 
-      .vacation-counters {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 30px;
-        border: 1px solid #e0e0e0;
-      }
+  /* Calendario Flatpickr */
+  .flatpickr-calendar {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
 
-      .counter-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-      }
+  .flatpickr-day.selected {
+    background: #ff5722;
+    border-radius: 50%;
+    color: white;
+  }
 
-      .counter-item:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
+  .flatpickr-day:hover {
+    background: #ff7043;
+    color: white;
+  }
 
-      .counter-label {
-        font-weight: 600;
-        color: #555;
-      }
+  /* Campos de fecha en línea */
+  .date-fields {
+    display: flex;
+    gap: 20px;
+  }
 
-      .counter-value {
-        font-weight: 700;
-      }
+  .date-fields .form-group {
+    flex: 1;
+  }
 
-      .available-days {
-        color: #27ae60;
-      }
+  /* Botón de enviar */
+  .submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
 
-      .used-days {
-        color: #e74c3c;
-      }
+  .submit-button:hover {
+    background-color: #1a252f;
+  }
 
-      .total-days {
-        color: #2c3e50;
-      }
-    </style>
+  /* Mensajes de error */
+  .error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+  }
+
+  /* Contadores de vacaciones */
+  .vacation-counters {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
+  }
+
+  .counter-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .counter-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .counter-label {
+    font-weight: 600;
+    color: #555;
+  }
+
+  .counter-value {
+    font-weight: 700;
+  }
+
+  .available-days {
+    color: #27ae60;
+  }
+
+  .used-days {
+    color: #e74c3c;
+  }
+
+  .total-days {
+    color: #2c3e50;
+  }
+
+  /* Modal de confirmación */
+  #confirm-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  #confirm-modal .modal-content {
+    background-color: #ffffff;
+    padding: 30px 25px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  #confirm-modal h2 {
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  #confirm-modal p {
+    font-size: 16px;
+    color: #555;
+  }
+
+  #confirm-btn, #cancel-btn {
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 17px;
+    width: 100%;
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+
+  #confirm-btn {
+    background-color: #4caf50;
+    margin-bottom: 10px;
+  }
+
+  #cancel-btn {
+    background-color: #f44336;
+  }
+
+  #confirm-btn:hover, #cancel-btn:hover {
+    opacity: 0.9;
+  }
+
+  /* Animaciones */
+  @keyframes fadeIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+</style>
+
   </head>
   <body>
     <header>
@@ -241,7 +399,7 @@
     <div class="main-container">
       <div class="welcome-section">
         <div class="welcome-message">
-          ¡Hola <span id="employee-name">Empleado</span>!
+          
         </div>
         <p>
           Por favor completa el siguiente formulario para solicitar tus
@@ -426,199 +584,182 @@
       }
     </style>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        let totalVacationDays = 15;
-        let usedVacationDays = 0;
-        let availableDays = totalVacationDays - usedVacationDays;
+    
 
-        const formatDate = (date) => {
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, "0");
-          const day = String(date.getDate()).padStart(2, "0");
-          return `${year}-${month}-${day}`;
-        };
+   <script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    const idUsuario = localStorage.getItem("idUsuario");
+    let diasFestivos = [];
+    let diasDisponibles = 0;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const minDate = new Date(today);
-        minDate.setDate(minDate.getDate() + 7);
-        const formattedMinDate = formatDate(minDate);
+    if (!idUsuario) {
+      alert("No se encontró el ID del usuario. Inicia sesión nuevamente.");
+      window.location.href = "login.html";
+      return;
+    }
 
-        const fechaInicioInput = document.getElementById("fecha-inicio");
-        const fechaFinInput = document.getElementById("fecha-fin");
+    // Mostrar nombre del usuario
+    try {
+      const res = await fetch("/api/usuario/nombre", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idUsuario })
+      });
 
-        fechaInicioInput.min = formattedMinDate;
-        fechaFinInput.min = formattedMinDate;
-        fechaInicioInput.value = formattedMinDate;
+      const data = await res.json();
+      if (data.nombres) {
+        const nombreCompleto = `${data.nombres} ${data.paterno} ${data.materno}`;
+        const nombreElemento = document.getElementById("employee-name");
+        if (nombreElemento) nombreElemento.textContent = nombreCompleto;
+      }
+    } catch (err) {
+      console.error("Error al obtener nombre del usuario:", err);
+    }
 
-        function contarDiasHabiles(fechaInicio, fechaFin) {
-          let count = 0;
-          let current = new Date(fechaInicio);
-          current.setHours(0, 0, 0, 0);
-          fechaFin = new Date(fechaFin);
-          fechaFin.setHours(0, 0, 0, 0);
+    // Obtener vacaciones disponibles
+    try {
+      const resVac = await fetch(`/api/vacacionesUsuario/${idUsuario}`);
+      if (!resVac.ok) throw new Error("No se pudieron obtener las vacaciones");
+      const vacData = await resVac.json();
 
-          while (current <= fechaFin) {
-            const dia = current.getDay();
-            if (dia !== 0 && dia !== 6) {
-              count++;
-            }
-            current.setDate(current.getDate() + 1);
-          }
-          return count;
+      diasDisponibles = parseInt(vacData.vacaciones ?? "0");
+
+      document.querySelector(".total-days").textContent = diasDisponibles;
+      document.querySelector(".used-days").textContent = "0";
+      document.querySelector(".available-days").textContent = diasDisponibles;
+    } catch (error) {
+      console.error("Error al obtener vacaciones:", error);
+    }
+
+    // Obtener días festivos
+    try {
+      const res = await fetch("/api/festivos");
+      diasFestivos = await res.json();
+    } catch (error) {
+      console.error("Error al obtener días festivos:", error);
+      diasFestivos = [];
+    }
+
+    // Utilidades
+    const bloquearFinesDeSemana = (date) => {
+      const dia = date.getDay();
+      return dia === 0 || dia === 6;
+    };
+
+    function contarDiasHabiles(fechaInicio, fechaFin, festivos = []) {
+      const inicio = new Date(fechaInicio);
+      const fin = new Date(fechaFin);
+      let contador = 0;
+
+      for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
+        const dia = d.getDay();
+        const formato = d.toISOString().split("T")[0];
+        if (dia !== 0 && dia !== 6 && !festivos.includes(formato)) {
+          contador++;
         }
+      }
+      return contador;
+    }
 
-        // Validación completa del formulario
-        document
-          .getElementById("vacation-form")
-          .addEventListener("submit", function (e) {
-            e.preventDefault();
-            let isValid = true;
+    function sumarDiasHabiles(fechaInicio, cantidadDias, festivos = []) {
+      const resultado = new Date(fechaInicio);
+      let sumados = 0;
 
-            const startDate = new Date(fechaInicioInput.value);
-            const endDate = new Date(fechaFinInput.value);
-            startDate.setHours(0, 0, 0, 0);
-            endDate.setHours(0, 0, 0, 0);
+      while (sumados < cantidadDias) {
+        resultado.setDate(resultado.getDate() + 1);
+        const dia = resultado.getDay();
+        const formato = resultado.toISOString().split("T")[0];
 
-            const minStartDate = new Date();
-            minStartDate.setHours(0, 0, 0, 0);
-            minStartDate.setDate(minStartDate.getDate() + 6);
+        if (dia !== 0 && dia !== 6 && !festivos.includes(formato)) {
+          sumados++;
+        }
+      }
 
-            if (startDate < minStartDate) {
-              document.getElementById("start-date-error").style.display =
-                "block";
-              isValid = false;
-            } else {
-              document.getElementById("start-date-error").style.display =
-                "none";
-            }
+      return resultado;
+    }
 
-            if (endDate < startDate) {
-              document.getElementById("end-date-error").style.display = "block";
-              isValid = false;
-            } else {
-              document.getElementById("end-date-error").style.display = "none";
-            }
+    // Calendarios
+    const fechaInicioInput = document.getElementById("fecha-inicio");
+    const fechaFinInput = document.getElementById("fecha-fin");
 
-            if (document.getElementById("motivo").value.trim() === "") {
-              document.getElementById("reason-error").style.display = "block";
-              isValid = false;
-            } else {
-              document.getElementById("reason-error").style.display = "none";
-            }
+    let fechaInicioSeleccionada = null;
 
-            const daysDiff = contarDiasHabiles(startDate, endDate);
+    flatpickr(fechaInicioInput, {
+      disable: [...diasFestivos, bloquearFinesDeSemana],
+      minDate: new Date().fp_incr(7),
+      dateFormat: "Y-m-d",
+      locale: "es",
+      onChange: function (selectedDates) {
+        if (!selectedDates.length) return;
 
-            if (daysDiff > availableDays) {
-              alert(
-                `No tienes suficientes días disponibles. Estás solicitando ${daysDiff} días hábiles pero solo tienes ${availableDays} disponibles.`
-              );
-              return false;
-            }
+        fechaInicioSeleccionada = selectedDates[0];
+        const fechaLimite = sumarDiasHabiles(fechaInicioSeleccionada, diasDisponibles - 1, diasFestivos);
 
-            if (isValid) {
-              const fechaInicioStr = startDate.toLocaleDateString("es-MX", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              });
+        flatpickr(fechaFinInput, {
+          disable: [...diasFestivos, bloquearFinesDeSemana],
+          minDate: fechaInicioSeleccionada,
+          maxDate: fechaLimite,
+          dateFormat: "Y-m-d",
+          locale: "es"
+        });
+      }
+    });
 
-              const fechaFinStr = endDate.toLocaleDateString("es-MX", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              });
+    // Envío del formulario
+    document.getElementById("vacation-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-              modalText.innerHTML = `
-    Estás solicitando <strong>${daysDiff}</strong> día(s) hábil(es) de vacaciones.<br><br>
-    Desde: <strong>${fechaInicioStr}</strong><br>
-    Hasta: <strong>${fechaFinStr}</strong><br><br>
-    ¿Deseas confirmar la solicitud?
-`;
+      const fechaInicio = fechaInicioInput.value;
+      const fechaFin = fechaFinInput.value;
+      const motivo = document.getElementById("motivo").value;
 
-              modal.style.display = "flex";
-            }
-          });
+      if (!fechaInicio || !fechaFin || !motivo) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
 
-        // Actualizar min de fecha-fin y validar que no sea menor
-        fechaInicioInput.addEventListener("change", function () {
-          const selectedDate = this.value;
-          const day = new Date(selectedDate).getDay();
+      const diasSolicitados = contarDiasHabiles(fechaInicio, fechaFin, diasFestivos);
 
-          // Bloquear sábado o domingo
-          if (day === 0 || day === 6) {
-            alert(
-              "No puedes seleccionar sábado o domingo como inicio de vacaciones."
-            );
-            this.value = "";
-            return;
-          }
+      if (diasSolicitados > diasDisponibles) {
+        alert(`Estás solicitando ${diasSolicitados} días hábiles, pero solo tienes ${diasDisponibles} disponibles.`);
+        return;
+      }
 
-          fechaFinInput.min = selectedDate;
-          if (fechaFinInput.value < selectedDate) {
-            fechaFinInput.value = selectedDate;
-          }
+      const confirmar = confirm(`¿Deseas solicitar ${diasSolicitados} días de vacaciones?`);
+      if (!confirmar) return;
+
+      try {
+        const res = await fetch("/api/solicitarVacaciones", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idUsuario,
+            fechaInicio,
+            fechaFin,
+            motivo
+          })
         });
 
-        // Bloquear selección de sábado o domingo en fecha-fin
-        fechaFinInput.addEventListener("change", function () {
-          const selectedDate = this.value;
-          const day = new Date(selectedDate).getDay();
-
-          if (day === 0 || day === 6) {
-            alert(
-              "No puedes seleccionar sábado o domingo como fin de vacaciones."
-            );
-            this.value = "";
-          }
-        });
-
-        // Simulación de carga de datos desde backend
-        async function loadVacationData() {
-          try {
-            const response = await fetch("/api/vacation-days");
-            const data = await response.json();
-
-            totalVacationDays = data.totalDays || 15;
-            usedVacationDays = data.usedDays || 0;
-            availableDays = totalVacationDays - usedVacationDays;
-
-            document.querySelector(".total-days").textContent =
-              totalVacationDays;
-            document.querySelector(".used-days").textContent = usedVacationDays;
-            document.querySelector(".available-days").textContent =
-              availableDays;
-          } catch (error) {
-            console.error("Error al cargar datos de vacaciones:", error);
-            document.querySelector(".total-days").textContent = 15;
-            document.querySelector(".used-days").textContent = 0;
-            document.querySelector(".available-days").textContent = 15;
-          }
+        const result = await res.json();
+        if (res.ok) {
+          alert("Solicitud enviada correctamente.");
+          location.reload();
+        } else {
+          alert(result.error || "Ocurrió un error al enviar la solicitud.");
         }
+      } catch (err) {
+        console.error("Error al enviar solicitud:", err);
+        alert("Error de red o del servidor.");
+      }
+    });
+  });
+</script>
 
-        loadVacationData();
-      });
 
-      // Modal de confirmación
-      const modal = document.getElementById("confirm-modal");
-      const modalText = document.getElementById("modal-text");
-      const confirmBtn = document.getElementById("confirm-btn");
-      const cancelBtn = document.getElementById("cancel-btn");
 
-      let solicitudConfirmada = false;
 
-      confirmBtn.addEventListener("click", () => {
-        modal.style.display = "none";
-        alert("Solicitud registrada correctamente.");
-        window.location.href = "empleado.html"; // Redirige al menú principal
-      });
+    <!-- Cambia el tema a 'airbnb' -->
 
-      cancelBtn.addEventListener("click", () => {
-        modal.style.display = "none";
-      });
-    </script>
+
   </body>
 </html>
