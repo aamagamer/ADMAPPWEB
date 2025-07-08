@@ -1025,13 +1025,14 @@
             />
           </div>
 
-          <!-- Campo Comentario de Salida -->
+          <!-- Campo Vacaciones -->
           <div class="form-group">
-            <label for="edit-comentarioSalida">Vacaciones:</label>
+            <label for="edit-vacaciones">Vacaciones:</label>
             <input
               type="text"
-              id="edit-comentarioSalida"
-              name="comentarioSalida"
+              id="edit-vacaciones"
+              name="Vacaciones"
+              readonly
             />
           </div>
 
@@ -1402,6 +1403,10 @@
         .addEventListener("submit", function (e) {
           e.preventDefault();
 
+          // Calcular días de vacaciones
+          const fechaIngreso = document.getElementById("fechaIngreso").value;
+          const diasVacaciones = calcularDiasVacaciones(fechaIngreso);
+
           const contraseña = document.getElementById("contraseña").value;
           const confirmarContraseña = document.getElementById(
             "confirmarContraseña"
@@ -1418,7 +1423,10 @@
             empleadoData[key] = value;
           });
 
-          // Mapear tipoRol y nombreArea a rol_id y area_id
+          // Agregar días de vacaciones al objeto empleadoData
+          empleadoData.Vacaciones = diasVacaciones;
+
+          // Resto del código para mapear campos y enviar la petición...
           empleadoData.rol_id = empleadoData.tipoRol;
           empleadoData.area_id = empleadoData.nombreArea;
           delete empleadoData.tipoRol;
@@ -1434,7 +1442,9 @@
           empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
           empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
           empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
+          empleadoData.Vacaciones = Number(empleadoData.Vacaciones);
 
+          // Resto del código para validar y enviar la petición...
           if (
             isNaN(empleadoData.idUsuario) ||
             isNaN(empleadoData.nss) ||
@@ -1491,95 +1501,91 @@
       }
 
       function editarEmpleado(id) {
-        document
-          .getElementById("edit-employee-modal")
-          .classList.remove("hidden");
+  document.getElementById("edit-employee-modal").classList.remove("hidden");
 
-        fetch(`/api/empleado/${id}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Error al obtener datos del empleado");
-            return res.json();
-          })
-          .then((data) => {
-            Promise.all([
-              fetch("/api/roles").then((res) => res.json()),
-              fetch("/api/areas").then((res) => res.json()),
-            ]).then(([roles, areas]) => {
-              const selectRol = document.getElementById("edit-tipoRol");
-              const selectArea = document.getElementById("edit-nombreArea");
+  fetch(`/api/empleado/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Error al obtener datos del empleado");
+      return res.json();
+    })
+    .then((data) => {
+      Promise.all([
+        fetch("/api/roles").then((res) => res.json()),
+        fetch("/api/areas").then((res) => res.json()),
+      ]).then(([roles, areas]) => {
+        const selectRol = document.getElementById("edit-tipoRol");
+        const selectArea = document.getElementById("edit-nombreArea");
 
-              selectRol.innerHTML =
-                '<option value="">Seleccione un rol</option>';
-              roles.forEach((rol) => {
-                const option = document.createElement("option");
-                option.value = rol.idRol;
-                option.textContent = rol.TipoRol;
-                selectRol.appendChild(option);
-              });
+        // Llenar roles
+        selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+        roles.forEach((rol) => {
+          const option = document.createElement("option");
+          option.value = rol.idRol;
+          option.textContent = rol.TipoRol;
+          selectRol.appendChild(option);
+        });
 
-              selectArea.innerHTML =
-                '<option value="">Seleccione un área</option>';
-              areas.forEach((area) => {
-                const option = document.createElement("option");
-                option.value = area.idArea;
-                option.textContent = area.NombreArea;
-                selectArea.appendChild(option);
-              });
+        // Llenar áreas
+        selectArea.innerHTML = '<option value="">Seleccione un área</option>';
+        areas.forEach((area) => {
+          const option = document.createElement("option");
+          option.value = area.idArea;
+          option.textContent = area.NombreArea;
+          selectArea.appendChild(option);
+        });
 
-              document.getElementById("edit-idUsuario").value =
-                data.idUsuario || "";
-              document.getElementById("edit-tipoRol").value =
-                data.Rol_idRol || "";
-              document.getElementById("edit-nombreArea").value =
-                data.Area_idArea || "";
-              document.getElementById("edit-nombres").value =
-                data.Nombres || "";
-              document.getElementById("edit-paterno").value =
-                data.Paterno || "";
-              document.getElementById("edit-materno").value =
-                data.Materno || "";
-              document.getElementById("edit-fechaNacimiento").value =
-                formatoFechaParaInput(data.FechaNacimiento);
-              document.getElementById("edit-direccion").value =
-                data.Direccion || "";
-              document.getElementById("edit-codigoPostal").value =
-                data.CodigoPostal || "";
-              document.getElementById("edit-correo").value = data.Correo || "";
-              document.getElementById("edit-nss").value = data.NSS || "";
-              document.getElementById("edit-telefono").value =
-                data.Telefono || "";
-              document.getElementById("edit-fechaIngreso").value =
-                formatoFechaParaInput(data.FechaIngreso);
-              document.getElementById("edit-rfc").value = data.RFC || "";
-              document.getElementById("edit-curp").value = data.Curp || "";
-              document.getElementById("edit-puesto").value = data.Puesto || "";
-              document.getElementById("edit-nombreContactoEmergencia").value =
-                data.NombreContactoEmergencia || "";
-              document.getElementById("edit-telefonoEmergencia").value =
-                data.TelefonoEmergencia || "";
-              document.getElementById("edit-parentesco").value =
-                data.Parentesco || "";
-              document.getElementById("edit-contraseña").value =
-                data.clave || "";
-              document.getElementById("edit-confirmarContraseña").value =
-                data.clave || "";
-              document.getElementById("edit-sueldoDiario").value =
-                data.SueldoDiario || "";
-              document.getElementById("edit-sueldoSemanal").value =
-                data.SueldoSemanal || "";
-              document.getElementById("edit-bonoSemanal").value =
-                data.BonoSemanal || "";
-              document.getElementById("edit-fechaBaja").value =
-                formatoFechaParaInput(data.FechaBaja);
-              document.getElementById("edit-comentarioSalida").value =
-                data.ComentarioSalida || "";
-            });
-          })
-          .catch((error) => {
-            console.error("Error al cargar datos del empleado:", error);
-            alert("No se pudieron cargar los datos del empleado.");
-          });
-      }
+        // Llenar campos
+        document.getElementById("edit-idUsuario").value = data.idUsuario || "";
+        document.getElementById("edit-tipoRol").value = data.Rol_idRol || "";
+        document.getElementById("edit-nombreArea").value = data.Area_idArea || "";
+        document.getElementById("edit-nombres").value = data.Nombres || "";
+        document.getElementById("edit-paterno").value = data.Paterno || "";
+        document.getElementById("edit-materno").value = data.Materno || "";
+        document.getElementById("edit-fechaNacimiento").value = formatoFechaParaInput(data.FechaNacimiento);
+        document.getElementById("edit-direccion").value = data.Direccion || "";
+        document.getElementById("edit-codigoPostal").value = data.CodigoPostal || "";
+        document.getElementById("edit-correo").value = data.Correo || "";
+        document.getElementById("edit-nss").value = data.NSS || "";
+        document.getElementById("edit-telefono").value = data.Telefono || "";
+
+        const fechaIngresoInput = document.getElementById("edit-fechaIngreso");
+        fechaIngresoInput.value = formatoFechaParaInput(data.FechaIngreso);
+
+        const diasIniciales = calcularDiasVacaciones(fechaIngresoInput.value);
+document.getElementById("edit-vacaciones").value = diasIniciales;
+
+
+        document.getElementById("edit-rfc").value = data.RFC || "";
+        document.getElementById("edit-curp").value = data.Curp || "";
+        document.getElementById("edit-puesto").value = data.Puesto || "";
+        document.getElementById("edit-nombreContactoEmergencia").value = data.NombreContactoEmergencia || "";
+        document.getElementById("edit-telefonoEmergencia").value = data.TelefonoEmergencia || "";
+        document.getElementById("edit-parentesco").value = data.Parentesco || "";
+        document.getElementById("edit-contraseña").value = data.clave || "";
+        document.getElementById("edit-confirmarContraseña").value = data.clave || "";
+        document.getElementById("edit-sueldoDiario").value = data.SueldoDiario || "";
+        document.getElementById("edit-sueldoSemanal").value = data.SueldoSemanal || "";
+        document.getElementById("edit-bonoSemanal").value = data.BonoSemanal || "";
+        document.getElementById("edit-fechaBaja").value = formatoFechaParaInput(data.FechaBaja);
+        document.getElementById("edit-comentarioSalida").value = data.ComentarioSalida || "";
+
+        // ✅ Vacaciones
+        document.getElementById("edit-vacaciones").value = data.Vacaciones || 0;
+
+        // ✅ Recalcular si cambia la fecha de ingreso
+        fechaIngresoInput.addEventListener("change", function () {
+          const nuevaFecha = this.value;
+          const dias = calcularDiasVacaciones(nuevaFecha); // Asegúrate de que esta función esté definida
+          document.getElementById("edit-vacaciones").value = dias;
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("Error al cargar datos del empleado:", error);
+      alert("No se pudieron cargar los datos del empleado.");
+    });
+}
+
 
       function cerrarModalEditarEmpleado() {
         document.getElementById("edit-employee-modal").classList.add("hidden");
@@ -1648,44 +1654,34 @@
           }
 
           const empleadoData = {
-            idUsuario: Number(document.getElementById("edit-idUsuario").value),
-            rol_id: document.getElementById("edit-tipoRol").value,
-            area_id: document.getElementById("edit-nombreArea").value,
-            nombres: document.getElementById("edit-nombres").value,
-            paterno: document.getElementById("edit-paterno").value,
-            materno: document.getElementById("edit-materno").value,
-            fechaNacimiento: document.getElementById("edit-fechaNacimiento")
-              .value,
-            direccion: document.getElementById("edit-direccion").value,
-            codigoPostal: document.getElementById("edit-codigoPostal").value,
-            correo: document.getElementById("edit-correo").value,
-            nss: Number(document.getElementById("edit-nss").value),
-            telefono: Number(document.getElementById("edit-telefono").value),
-            fechaIngreso: document.getElementById("edit-fechaIngreso").value,
-            rfc: document.getElementById("edit-rfc").value,
-            curp: document.getElementById("edit-curp").value,
-            puesto: document.getElementById("edit-puesto").value,
-            nombreContactoEmergencia: document.getElementById(
-              "edit-nombreContactoEmergencia"
-            ).value,
-            telefonoEmergencia: Number(
-              document.getElementById("edit-telefonoEmergencia").value
-            ),
-            parentesco: document.getElementById("edit-parentesco").value,
-            contraseña: contraseña,
-            SueldoDiario: Number(
-              document.getElementById("edit-sueldoDiario").value
-            ),
-            SueldoSemanal: Number(
-              document.getElementById("edit-sueldoSemanal").value
-            ),
-            BonoSemanal: Number(
-              document.getElementById("edit-bonoSemanal").value
-            ),
-            fechaBaja: document.getElementById("edit-fechaBaja").value || null,
-            comentarioSalida:
-              document.getElementById("edit-comentarioSalida").value || null,
-          };
+  idUsuario: Number(document.getElementById("edit-idUsuario").value),
+  rol_id: document.getElementById("edit-tipoRol").value,
+  area_id: document.getElementById("edit-nombreArea").value,
+  nombres: document.getElementById("edit-nombres").value,
+  paterno: document.getElementById("edit-paterno").value,
+  materno: document.getElementById("edit-materno").value,
+  fechaNacimiento: document.getElementById("edit-fechaNacimiento").value,
+  direccion: document.getElementById("edit-direccion").value,
+  codigoPostal: document.getElementById("edit-codigoPostal").value,
+  correo: document.getElementById("edit-correo").value,
+  nss: Number(document.getElementById("edit-nss").value),
+  telefono: Number(document.getElementById("edit-telefono").value),
+  fechaIngreso: document.getElementById("edit-fechaIngreso").value,
+  rfc: document.getElementById("edit-rfc").value,
+  curp: document.getElementById("edit-curp").value,
+  puesto: document.getElementById("edit-puesto").value,
+  nombreContactoEmergencia: document.getElementById("edit-nombreContactoEmergencia").value,
+  telefonoEmergencia: Number(document.getElementById("edit-telefonoEmergencia").value),
+  parentesco: document.getElementById("edit-parentesco").value,
+  contraseña: contraseña,
+  SueldoDiario: Number(document.getElementById("edit-sueldoDiario").value),
+  SueldoSemanal: Number(document.getElementById("edit-sueldoSemanal").value),
+  BonoSemanal: Number(document.getElementById("edit-bonoSemanal").value),
+  fechaBaja: document.getElementById("edit-fechaBaja").value || null,
+  comentarioSalida: document.getElementById("edit-comentarioSalida").value || null,
+  Vacaciones: Number(document.getElementById("edit-vacaciones").value) || 0 // ✅ campo agregado
+};
+
 
           fetch(`/api/empleado/${empleadoData.idUsuario}`, {
             method: "PUT",
@@ -1838,82 +1834,92 @@
       }
 
       function exportarExcel() {
-  const checkboxes = document.querySelectorAll('#export-employees-container input[type="checkbox"]:checked');
-  empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
-
-  if (empleadosSeleccionados.length === 0) {
-    alert("Por favor selecciona al menos un empleado para exportar");
-    return;
-  }
-
-  const exportBtn = document.querySelector("#paso-empleados .btn-primary");
-  const originalText = exportBtn.textContent;
-  exportBtn.textContent = "Generando...";
-  exportBtn.disabled = true;
-
-  const promises = empleadosSeleccionados.map((id) =>
-    fetch(`/api/empleado/${id}`).then((res) => res.json())
-  );
-
-  Promise.all(promises)
-    .then((empleadosCompletos) => {
-      const datosExcel = empleadosCompletos.map((empleado) => {
-        const fila = {};
-        camposSeleccionados.forEach((campo) => {
-          fila[campo] = empleado[campo] !== undefined ? empleado[campo] : "";
-        });
-        return fila;
-      });
-
-      // Crear hoja Excel
-      const worksheet = XLSX.utils.json_to_sheet(datosExcel, { header: camposSeleccionados });
-
-      // Agregar estilos de encabezado (fondo amarillo)
-      const range = XLSX.utils.decode_range(worksheet['!ref']);
-      for (let C = range.s.c; C <= range.e.c; ++C) {
-        const cell_address = XLSX.utils.encode_cell({ r: 0, c: C });
-        if (!worksheet[cell_address]) continue;
-
-        worksheet[cell_address].s = {
-          fill: {
-            patternType: "solid",
-            fgColor: { rgb: "FFFF00" }, // Amarillo
-          },
-          font: {
-            bold: true
-          },
-          alignment: {
-            horizontal: "center"
-          }
-        };
-      }
-
-      // Ajustar automáticamente el ancho de las columnas
-      worksheet['!cols'] = camposSeleccionados.map(campo => {
-        const maxLength = Math.max(
-          campo.length,
-          ...datosExcel.map(row => (row[campo] ? row[campo].toString().length : 0))
+        const checkboxes = document.querySelectorAll(
+          '#export-employees-container input[type="checkbox"]:checked'
         );
-        return { wch: maxLength + 2 };
-      });
+        empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
 
-      // Crear libro y exportar
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Empleados");
+        if (empleadosSeleccionados.length === 0) {
+          alert("Por favor selecciona al menos un empleado para exportar");
+          return;
+        }
 
-      XLSX.writeFile(workbook, "empleados_exportados.xlsx");
-    })
-    .catch((error) => {
-      console.error("Error al exportar a Excel:", error);
-      alert("Ocurrió un error al generar el archivo Excel: " + error.message);
-    })
-    .finally(() => {
-      exportBtn.textContent = originalText;
-      exportBtn.disabled = false;
-      cerrarModalExportarExcel();
-    });
-}
+        const exportBtn = document.querySelector(
+          "#paso-empleados .btn-primary"
+        );
+        const originalText = exportBtn.textContent;
+        exportBtn.textContent = "Generando...";
+        exportBtn.disabled = true;
 
+        const promises = empleadosSeleccionados.map((id) =>
+          fetch(`/api/empleado/${id}`).then((res) => res.json())
+        );
+
+        Promise.all(promises)
+          .then((empleadosCompletos) => {
+            const datosExcel = empleadosCompletos.map((empleado) => {
+              const fila = {};
+              camposSeleccionados.forEach((campo) => {
+                fila[campo] =
+                  empleado[campo] !== undefined ? empleado[campo] : "";
+              });
+              return fila;
+            });
+
+            // Crear hoja Excel
+            const worksheet = XLSX.utils.json_to_sheet(datosExcel, {
+              header: camposSeleccionados,
+            });
+
+            // Agregar estilos de encabezado (fondo amarillo)
+            const range = XLSX.utils.decode_range(worksheet["!ref"]);
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+              const cell_address = XLSX.utils.encode_cell({ r: 0, c: C });
+              if (!worksheet[cell_address]) continue;
+
+              worksheet[cell_address].s = {
+                fill: {
+                  patternType: "solid",
+                  fgColor: { rgb: "FFFF00" }, // Amarillo
+                },
+                font: {
+                  bold: true,
+                },
+                alignment: {
+                  horizontal: "center",
+                },
+              };
+            }
+
+            // Ajustar automáticamente el ancho de las columnas
+            worksheet["!cols"] = camposSeleccionados.map((campo) => {
+              const maxLength = Math.max(
+                campo.length,
+                ...datosExcel.map((row) =>
+                  row[campo] ? row[campo].toString().length : 0
+                )
+              );
+              return { wch: maxLength + 2 };
+            });
+
+            // Crear libro y exportar
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Empleados");
+
+            XLSX.writeFile(workbook, "empleados_exportados.xlsx");
+          })
+          .catch((error) => {
+            console.error("Error al exportar a Excel:", error);
+            alert(
+              "Ocurrió un error al generar el archivo Excel: " + error.message
+            );
+          })
+          .finally(() => {
+            exportBtn.textContent = originalText;
+            exportBtn.disabled = false;
+            cerrarModalExportarExcel();
+          });
+      }
 
       function cerrarModalExportarExcel() {
         document.getElementById("export-excel-modal").classList.add("hidden");
@@ -1966,6 +1972,39 @@
           modal.classList.add("hidden");
         };
       }
+      function calcularDiasVacaciones(fechaIngreso) {
+  const hoy = new Date();
+  const ingreso = new Date(fechaIngreso);
+
+  let años = hoy.getFullYear() - ingreso.getFullYear();
+  let meses = hoy.getMonth() - ingreso.getMonth();
+  let dias = hoy.getDate() - ingreso.getDate();
+
+  // Ajuste si aún no ha cumplido el año, mes y día exacto
+  if (meses < 0 || (meses === 0 && dias < 0)) {
+    años--;
+  }
+
+  console.log("Antigüedad exacta:", años, "años");
+
+  // Tabla oficial LFT 2023
+  let diasVacaciones = 0;
+  if (años < 1) diasVacaciones = 0;
+  else if (años === 1) diasVacaciones = 12;
+  else if (años === 2) diasVacaciones = 14;
+  else if (años === 3) diasVacaciones = 16;
+  else if (años === 4) diasVacaciones = 18;
+  else if (años === 5) diasVacaciones = 20;
+  else if (años >= 6 && años <= 10) diasVacaciones = 22;
+  else if (años >= 11 && años <= 15) diasVacaciones = 24;
+  else if (años >= 16 && años <= 20) diasVacaciones = 26;
+  else if (años >= 21 && años <= 25) diasVacaciones = 28;
+  else if (años >= 26) diasVacaciones = 30;
+
+  return diasVacaciones;
+}
+
+
     </script>
   </body>
 </html>

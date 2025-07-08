@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import pyodbc
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
@@ -16,6 +17,37 @@ def get_connection():
         'Encrypt=no;'
         'Connection Timeout=10;'
     )
+
+def calcular_dias_vacaciones(fecha_ingreso_str):
+    hoy = datetime.now().date()
+    fecha_ingreso = datetime.strptime(fecha_ingreso_str, '%Y-%m-%d').date()
+
+    años = hoy.year - fecha_ingreso.year
+    if (hoy.month, hoy.day) < (fecha_ingreso.month, fecha_ingreso.day):
+        años -= 1
+
+    if años < 1:
+        return 0
+    elif años == 1:
+        return 12
+    elif años == 2:
+        return 14
+    elif años == 3:
+        return 16
+    elif años == 4:
+        return 18
+    elif años == 5:
+        return 20
+    elif 6 <= años <= 10:
+        return 22
+    elif 11 <= años <= 15:
+        return 24
+    elif 16 <= años <= 20:
+        return 26
+    elif 21 <= años <= 25:
+        return 28
+    else:
+        return 30
 
 @app.route('/')
 def index():
@@ -36,13 +68,25 @@ def login():
             WHERE u.idUsuario = ?
         """, username)
         row = cursor.fetchone()
+
         if row and row.clave == password:
+            cursor.execute("SELECT FechaIngreso, Vacaciones FROM Usuario WHERE idUsuario = ?", username)
+            ingreso_row = cursor.fetchone()
+            if ingreso_row:
+                fecha_ingreso_str = ingreso_row.FechaIngreso.strftime('%Y-%m-%d')
+                vacaciones_actuales = ingreso_row.Vacaciones or 0
+                vacaciones_calculadas = calcular_dias_vacaciones(fecha_ingreso_str)
+                if vacaciones_actuales != vacaciones_calculadas:
+                    cursor.execute("UPDATE Usuario SET Vacaciones = ? WHERE idUsuario = ?",
+                                   vacaciones_calculadas, username)
+                    conn.commit()
+
             rol = row.TipoRol.strip()
             rutas = {'Empleado': 'empleado.html', 'RH': 'rh.html', 'Administrador': 'admin.html'}
             return jsonify({
                 "success": True,
                 "redirect": rutas.get(rol, "index.html"),
-                "idUsuario": row.idUsuario  # <-- Añade esta línea
+                "idUsuario": row.idUsuario
             })
         return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
     except Exception as e:
@@ -82,7 +126,6 @@ def obtener_empleado(id):
     columns = [col[0] for col in cursor.description]
     conn.close()
     return jsonify(dict(zip(columns, row)))
-
 
 @app.route('/api/empleado/<int:id>', methods=['PUT'])
 def actualizar_empleado(id):
@@ -134,7 +177,6 @@ def actualizar_empleado(id):
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
-
 
 @app.route('/api/empleado', methods=['POST'])
 def agregar_empleado():
@@ -196,6 +238,7 @@ def agregar_empleado():
             int(data['SueldoDiario']),
             int(data['SueldoSemanal']),
             int(data['BonoSemanal']),
+            int(data['Vacaciones'])
         ))
 
         conn.commit()
@@ -270,9 +313,6 @@ def obtener_nombre_usuario():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    
-
 
 @app.route('/<path:filename>')
 def serve_file(filename):
