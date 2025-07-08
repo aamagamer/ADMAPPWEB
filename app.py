@@ -283,6 +283,23 @@ def obtener_areas():
     conn.close()
     return jsonify(areas)
 
+@app.route('/api/compensaciones', methods=['GET'])
+def obtener_compensaciones():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT TipoCompensacion FROM Compensacion")
+        resultados = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        compensaciones = [row[0] for row in resultados]
+        return jsonify({"compensaciones": compensaciones})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/usuario/nombre', methods=['POST'])
 def obtener_nombre_usuario():
     data = request.json
@@ -313,6 +330,10 @@ def obtener_nombre_usuario():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+    
+    
 
 @app.route('/<path:filename>')
 def serve_file(filename):

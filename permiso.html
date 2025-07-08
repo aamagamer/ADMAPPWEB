@@ -119,6 +119,29 @@
       .time-fields .form-group {
         flex: 1;
       }
+
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        background-color: white;
+        appearance: none; /* Oculta el estilo por defecto en la mayoría de navegadores */
+        background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"><polygon points="0,0 14,0 7,10" style="fill:%23666"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 12px 10px;
+        cursor: pointer;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+
+      select:focus {
+        border-color: #2c3e50;
+        outline: none;
+        box-shadow: 0 0 5px rgba(44, 62, 80, 0.3);
+      }
+
       .submit-button {
         width: 100%;
         padding: 12px;
@@ -187,6 +210,14 @@
               <input type="time" id="hora-fin" name="hora-fin" required />
             </div>
           </div>
+
+          <div class="form-group">
+            <label for="tipo-compensacion">Tipo de Compensación</label>
+            <select id="tipo-compensacion" name="tipo-compensacion" required>
+              <option value="">Selecciona una opción</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label for="actividades">Descripción</label>
             <textarea
@@ -371,6 +402,23 @@
           modal.style.display = "none";
         });
       });
+
+      fetch("/api/compensaciones")
+        .then((response) => response.json())
+        .then((data) => {
+          const select = document.getElementById("tipo-compensacion");
+          if (data.compensaciones) {
+            data.compensaciones.forEach((tipo) => {
+              const option = document.createElement("option");
+              option.value = tipo;
+              option.textContent = tipo;
+              select.appendChild(option);
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error al cargar las compensaciones:", error);
+        });
     </script>
   </body>
 </html>
