@@ -18,6 +18,27 @@ def get_connection():
         'Connection Timeout=10;'
     )
 
+@app.route('/api/usuario/<int:id>/area', methods=['GET'])
+def obtener_area_usuario(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT a.NombreArea
+        FROM Usuario u
+        JOIN Area a ON u.Area_idArea = a.idArea
+        WHERE u.idUsuario = ?
+    """, (id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return jsonify({"NombreArea": row[0]})
+    else:
+        return jsonify({"error": "Área no encontrada"}), 404
+    
+    
+
+
 @app.route('/api/solicitarVacaciones', methods=['POST'])
 def solicitar_vacaciones():
     try:
@@ -206,7 +227,7 @@ def login():
                     conn.commit()
 
             rol = row.TipoRol.strip()
-            rutas = {'Empleado': 'empleado.html', 'RH': 'rh.html', 'Administrador': 'admin.html'}
+            rutas = {'Empleado': 'empleado.html', 'RH': 'rh.html', 'Administrador': 'admin.html', 'Lider Area' : 'lider.html'}
             return jsonify({
                 "success": True,
                 "redirect": rutas.get(rol, "index.html"),
@@ -507,12 +528,46 @@ def obtener_vacaciones(idUsuario):
         cursor.close()
         conn.close()
 
-        
+@app.route('/api/vacaciones/area/<int:idArea>', methods=['GET'])
+def obtener_vacaciones_por_area(idArea):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    
+        cursor.execute("""
+            SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+            FROM Vacaciones v
+            JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+            JOIN Area a ON u.Area_idArea = a.idArea
+            WHERE a.idArea = ?
+        """, (idArea,))
 
-    
-    
+        rows = cursor.fetchall()
+        vacaciones = []
+
+        for row in rows:
+            inicio = row[1].strftime('%Y-%m-%d') if row[1] else ""
+            fin = row[2].strftime('%Y-%m-%d') if row[2] else ""
+            nombre = f"{row[3]} {row[4]} {row[5]}"
+            vacaciones.append({
+                "id": row[0],
+                "inicio": inicio,
+                "fin": fin,
+                "nombre": nombre
+            })
+
+        return jsonify(vacaciones)
+
+    except Exception as e:
+        print("ERROR EN /api/vacaciones/area:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
 
 @app.route('/<path:filename>')
 def serve_file(filename):

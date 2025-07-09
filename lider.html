@@ -20,7 +20,7 @@
         padding: 0;
         box-sizing: border-box;
         font-family: "Arial", sans-serif;
-        text-decoration: none; /* Elimina subrayados por defecto */
+        text-decoration: none;
       }
 
       body {
@@ -155,14 +155,14 @@
     <header>
       <div class="header-container">
         <img src="Media/logo.png" alt="Logo" class="logo" />
-        <h1>Portal del Empleado</h1>
+        <h1 id="header-title">Portal de Líder</h1>
       </div>
     </header>
 
     <div class="main-container">
       <div class="welcome-section">
         <div class="welcome-message">
-          ¡Hola <span id="employee-name">Empleado</span>!
+          ¡Hola <span id="employee-name"></span>!
         </div>
         <p>¿Qué deseas hacer hoy? <br /><br /></p>
       </div>
@@ -186,18 +186,81 @@
           <p>Consulta el estado de tus solicitudes enviadas</p>
         </a>
 
-        <a href="pendiente.html" class="option-button">
-          <i class="bi bi-search"></i>
-          <h2>Revisar Solicitudes</h2>
-          <p>Consulta el estado de tus solicitudes enviadas</p>
+        <a href="evaluarSoli.html" class="option-button">
+          <i class="bi bi-check"></i>
+          <h2>Evaluar solicitudes</h2>
+          <p>Acepta o rechaza las solicitudes realizadas</p>
+        </a>
+
+        <a href="reporte.html" class="option-button">
+          <i class="bi bi-book"></i>
+          <h2>Reporte</h2>
+          <p>Genera un reporte</p>
         </a>
       </div>
     </div>
 
-    <script>
-      // Puedes personalizar el nombre del empleado aquí
-      // O obtenerlo de una sesión/login real
-      document.getElementById("employee-name").textContent = "Juan Pérez";
-    </script>
+   <script>
+  // Función para obtener los datos del usuario
+  async function cargarDatosUsuario() {
+    try {
+      const idUsuario = localStorage.getItem("idUsuario");
+
+      if (!idUsuario) {
+        console.error('No se encontró idUsuario en localStorage');
+        return;
+      }
+
+      const response = await fetch(`/api/empleado/${idUsuario}`);
+      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+      const data = await response.json();
+      console.log("Datos recibidos:", data);
+
+      // Mostrar nombre del empleado en el saludo
+      if (data.Nombres && data.Paterno && data.Materno) {
+  const nombreCompleto = `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+  document.getElementById('employee-name').textContent = nombreCompleto;
+} else {
+  document.getElementById('employee-name').textContent = data.Nombres || "Empleado";
+}
+
+
+      // Si es líder, cargar su área
+      if (data.TipoRol && data.TipoRol.toLowerCase().includes("lider")) {
+        cargarAreaLider(idUsuario);
+      } else {
+        // Si no es líder, establecer título por defecto
+        document.getElementById('header-title').textContent = "Portal del Empleado";
+      }
+
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    }
+  }
+
+  // Función para obtener el área del usuario si es líder
+  async function cargarAreaLider(idUsuario) {
+    try {
+      const res = await fetch(`/api/usuario/${idUsuario}/area`);
+      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+
+      const data = await res.json();
+      console.log("Área recibida:", data);
+
+      if (data.NombreArea) {
+        document.getElementById('header-title').textContent =
+          `Portal de Líder de ${data.NombreArea}`;
+      }
+    } catch (err) {
+      console.error("Error al obtener el área del líder:", err);
+    }
+  }
+
+  // Ejecutar al cargar la página
+  window.addEventListener('DOMContentLoaded', cargarDatosUsuario);
+</script>
+
+
   </body>
 </html>

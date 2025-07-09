@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <title>Evaluar Solicitudes</title>
+    <style>
+      :root {
+        --primary: #2c3e50;
+        --secondary: #666;
+      }
+
+      /* Reset y estilos generales */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+        text-decoration: none; /* Elimina subrayados por defecto */
+      }
+
+      body {
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      /* Header grande */
+      header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 40px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 180px;
+        display: flex;
+        align-items: center;
+      }
+
+      .header-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        width: 100%;
+      }
+
+      .logo {
+        width: 50%;
+        height: 25%;
+        margin-bottom: 15px;
+        max-height: 25%;
+        max-width: 25%;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      /* Contenedor principal */
+      .main-container {
+        max-width: 1200px;
+        margin: 20px auto 50px;
+        padding: 0 20px;
+      }
+
+      /* Sección de saludo */
+      .welcome-section {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .welcome-message {
+        font-size: 30px;
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      /* Contenedor de secciones */
+      .sections-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        justify-content: space-between;
+      }
+
+      /* Secciones verticales */
+      .section {
+        background-color: white;
+        border-radius: 16px;
+        padding: 25px;
+        width: calc(50% - 15px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .section-title {
+        font-size: 22px;
+        color: var(--primary);
+        margin-bottom: 20px;
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+
+      /* Recuadro para contenido futuro */
+      .content-box {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 20px;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--secondary);
+        font-style: italic;
+        border: 1px dashed #ccc;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .section {
+          width: 100%;
+        }
+
+        .welcome-message {
+          font-size: 26px;
+        }
+      }
+
+      .vacacion-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vacacion-info {
+    flex-grow: 1;
+  }
+
+  .btn-group button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-aceptar {
+    color: green;
+  }
+
+  .btn-aceptar:hover {
+    background-color: #d4edda;
+  }
+
+  .btn-rechazar {
+    color: red;
+  }
+
+  .btn-rechazar:hover {
+    background-color: #f8d7da;
+  }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <img src="Media/logo.png" alt="Logo" class="logo" />
+        <h1>Evaluar Solicitudes</h1>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="welcome-section">
+        <div class="welcome-message">
+          ¡Hola <span id="employee-name">Líder</span>!
+        </div>
+        <p>Aquí puedes evaluar las solicitudes de tu equipo</p>
+      </div>
+
+      <div class="sections-container">
+        <div class="section">
+          <h2 class="section-title">Evaluar Permisos</h2>
+          <div class="content-box">
+            Contenido de permisos pendientes se cargará aquí
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Evaluar Vacaciones</h2>
+          <div class="content-box" id="vacaciones-box">
+            Cargando solicitudes de vacaciones...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Puedes personalizar el nombre del líder aquí
+      document.getElementById("employee-name").textContent = "Juan Pérez";
+ 
+  const idAreaUsuario = 2; // Aquí podrías cargar dinámicamente desde sesión, etc.
+
+  fetch(`/api/vacaciones/area/${idAreaUsuario}`)
+
+  .then(response => response.json())
+  .then(data => {
+    const box = document.getElementById("vacaciones-box");
+    
+    if (!Array.isArray(data)) {
+      box.innerHTML = "Error al obtener las solicitudes.";
+      console.error("Respuesta inesperada:", data);
+      return;
+    }
+
+    if (data.length === 0) {
+      box.innerHTML = "No hay solicitudes de vacaciones.";
+      return;
+    }
+
+    box.innerHTML = "";
+    data.forEach(vacacion => {
+  const card = document.createElement("div");
+  card.classList.add("vacacion-card");
+
+  const info = document.createElement("div");
+  info.classList.add("vacacion-info");
+  info.innerHTML = `
+    <strong>${vacacion.nombre}</strong><br/>
+    Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
+    al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
+    ID Solicitud: ${vacacion.id}
+  `;
+
+  const btnGroup = document.createElement("div");
+  btnGroup.classList.add("btn-group");
+
+  const btnAceptar = document.createElement("button");
+  btnAceptar.classList.add("btn-aceptar");
+  btnAceptar.title = "Aceptar";
+  btnAceptar.innerHTML = "✔️";
+  btnAceptar.onclick = () => {
+    // Aquí llamas a función para aprobar la solicitud
+    alert(`Aceptar solicitud ID: ${vacacion.id}`);
+    // Puedes hacer fetch para aprobar en backend
+  };
+
+  const btnRechazar = document.createElement("button");
+  btnRechazar.classList.add("btn-rechazar");
+  btnRechazar.title = "Rechazar";
+  btnRechazar.innerHTML = "❌";
+  btnRechazar.onclick = () => {
+    // Aquí llamas a función para rechazar la solicitud
+    alert(`Rechazar solicitud ID: ${vacacion.id}`);
+    // Puedes hacer fetch para rechazar en backend
+  };
+
+  btnGroup.appendChild(btnAceptar);
+  btnGroup.appendChild(btnRechazar);
+
+  card.appendChild(info);
+  card.appendChild(btnGroup);
+
+  box.appendChild(card);
+});
+
+  })
+  .catch(error => {
+    document.getElementById("vacaciones-box").innerHTML = "Error al cargar datos.";
+    console.error("Error:", error);
+  });
+</script>
+
+
+  </body>
+</html>
