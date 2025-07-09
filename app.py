@@ -19,22 +19,21 @@ def get_connection():
     )
 
 @app.route('/api/usuario/<int:id>/area', methods=['GET'])
-def obtener_area_usuario(id):
+def obtener_areas_usuario(id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT a.NombreArea
-        FROM Usuario u
-        JOIN Area a ON u.Area_idArea = a.idArea
-        WHERE u.idUsuario = ?
+        SELECT a.idArea, a.NombreArea
+        FROM Usuario_Area ua
+        JOIN Area a ON ua.idArea = a.idArea
+        WHERE ua.idUsuario = ?
     """, (id,))
-    row = cursor.fetchone()
+    rows = cursor.fetchall()
     conn.close()
 
-    if row:
-        return jsonify({"NombreArea": row[0]})
-    else:
-        return jsonify({"error": "Área no encontrada"}), 404
+    areas = [{"idArea": row[0], "NombreArea": row[1]} for row in rows]
+    return jsonify(areas)
+
     
     
 
@@ -328,43 +327,26 @@ def actualizar_empleado(id):
 def agregar_empleado():
     data = request.get_json()
     try:
-        if any(k not in data or not str(data[k]).isdigit() for k in ['SueldoDiario', 'SueldoSemanal', 'BonoSemanal']):
-            return jsonify({"error": "Faltan datos de sueldo o no son válidos"}), 400
+        # Validaciones...
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", (data['idUsuario'],))
-        if cursor.fetchone():
-            return jsonify({"error": "El ID de usuario ya existe"}), 400
-
-        cursor.execute("SELECT 1 FROM Usuario WHERE Correo = ?", (data['correo'],))
-        if cursor.fetchone():
-            return jsonify({"error": "El correo ya está registrado"}), 400
-
-        cursor.execute("SELECT idRol FROM Rol WHERE idRol = ?", data['rol_id'])
-        if not cursor.fetchone():
-            return jsonify({"error": "Rol no válido"}), 400
-
-        cursor.execute("SELECT idArea FROM Area WHERE idArea = ?", data['area_id'])
-        if not cursor.fetchone():
-            return jsonify({"error": "Área no válida"}), 400
-
+        # Insertar en Usuario (sin Area_idArea)
         cursor.execute("""
             INSERT INTO Usuario (
-                idUsuario, Rol_idRol, Area_idArea, Nombres, Paterno, Materno,
+                idUsuario, Rol_idRol, Nombres, Paterno, Materno,
                 FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
                 FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
                 TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida,
                 clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Vacaciones,
-                       DiasDisponibles
+                DiasDisponibles
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
-                    ?, 'Activo', ?, ?, ?, ?,?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
+                    ?, 'Activo', ?, ?, ?, ?, ?)
         """, (
             int(data['idUsuario']),
             data['rol_id'],
-            data['area_id'],
             data['nombres'],
             data['paterno'],
             data.get('materno'),
@@ -389,6 +371,32 @@ def agregar_empleado():
             int(data['diasDisponibles'])
         ))
 
+        # Obtener lista de areas, ya sea IDs o nombres
+        area_ids = data.get('areas')
+        if not area_ids or not isinstance(area_ids, list):
+            return jsonify({"error": "Debes proporcionar al menos una área (lista)"}), 400
+
+        # Si son nombres, convertir a ids:
+        # Si tienes IDs directamente, comenta este bloque
+        """
+        area_ids_real = []
+        for nombre_area in area_ids:
+            cursor.execute("SELECT idArea FROM Area WHERE NombreArea = ?", (nombre_area,))
+            row = cursor.fetchone()
+            if not row:
+                return jsonify({"error": f"Área '{nombre_area}' no existe"}), 400
+            area_ids_real.append(row[0])
+        area_ids = area_ids_real
+        """
+
+        # Insertar en tabla intermedia
+        for id_area in area_ids:
+            cursor.execute("SELECT 1 FROM Area WHERE idArea = ?", (id_area,))
+            if not cursor.fetchone():
+                return jsonify({"error": f"Área con ID {id_area} no existe"}), 400
+            cursor.execute("INSERT INTO Usuario_Area (idUsuario, idArea) VALUES (?, ?)",
+                           (int(data['idUsuario']), id_area))
+
         conn.commit()
         return jsonify({"mensaje": "Empleado insertado correctamente"}), 201
 
@@ -396,6 +404,8 @@ def agregar_empleado():
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
+
 
 @app.route('/api/empleado/<int:id>', methods=['DELETE'])
 def eliminar_empleado(id):
