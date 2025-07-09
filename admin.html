@@ -796,6 +796,14 @@
             <input type="number" id="bonoSemanal" name="BonoSemanal" required />
           </div>
 
+          <!-- Campo Vacaciones Disponibles -->
+          <div class="form-group">
+            <label for="vacacionesDisponibles">Vacaciones Disponibles:</label>
+            <input type="number" id="diasDisponibles" name="diasDisponibles" required />
+          </div>
+
+
+
           <div class="form-actions">
             <button
               type="button"
@@ -1043,10 +1051,20 @@
           <div class="form-group">
             <label for="edit-vacaciones">Vacaciones:</label>
             <input
-              type="text"
+              type="number"
               id="edit-vacaciones"
               name="Vacaciones"
-              readonly
+            />
+          </div>
+
+          <!-- Campo Vacaciones Disponibles -->
+          <div class="form-group">
+            <label for="edit-diasDisponibles">Vacaciones disponibles:</label>
+            <input
+              type="text"
+              id="edit-diasDisponibles"
+              name="diasDisponibles"
+              
             />
           </div>
 
@@ -1365,6 +1383,7 @@
         ${renderField("Sueldo Semanal", data.SueldoSemanal)}
         ${renderField("Bono Semanal", data.BonoSemanal)}
         ${renderField("Vacaciones", data.Vacaciones)}
+        ${renderField("Vacaciones disponibles", data.DiasDisponibles)}
       `;
 
             document.getElementById("modal").classList.remove("hidden");
@@ -1555,119 +1574,91 @@
       }
 
       function editarEmpleado(id) {
-        document
-          .getElementById("edit-employee-modal")
-          .classList.remove("hidden");
+  document.getElementById("edit-employee-modal").classList.remove("hidden");
 
-        fetch(`/api/empleado/${id}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Error al obtener datos del empleado");
-            return res.json();
-          })
-          .then((data) => {
-            Promise.all([
-              fetch("/api/roles").then((res) => res.json()),
-              fetch("/api/areas").then((res) => res.json()),
-            ]).then(([roles, areas]) => {
-              const selectRol = document.getElementById("edit-tipoRol");
-              const selectArea = document.getElementById("edit-nombreArea");
+  fetch(`/api/empleado/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Error al obtener datos del empleado");
+      return res.json();
+    })
+    .then((data) => {
+      Promise.all([
+        fetch("/api/roles").then((res) => res.json()),
+        fetch("/api/areas").then((res) => res.json()),
+      ]).then(([roles, areas]) => {
+        const selectRol = document.getElementById("edit-tipoRol");
+        const selectArea = document.getElementById("edit-nombreArea");
 
-              // Llenar roles
-              selectRol.innerHTML =
-                '<option value="">Seleccione un rol</option>';
-              roles.forEach((rol) => {
-                const option = document.createElement("option");
-                option.value = rol.idRol;
-                option.textContent = rol.TipoRol;
-                selectRol.appendChild(option);
-              });
+        // Llenar roles
+        selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+        roles.forEach((rol) => {
+          const option = document.createElement("option");
+          option.value = rol.idRol;
+          option.textContent = rol.TipoRol;
+          selectRol.appendChild(option);
+        });
 
-              // Llenar áreas
-              selectArea.innerHTML =
-                '<option value="">Seleccione un área</option>';
-              areas.forEach((area) => {
-                const option = document.createElement("option");
-                option.value = area.idArea;
-                option.textContent = area.NombreArea;
-                selectArea.appendChild(option);
-              });
+        // Llenar áreas
+        selectArea.innerHTML = '<option value="">Seleccione un área</option>';
+        areas.forEach((area) => {
+          const option = document.createElement("option");
+          option.value = area.idArea;
+          option.textContent = area.NombreArea;
+          selectArea.appendChild(option);
+        });
 
-              // Llenar campos
-              document.getElementById("edit-idUsuario").value =
-                data.idUsuario || "";
-              document.getElementById("edit-tipoRol").value =
-                data.Rol_idRol || "";
-              document.getElementById("edit-nombreArea").value =
-                data.Area_idArea || "";
-              document.getElementById("edit-nombres").value =
-                data.Nombres || "";
-              document.getElementById("edit-paterno").value =
-                data.Paterno || "";
-              document.getElementById("edit-materno").value =
-                data.Materno || "";
-              document.getElementById("edit-fechaNacimiento").value =
-                formatoFechaParaInput(data.FechaNacimiento);
-              document.getElementById("edit-direccion").value =
-                data.Direccion || "";
-              document.getElementById("edit-codigoPostal").value =
-                data.CodigoPostal || "";
-              document.getElementById("edit-correo").value = data.Correo || "";
-              document.getElementById("edit-nss").value = data.NSS || "";
-              document.getElementById("edit-telefono").value =
-                data.Telefono || "";
+        // Llenar campos de texto
+        document.getElementById("edit-idUsuario").value = data.idUsuario || "";
+        document.getElementById("edit-tipoRol").value = data.Rol_idRol || "";
+        document.getElementById("edit-nombreArea").value = data.Area_idArea || "";
+        document.getElementById("edit-nombres").value = data.Nombres || "";
+        document.getElementById("edit-paterno").value = data.Paterno || "";
+        document.getElementById("edit-materno").value = data.Materno || "";
+        document.getElementById("edit-fechaNacimiento").value = formatoFechaParaInput(data.FechaNacimiento);
+        document.getElementById("edit-direccion").value = data.Direccion || "";
+        document.getElementById("edit-codigoPostal").value = data.CodigoPostal || "";
+        document.getElementById("edit-correo").value = data.Correo || "";
+        document.getElementById("edit-nss").value = data.NSS || "";
+        document.getElementById("edit-telefono").value = data.Telefono || "";
+        document.getElementById("edit-rfc").value = data.RFC || "";
+        document.getElementById("edit-curp").value = data.Curp || "";
+        document.getElementById("edit-puesto").value = data.Puesto || "";
+        document.getElementById("edit-nombreContactoEmergencia").value = data.NombreContactoEmergencia || "";
+        document.getElementById("edit-telefonoEmergencia").value = data.TelefonoEmergencia || "";
+        document.getElementById("edit-parentesco").value = data.Parentesco || "";
+        document.getElementById("edit-contraseña").value = data.clave || "";
+        document.getElementById("edit-confirmarContraseña").value = data.clave || "";
+        document.getElementById("edit-sueldoDiario").value = data.SueldoDiario || "";
+        document.getElementById("edit-sueldoSemanal").value = data.SueldoSemanal || "";
+        document.getElementById("edit-bonoSemanal").value = data.BonoSemanal || "";
+        document.getElementById("edit-fechaBaja").value = formatoFechaParaInput(data.FechaBaja);
+        document.getElementById("edit-comentarioSalida").value = data.ComentarioSalida || "";
 
-              const fechaIngresoInput =
-                document.getElementById("edit-fechaIngreso");
-              fechaIngresoInput.value = formatoFechaParaInput(
-                data.FechaIngreso
-              );
+        // Fecha de ingreso y recalcular vacaciones si cambia
+        const fechaIngresoInput = document.getElementById("edit-fechaIngreso");
+        fechaIngresoInput.value = formatoFechaParaInput(data.FechaIngreso);
 
-              const diasIniciales = calcularDiasVacaciones(
-                fechaIngresoInput.value
-              );
-              document.getElementById("edit-vacaciones").value = diasIniciales;
+        // ✅ Vacaciones (si no hay valor, calcularlas automáticamente)
+        const campoVacaciones = document.getElementById("edit-vacaciones");
+        campoVacaciones.value = data.Vacaciones != null ? data.Vacaciones : calcularDiasVacaciones(fechaIngresoInput.value);
 
-              document.getElementById("edit-rfc").value = data.RFC || "";
-              document.getElementById("edit-curp").value = data.Curp || "";
-              document.getElementById("edit-puesto").value = data.Puesto || "";
-              document.getElementById("edit-nombreContactoEmergencia").value =
-                data.NombreContactoEmergencia || "";
-              document.getElementById("edit-telefonoEmergencia").value =
-                data.TelefonoEmergencia || "";
-              document.getElementById("edit-parentesco").value =
-                data.Parentesco || "";
-              document.getElementById("edit-contraseña").value =
-                data.clave || "";
-              document.getElementById("edit-confirmarContraseña").value =
-                data.clave || "";
-              document.getElementById("edit-sueldoDiario").value =
-                data.SueldoDiario || "";
-              document.getElementById("edit-sueldoSemanal").value =
-                data.SueldoSemanal || "";
-              document.getElementById("edit-bonoSemanal").value =
-                data.BonoSemanal || "";
-              document.getElementById("edit-fechaBaja").value =
-                formatoFechaParaInput(data.FechaBaja);
-              document.getElementById("edit-comentarioSalida").value =
-                data.ComentarioSalida || "";
+        // ✅ Vacaciones disponibles
+        document.getElementById("edit-diasDisponibles").value = data.DiasDisponibles || 0;
 
-              // ✅ Vacaciones
-              document.getElementById("edit-vacaciones").value =
-                data.Vacaciones || 0;
+        // Recalcular vacaciones si se cambia fecha de ingreso
+        fechaIngresoInput.addEventListener("change", function () {
+          const nuevaFecha = this.value;
+          const dias = calcularDiasVacaciones(nuevaFecha);
+          document.getElementById("edit-vacaciones").value = dias;
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("Error al cargar datos del empleado:", error);
+      alert("No se pudieron cargar los datos del empleado.");
+    });
+}
 
-              // ✅ Recalcular si cambia la fecha de ingreso
-              fechaIngresoInput.addEventListener("change", function () {
-                const nuevaFecha = this.value;
-                const dias = calcularDiasVacaciones(nuevaFecha); // Asegúrate de que esta función esté definida
-                document.getElementById("edit-vacaciones").value = dias;
-              });
-            });
-          })
-          .catch((error) => {
-            console.error("Error al cargar datos del empleado:", error);
-            alert("No se pudieron cargar los datos del empleado.");
-          });
-      }
 
       function cerrarModalEditarEmpleado() {
         document.getElementById("edit-employee-modal").classList.add("hidden");
@@ -1775,6 +1766,8 @@
               document.getElementById("edit-comentarioSalida").value || null,
             Vacaciones:
               Number(document.getElementById("edit-vacaciones").value) || 0, // ✅ campo agregado
+              diasDisponibles:
+              Number(document.getElementById("edit-diasDisponibles").value) || 0, // 
           };
 
           fetch(`/api/empleado/${empleadoData.idUsuario}`, {

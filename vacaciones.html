@@ -411,25 +411,24 @@
         <h2 class="form-title">Detalles de las vacaciones</h2>
 
         <!-- Contadores de días de vacaciones -->
-        <div class="vacation-counters">
-          <div class="counter-item">
-            <span class="counter-label"
-              >Tienes <span class="total-days">15</span> días por ley de
-              vacaciones este año</span
-            >
-          </div>
-          <div class="counter-item">
-            <span class="counter-label"
-              >Has usado <span class="used-days">0</span> días este año</span
-            >
-          </div>
-          <div class="counter-item">
-            <span class="counter-label"
-              >Tienes <span class="available-days">15</span> días disponibles
-              este año</span
-            >
-          </div>
-        </div>
+<div class="vacation-counters">
+  <div class="counter-item">
+    <span class="counter-label">
+      Tienes <span class="total-days">0</span> días por ley de vacaciones este año
+    </span>
+  </div>
+  <div class="counter-item">
+    <span class="counter-label">
+      Has usado <span class="used-days">0</span> días este año
+    </span>
+  </div>
+  <div class="counter-item">
+    <span class="counter-label">
+      Tienes <span class="available-days">0</span> días disponibles este año
+    </span>
+  </div>
+</div>
+
 
         <form id="vacation-form" action="#" method="post">
           <div class="date-fields">
@@ -589,6 +588,7 @@
    <script>
   document.addEventListener("DOMContentLoaded", async function () {
     const idUsuario = localStorage.getItem("idUsuario");
+     cargarContadoresVacaciones(idUsuario);
     let diasFestivos = [];
     let diasDisponibles = 0;
 
@@ -753,6 +753,24 @@
       }
     });
   });
+
+  function cargarContadoresVacaciones(idUsuario) {
+  fetch(`/api/empleado/${idUsuario}`)
+    .then((res) => res.json())
+    .then((data) => {
+      const vacacionesTotales = data.Vacaciones || 0;
+      const diasDisponibles = data.DiasDisponibles || 0;
+      const diasUsados = vacacionesTotales - diasDisponibles;
+
+      document.querySelector(".total-days").textContent = vacacionesTotales;
+      document.querySelector(".available-days").textContent = diasDisponibles;
+      document.querySelector(".used-days").textContent = diasUsados;
+    })
+    .catch((error) => {
+      console.error("Error al cargar contadores de vacaciones:", error);
+    });
+}
+
 </script>
 
 

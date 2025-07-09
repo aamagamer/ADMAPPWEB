@@ -25,54 +25,88 @@ def solicitar_vacaciones():
         id_usuario = data.get('idUsuario')
         fecha_salida = data.get('fechaInicio')
         fecha_regreso = data.get('fechaFin')
-        motivo = data.get('motivo')  # NUEVO
+        motivo = data.get('motivo')
+
+        # Validación de datos requeridos
+        if not all([id_usuario, fecha_salida, fecha_regreso, motivo]):
+            return jsonify({"error": "Faltan datos requeridos"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Obtener área del usuario
-        cursor.execute("SELECT Area_idArea FROM Usuario WHERE idUsuario = ?", (id_usuario,))
-        result = cursor.fetchone()
-        if not result:
+        # Verificar que el usuario existe y obtener sus días disponibles
+        cursor.execute("SELECT DiasDisponibles FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        usuario = cursor.fetchone()
+        if not usuario:
             return jsonify({"error": "Usuario no encontrado"}), 404
 
-        area_id = result[0]
+        dias_disponibles = usuario[0] or 0
 
-        # Mapeo de área a estado de solicitud
-        estado_por_area = {
-            2: 3,
-            11: 6,
-            12: 7,
-            13: 8,
-            14: 9,
-            15: 11,
-            16: 12,
-            17: 13,
-            18: 14,
-            19: 15,
-            20: 16,
-            21: 17
-        }
+        # Calcular días solicitados
+        dias_solicitados = contar_dias_habiles(fecha_salida, fecha_regreso)
 
-        estado_id = estado_por_area.get(area_id, 3)
+        if dias_solicitados > dias_disponibles:
+            return jsonify({
+                "error": f"No tienes suficientes días disponibles. Disponibles: {dias_disponibles}, Solicitados: {dias_solicitados}"
+            }), 400
 
-        # DEBUG opcional
-        print("INSERTAR:", id_usuario, estado_id, fecha_salida, fecha_regreso, motivo)
-
-        # INSERT actualizado
+        # Obtener el ID de estado "Pendiente de aprobar por tu líder"
         cursor.execute("""
-            INSERT INTO Vacaciones (Usuario_idUsuario, EstadoSolicitud, FechaSalida, FechaRegreso, Motivo)
-            VALUES (?, ?, ?, ?, ?)
-        """, (id_usuario, estado_id, fecha_salida, fecha_regreso, motivo))
+            SELECT idSolicitud FROM EstadoSolicitud 
+            WHERE Estado = 'Pendiente de aprobar por tu líder'
+        """)
+        estado_result = cursor.fetchone()
+
+        if not estado_result:
+            return jsonify({"error": "Estado de solicitud no encontrado"}), 404
+
+        estado_id = estado_result[0]
+
+        # Insertar la solicitud de vacaciones
+        cursor.execute("""
+            INSERT INTO Vacaciones (
+                Usuario_idUsuario, 
+                EstadoSolicitud_idSolicitud, 
+                DiasSolicitados,
+                FechaSalida, 
+                FechaRegreso, 
+                Motivo
+            ) VALUES (?, ?, ?, ?, ?, ?)
+        """, (id_usuario, estado_id, dias_solicitados, fecha_salida, fecha_regreso, motivo))
+
+       
 
         conn.commit()
-        return jsonify({"mensaje": "Solicitud registrada correctamente"}), 201
+
+        return jsonify({
+            "mensaje": "Solicitud registrada correctamente",
+            "dias_solicitados": dias_solicitados
+        }), 201
 
     except Exception as e:
         print("ERROR EN SOLICITAR VACACIONES:", e)
         return jsonify({"error": "Error al registrar solicitud"}), 500
     finally:
         conn.close()
+
+
+def contar_dias_habiles(fecha_inicio, fecha_fin):
+    """Calcula los días hábiles entre dos fechas (excluyendo fines de semana)"""
+    try:
+        # Convertir strings a objetos date
+        from datetime import datetime, timedelta
+        inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+        fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+        
+        dias = 0
+        current = inicio
+        while current <= fin:
+            if current.weekday() < 5:  # 0-4 = lunes a viernes
+                dias += 1
+            current += timedelta(days=1)
+        return dias
+    except:
+        return 0  # En caso de error, retornar 0 (debería manejarse mejor)
 
 
 
@@ -233,7 +267,7 @@ def actualizar_empleado(id):
                 FechaNacimiento = ?, Direccion = ?, CodigoPostal = ?, Correo = ?, NSS = ?, Telefono = ?,
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
                 TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
-                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Vacaciones = ?
+                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Vacaciones = ?, DiasDisponibles = ?
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
@@ -259,6 +293,7 @@ def actualizar_empleado(id):
             int(data['SueldoSemanal']),
             int(data['BonoSemanal']),
             int(data['Vacaciones']),
+            int(data['diasDisponibles']),
             id
         ))
         conn.commit()
@@ -300,10 +335,11 @@ def agregar_empleado():
                 FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
                 FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
                 TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida,
-                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Vacaciones
+                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Vacaciones,
+                       DiasDisponibles
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
-                    ?, 'Activo', ?, ?, ?, ?)
+                    ?, 'Activo', ?, ?, ?, ?,?)
         """, (
             int(data['idUsuario']),
             data['rol_id'],
@@ -328,7 +364,8 @@ def agregar_empleado():
             int(data['SueldoDiario']),
             int(data['SueldoSemanal']),
             int(data['BonoSemanal']),
-            int(data['Vacaciones'])
+            int(data['Vacaciones']),
+            int(data['diasDisponibles'])
         ))
 
         conn.commit()
