@@ -454,20 +454,6 @@
               </div>
             </div>
           </div>
-
-          <div class="form-group">
-            <label for="motivo">Motivo de las vacaciones</label>
-            <textarea
-              id="motivo"
-              name="motivo"
-              placeholder="Describe el motivo de tus vacaciones..."
-              required
-            ></textarea>
-            <div id="reason-error" class="error-message">
-              Por favor describe el motivo de tus vacaciones
-            </div>
-          </div>
-
           <button type="submit" class="submit-button">Enviar Solicitud</button>
         </form>
       </div>
@@ -717,9 +703,9 @@
 
             const fechaInicio = fechaInicioInput.value;
             const fechaFin = fechaFinInput.value;
-            const motivo = document.getElementById("motivo").value;
+          
 
-            if (!fechaInicio || !fechaFin || !motivo) {
+            if (!fechaInicio || !fechaFin ) {
               alert("Por favor completa todos los campos.");
               return;
             }
@@ -750,7 +736,6 @@
                   idUsuario,
                   fechaInicio,
                   fechaFin,
-                  motivo,
                   diasSolicitados
                 }),
               });

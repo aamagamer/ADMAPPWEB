@@ -51,7 +51,7 @@ def solicitar_vacaciones():
         dias_solicitados = data.get('diasSolicitados')  # Se recibe desde el frontend
 
         # Validación de datos requeridos
-        if not all([id_usuario, fecha_salida, fecha_regreso, motivo, dias_solicitados]):
+        if not all([id_usuario, fecha_salida, fecha_regreso, dias_solicitados]):
             return jsonify({"error": "Faltan datos requeridos"}), 400
 
         try:
@@ -94,10 +94,9 @@ def solicitar_vacaciones():
                 EstadoSolicitud_idSolicitud, 
                 DiasSolicitados,
                 FechaSalida, 
-                FechaRegreso, 
-                Motivo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-        """, (id_usuario, estado_id, dias_solicitados, fecha_salida, fecha_regreso, motivo))
+                FechaRegreso 
+            ) VALUES (?, ?, ?, ?, ?)
+        """, (id_usuario, estado_id, dias_solicitados, fecha_salida, fecha_regreso))
 
         # Actualizar los días disponibles del usuario
         cursor.execute("""
@@ -590,19 +589,24 @@ def obtener_vacaciones(idUsuario):
         cursor.close()
         conn.close()
 
-@app.route('/api/vacaciones/area/<int:idArea>', methods=['GET'])
-def obtener_vacaciones_por_area(idArea):
+
+
+
+@app.route('/api/vacaciones/area/<ids>', methods=['GET'])
+def obtener_vacaciones_por_areas(ids):
     try:
+        lista_ids = ids.split(",")  # ["13", "14"]
+        placeholders = ",".join("?" for _ in lista_ids)
+
         conn = get_connection()
         cursor = conn.cursor()
-
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
             FROM Vacaciones v
             JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
-            JOIN Area a ON u.Area_idArea = a.idArea
-            WHERE a.idArea = ?
-        """, (idArea,))
+            JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+            WHERE ua.idArea IN ({placeholders})
+        """, lista_ids)
 
         rows = cursor.fetchall()
         vacaciones = []
@@ -621,12 +625,15 @@ def obtener_vacaciones_por_area(idArea):
         return jsonify(vacaciones)
 
     except Exception as e:
-        print("ERROR EN /api/vacaciones/area:", str(e))
+        print("ERROR EN /api/vacaciones/area/<ids>:", str(e))
         return jsonify({"error": str(e)}), 500
 
     finally:
         cursor.close()
         conn.close()
+
+
+
 
 
 

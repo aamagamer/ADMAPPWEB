@@ -215,15 +215,20 @@
     <script>
       // Puedes personalizar el nombre del líder aquí
       document.getElementById("employee-name").textContent = "Juan Pérez";
- 
-  const idAreaUsuario = 2; // Aquí podrías cargar dinámicamente desde sesión, etc.
+const idUsuario = localStorage.getItem("idUsuario");
 
-  fetch(`/api/vacaciones/area/${idAreaUsuario}`)
+fetch(`/api/usuario/${idUsuario}/area`)
+  .then(res => res.json())
+  .then(areas => {
+    console.log("Áreas del usuario:", areas);
 
+    const ids = areas.map(a => a.idArea).join(",");  // <- CORREGIDO AQUÍ
+    return fetch(`/api/vacaciones/area/${ids}`);
+  })
   .then(response => response.json())
   .then(data => {
     const box = document.getElementById("vacaciones-box");
-    
+
     if (!Array.isArray(data)) {
       box.innerHTML = "Error al obtener las solicitudes.";
       console.error("Respuesta inesperada:", data);
@@ -237,55 +242,50 @@
 
     box.innerHTML = "";
     data.forEach(vacacion => {
-  const card = document.createElement("div");
-  card.classList.add("vacacion-card");
+      const card = document.createElement("div");
+      card.classList.add("vacacion-card");
 
-  const info = document.createElement("div");
-  info.classList.add("vacacion-info");
-  info.innerHTML = `
-    <strong>${vacacion.nombre}</strong><br/>
-    Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
-    al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
-   
-  `;
+      const info = document.createElement("div");
+      info.classList.add("vacacion-info");
+      info.innerHTML = `
+        <strong>${vacacion.nombre}</strong><br/>
+        Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
+        al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
+      `;
 
-  const btnGroup = document.createElement("div");
-  btnGroup.classList.add("btn-group");
+      const btnGroup = document.createElement("div");
+      btnGroup.classList.add("btn-group");
 
-  const btnAceptar = document.createElement("button");
-  btnAceptar.classList.add("btn-aceptar");
-  btnAceptar.title = "Aceptar";
-  btnAceptar.innerHTML = "✔️";
-  btnAceptar.onclick = () => {
-    // Aquí llamas a función para aprobar la solicitud
-    alert(`Aceptar solicitud ID: ${vacacion.id}`);
-    // Puedes hacer fetch para aprobar en backend
-  };
+      const btnAceptar = document.createElement("button");
+      btnAceptar.classList.add("btn-aceptar");
+      btnAceptar.title = "Aceptar";
+      btnAceptar.innerHTML = "✔️";
+      btnAceptar.onclick = () => {
+        alert(`Aceptar solicitud ID: ${vacacion.id}`);
+      };
 
-  const btnRechazar = document.createElement("button");
-  btnRechazar.classList.add("btn-rechazar");
-  btnRechazar.title = "Rechazar";
-  btnRechazar.innerHTML = "❌";
-  btnRechazar.onclick = () => {
-    // Aquí llamas a función para rechazar la solicitud
-    alert(`Rechazar solicitud ID: ${vacacion.id}`);
-    // Puedes hacer fetch para rechazar en backend
-  };
+      const btnRechazar = document.createElement("button");
+      btnRechazar.classList.add("btn-rechazar");
+      btnRechazar.title = "Rechazar";
+      btnRechazar.innerHTML = "❌";
+      btnRechazar.onclick = () => {
+        alert(`Rechazar solicitud ID: ${vacacion.id}`);
+      };
 
-  btnGroup.appendChild(btnAceptar);
-  btnGroup.appendChild(btnRechazar);
+      btnGroup.appendChild(btnAceptar);
+      btnGroup.appendChild(btnRechazar);
 
-  card.appendChild(info);
-  card.appendChild(btnGroup);
+      card.appendChild(info);
+      card.appendChild(btnGroup);
 
-  box.appendChild(card);
-});
-
+      box.appendChild(card);
+    });
   })
   .catch(error => {
     document.getElementById("vacaciones-box").innerHTML = "Error al cargar datos.";
     console.error("Error:", error);
   });
+
 </script>
   </body>
 </html>
