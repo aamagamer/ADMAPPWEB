@@ -242,7 +242,7 @@ def login():
 def obtener_empleados():
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario")
+    cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario where Estado = 'Activo' ")
     empleados = [
         {
             "id": row.idUsuario,
@@ -446,21 +446,39 @@ def agregar_empleado():
 
 
 
-@app.route('/api/empleado/<int:id>', methods=['DELETE'])
-def eliminar_empleado(id):
+@app.route('/api/empleado/baja/<int:id>', methods=['PUT'])
+def baja_empleado(id):
     try:
+        data = request.json
+        fecha_baja = data.get("fechaBaja")
+        comentario = data.get("comentarioSalida")
+
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", id)
+
+        cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", (id,))
         if not cursor.fetchone():
             return jsonify({"error": "Empleado no encontrado"}), 404
-        cursor.execute("DELETE FROM Usuario WHERE idUsuario = ?", id)
+
+        cursor.execute("""
+            UPDATE Usuario
+            SET Estado = 'Inactivo',
+                FechaBaja = ?,
+                ComentarioSalida = ?
+            WHERE idUsuario = ?
+        """, (fecha_baja, comentario, id))
+
         conn.commit()
-        return jsonify({"mensaje": "Empleado eliminado correctamente"}), 200
+        return jsonify({"mensaje": "Empleado dado de baja correctamente"}), 200
+
     except Exception as e:
+        print("Error al dar de baja:", e)
         return jsonify({"error": str(e)}), 500
+
     finally:
         conn.close()
+
+
 
 @app.route('/api/roles', methods=['GET'])
 def obtener_roles():

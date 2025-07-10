@@ -437,7 +437,6 @@
       .btn:hover {
         opacity: 0.9;
       }
-      
 
       @keyframes fadeIn {
         from {
@@ -1202,20 +1201,52 @@
       </div>
     </div>
 
-    <div id="modal-confirmacion" class="modal-confirmacion hidden">
-      <div class="modal-contenido">
-        <p id="modal-texto">¿Quieres eliminar este empleado?</p>
-        <div class="modal-botones">
-          <button id="modal-cancelar" class="btn">Cancelar</button>
-          <button id="modal-confirmar" class="btn btn-danger">Eliminar</button>
-        </div>
-      </div>
-    </div>
-
     <div id="modal-exito" class="modal-exito hidden">
       <div class="modal-contenido-exito">
         <p>Actualización correcta</p>
         <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
+      </div>
+    </div>
+
+    <div id="modal-baja-empleado" class="modal hidden">
+      <div class="modal-content">
+        <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
+        <h2>Dar de Baja Empleado</h2>
+
+        <div style="margin-bottom: 15px">
+          <p>Empleado: <strong id="nombre-empleado-baja"></strong></p>
+          <p>ID: <strong id="id-empleado-baja"></strong></p>
+        </div>
+
+        <form id="form-baja-empleado">
+          <input type="hidden" id="baja-idUsuario" />
+
+          <div class="form-group">
+            <label for="baja-fecha">Fecha de Baja:</label>
+            <input type="date" id="baja-fecha" name="fechaBaja" required />
+          </div>
+
+          <div class="form-group">
+            <label for="baja-comentario">Motivo de la baja:</label>
+            <textarea
+              id="baja-comentario"
+              name="comentarioSalida"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="cerrarModalBajaEmpleado()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-danger">Confirmar Baja</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -1257,7 +1288,7 @@
                             <button class="action-btn" onclick="editarEmpleado(${emp.id})">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="action-btn" onclick="eliminarEmpleado(${emp.id})">
+                            <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -1326,7 +1357,7 @@
 <button class="action-btn" onclick="editarEmpleado(${emp.id})">
   <i class="bi bi-pencil"></i>
 </button>
-<button class="action-btn" onclick="eliminarEmpleado(${emp.id})">
+<button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
   <i class="bi bi-trash"></i>
 </button>
 
@@ -1410,83 +1441,91 @@
       }
 
       function abrirModalAltaEmpleado() {
-  // Mostrar el modal
-  document.getElementById("add-employee-modal").classList.remove("hidden");
+        // Mostrar el modal
+        document
+          .getElementById("add-employee-modal")
+          .classList.remove("hidden");
 
-  // Llenar roles
-  fetch("/api/roles")
-    .then((res) => res.json())
-    .then((data) => {
-      const selectRol = document.getElementById("tipoRol");
-      selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-      data.forEach((rol) => {
-        const option = document.createElement("option");
-        option.value = rol.idRol;
-        option.textContent = rol.TipoRol;
-        selectRol.appendChild(option);
-      });
-    });
+        // Llenar roles
+        fetch("/api/roles")
+          .then((res) => res.json())
+          .then((data) => {
+            const selectRol = document.getElementById("tipoRol");
+            selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+            data.forEach((rol) => {
+              const option = document.createElement("option");
+              option.value = rol.idRol;
+              option.textContent = rol.TipoRol;
+              selectRol.appendChild(option);
+            });
+          });
 
-  // Llenar áreas como checkboxes
-  fetch("/api/areas")
-    .then((res) => res.json())
-    .then((data) => {
-      const container = document.getElementById("checkbox-areas");
-      container.innerHTML = "";
+        // Llenar áreas como checkboxes
+        fetch("/api/areas")
+          .then((res) => res.json())
+          .then((data) => {
+            const container = document.getElementById("checkbox-areas");
+            container.innerHTML = "";
 
-      data.forEach((area) => {
-        const item = document.createElement("div");
-        item.className = "area-item";
+            data.forEach((area) => {
+              const item = document.createElement("div");
+              item.className = "area-item";
 
-        const label = document.createElement("label");
-        label.textContent = area.NombreArea;
-        label.className = "area-label";
+              const label = document.createElement("label");
+              label.textContent = area.NombreArea;
+              label.className = "area-label";
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.name = "areas";
-        checkbox.value = area.idArea;
-        checkbox.className = "area-checkbox";
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.name = "areas";
+              checkbox.value = area.idArea;
+              checkbox.className = "area-checkbox";
 
-        item.appendChild(label);
-        item.appendChild(checkbox);
-        container.appendChild(item);
-      });
+              item.appendChild(label);
+              item.appendChild(checkbox);
+              container.appendChild(item);
+            });
 
-      // Estilos iniciales para la animación
-      container.style.maxHeight = "0";
-      container.style.overflow = "hidden";
-      container.style.transition = "max-height 0.5s ease";
-    });
+            // Estilos iniciales para la animación
+            container.style.maxHeight = "0";
+            container.style.overflow = "hidden";
+            container.style.transition = "max-height 0.5s ease";
+          });
 
-  // Botón Mostrar/Ocultar Áreas
-  let toggleBtn = document.getElementById("toggle-areas");
-  if (!toggleBtn) {
-    toggleBtn = document.createElement("button");
-    toggleBtn.type = "button";
-    toggleBtn.id = "toggle-areas";
-    toggleBtn.textContent = "Mostrar Áreas ▼";
-    toggleBtn.className = "toggle-btn";
+        // Botón Mostrar/Ocultar Áreas
+        let toggleBtn = document.getElementById("toggle-areas");
+        if (!toggleBtn) {
+          toggleBtn = document.createElement("button");
+          toggleBtn.type = "button";
+          toggleBtn.id = "toggle-areas";
+          toggleBtn.textContent = "Mostrar Áreas ▼";
+          toggleBtn.className = "toggle-btn";
 
-    const containerPadre = document.getElementById("checkbox-areas").parentNode;
-    containerPadre.insertBefore(toggleBtn, document.getElementById("checkbox-areas"));
-  }
+          const containerPadre =
+            document.getElementById("checkbox-areas").parentNode;
+          containerPadre.insertBefore(
+            toggleBtn,
+            document.getElementById("checkbox-areas")
+          );
+        }
 
-  // Evento de toggle
-  const checkboxContainer = document.getElementById("checkbox-areas");
-  toggleBtn.onclick = () => {
-    const isOpen = checkboxContainer.style.maxHeight !== "0px" && checkboxContainer.style.maxHeight !== "";
+        // Evento de toggle
+        const checkboxContainer = document.getElementById("checkbox-areas");
+        toggleBtn.onclick = () => {
+          const isOpen =
+            checkboxContainer.style.maxHeight !== "0px" &&
+            checkboxContainer.style.maxHeight !== "";
 
-    if (isOpen) {
-      checkboxContainer.style.maxHeight = "0";
-      toggleBtn.textContent = "Mostrar Áreas ▼";
-    } else {
-      checkboxContainer.style.maxHeight = checkboxContainer.scrollHeight + "px";
-      toggleBtn.textContent = "Ocultar Áreas ▲";
-    }
-  };
-}
-
+          if (isOpen) {
+            checkboxContainer.style.maxHeight = "0";
+            toggleBtn.textContent = "Mostrar Áreas ▼";
+          } else {
+            checkboxContainer.style.maxHeight =
+              checkboxContainer.scrollHeight + "px";
+            toggleBtn.textContent = "Ocultar Áreas ▲";
+          }
+        };
+      }
 
       function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
         fetch("/api/areas")
@@ -1529,43 +1568,8 @@
       function cerrarModalAltaEmpleado() {
         document.getElementById("add-employee-modal").classList.add("hidden");
       }
-      function eliminarEmpleado(id) {
-        const modal = document.getElementById("modal-confirmacion");
-        const modalTexto = document.getElementById("modal-texto");
-        const btnConfirmar = document.getElementById("modal-confirmar");
-        const btnCancelar = document.getElementById("modal-cancelar");
-
-        modalTexto.textContent = `¿Estás seguro de que deseas eliminar al empleado con ID ${id}?`;
-
-        modal.classList.remove("hidden");
-
-        // Limpiar eventos previos para evitar acumulación
-        btnConfirmar.onclick = null;
-        btnCancelar.onclick = null;
-
-        btnConfirmar.onclick = () => {
-          fetch(`/api/empleado/${id}`, { method: "DELETE" })
-            .then((res) => {
-              if (!res.ok) throw new Error("Error al eliminar empleado");
-              //alert("Empleado eliminado correctamente");
-              location.reload();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              alert("Error al eliminar el empleado");
-            })
-            .finally(() => {
-              modal.classList.add("hidden");
-            });
-        };
-
-        btnCancelar.onclick = () => {
-          modal.classList.add("hidden");
-        };
-      }
 
       //Dar de alta a empleado
-
       document
         .getElementById("employee-form")
         .addEventListener("submit", function (e) {
@@ -1824,7 +1828,7 @@
               <button class="action-btn" onclick="editarEmpleado(${emp.id})">
                 <i class="bi bi-pencil"></i>
               </button>
-              <button class="action-btn" onclick="eliminarEmpleado(${emp.id})">
+              <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
                 <i class="bi bi-trash"></i>
               </button>
             </td>
@@ -2228,55 +2232,134 @@
       }
 
       // Función para abrir el modal de días festivos
-      function abrirModalAgregarFestivo() {
-        document.getElementById("add-holiday-modal").classList.remove("hidden");
-        // Establecer la fecha actual como valor por defecto
-        const today = new Date().toISOString().split("T")[0];
-        document.getElementById("fechaFestivo").value = today;
+function abrirModalAgregarFestivo() {
+  document.getElementById("add-holiday-modal").classList.remove("hidden");
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("fechaFestivo").value = today;
+}
+
+// Función para cerrar el modal de días festivos
+function cerrarModalAgregarFestivo() {
+  document.getElementById("add-holiday-modal").classList.add("hidden");
+}
+
+// Función para abrir el modal de baja
+function abrirModalBajaEmpleado(idUsuario) {
+  fetch(`/api/empleado/${idUsuario}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("No se encontró el empleado");
+      return res.json();
+    })
+    .then((empleado) => {
+      document.getElementById("nombre-empleado-baja").textContent =
+        `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`;
+      document.getElementById("id-empleado-baja").textContent = idUsuario;
+      document.getElementById("baja-idUsuario").value = idUsuario;
+
+      document.getElementById("modal-baja-empleado").classList.remove("hidden");
+    })
+    .catch((err) => {
+      console.error("Error al cargar empleado:", err);
+      alert("No se pudo abrir el modal de baja.");
+    });
+}
+
+function cerrarModalBajaEmpleado() {
+  document.getElementById("modal-baja-empleado").classList.add("hidden");
+}
+
+// Enviar solicitud de baja
+document.getElementById("form-baja-empleado").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const idUsuario = document.getElementById("baja-idUsuario").value;
+  const fechaBaja = document.getElementById("baja-fecha").value;
+  const comentarioSalida = document.getElementById("baja-comentario").value;
+
+  if (!fechaBaja || !comentarioSalida) {
+    alert("Todos los campos son obligatorios");
+    return;
+  }
+
+  const body = {
+    fechaBaja,
+    comentarioSalida,
+  };
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Procesando...";
+
+  fetch(`/api/empleado/baja/${idUsuario}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  })
+    .then(async res => {
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (_) {}
+
+      if (!res.ok || !data) {
+        throw new Error(data?.error || "Error al dar de baja al empleado");
       }
+      return data;
+    })
+    .then(data => {
+      alert("Empleado dado de baja correctamente.");
+      cerrarModalBajaEmpleado();
+      setTimeout(() => location.reload(), 1000);
+    })
+    .catch(err => {
+      console.error("Error al dar de baja:", err);
+      alert("Hubo un error al procesar la baja: " + err.message);
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    });
+});
 
-      // Función para cerrar el modal de días festivos
-      function cerrarModalAgregarFestivo() {
-        document.getElementById("add-holiday-modal").classList.add("hidden");
-      }
+// Enviar día festivo
+document.getElementById("holiday-form").addEventListener("submit", function (e) {
+  e.preventDefault();
 
-      // Manejar el envío del formulario de días festivos
-      document
-        .getElementById("holiday-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
+  const fecha = document.getElementById("fechaFestivo").value;
+  const descripcion = document.getElementById("descripcionFestivo").value;
+  const anio = new Date(fecha).getFullYear();
 
-          const fecha = document.getElementById("fechaFestivo").value;
-          const descripcion =
-            document.getElementById("descripcionFestivo").value;
-          const anio = new Date(fecha).getFullYear();
+  fetch("/api/diafestivo", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fecha: fecha,
+      descripcion: descripcion,
+      anio: anio,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok)
+        throw new Error("Error al guardar el día festivo");
+      return response.json();
+    })
+    .then((data) => {
+      alert("Día festivo agregado correctamente");
+      cerrarModalAgregarFestivo();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error al guardar el día festivo: " + error.message);
+    });
+});
 
-          fetch("/api/diafestivo", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fecha: fecha,
-              descripcion: descripcion,
-              anio: anio,
-            }),
-          })
-            .then((response) => {
-              if (!response.ok)
-                throw new Error("Error al guardar el día festivo");
-              return response.json();
-            })
-            .then((data) => {
-              alert("Día festivo agregado correctamente");
-              cerrarModalAgregarFestivo();
-              // Opcional: recargar la lista de días festivos si tienes una
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              alert("Error al guardar el día festivo: " + error.message);
-            });
-        });
+
+
     </script>
   </body>
 </html>
