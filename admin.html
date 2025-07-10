@@ -421,6 +421,17 @@
         justify-content: space-around;
       }
 
+      textarea.estilo-textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        resize: vertical;
+        font-size: 14px;
+        font-family: Arial, sans-serif;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
       .btn {
         padding: 8px 20px;
         border: none;
@@ -497,13 +508,6 @@
             Agregar empleado +
           </button>
 
-          <button
-            class="add-employee-btn"
-            onclick="abrirModalAgregarFestivo()"
-            style="margin-left: 2px"
-          >
-            Agregar Día Festivo +
-          </button>
 
           <button
             class="add-employee-btn"
@@ -577,14 +581,8 @@
 
         <a href="pendiente.html" class="option-button">
           <i class="bi bi-person-plus" style="font-size: 24px"></i>
-          <h2>Agregar Rol</h2>
-          <p>Nuevos roles</p>
-        </a>
-
-        <a href="pendiente.html" class="option-button">
-          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
-          <h2>Reportes</h2>
-          <p>Ver</p>
+          <h2>Rol</h2>
+          <p>Agrega o elimina roles</p>
         </a>
 
         <a href="pendiente.html" class="option-button">
@@ -592,6 +590,21 @@
           <h2>Área</h2>
           <p>Agregar</p>
         </a>
+
+        <a href="#" class="option-button" onclick="abrirModalAgregarFestivo()" style="text-decoration: none;">
+  <i class="bi bi-calendar-plus" style="font-size: 24px;"></i>
+  <h2>Día Festivo</h2>
+  <p>Agregar un nuevo día festivo</p>
+</a>
+
+
+        <a href="pendiente.html" class="option-button">
+          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
+          <h2>Reportes</h2>
+          <p>Ver</p>
+        </a>
+
+        
 
         <a href="pendiente.html" class="option-button">
           <i class="bi bi-pin-map" style="font-size: 24px"></i>
@@ -1214,7 +1227,9 @@
         <h2>Dar de Baja Empleado</h2>
 
         <div style="margin-bottom: 15px">
-          <p>Empleado: <strong id="nombre-empleado-baja"></strong></p>
+          <p>
+            Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
+          </p>
           <p>ID: <strong id="id-empleado-baja"></strong></p>
         </div>
 
@@ -1233,6 +1248,7 @@
               name="comentarioSalida"
               rows="4"
               required
+              class="estilo-textarea"
             ></textarea>
           </div>
 
@@ -2232,134 +2248,142 @@
       }
 
       // Función para abrir el modal de días festivos
-function abrirModalAgregarFestivo() {
-  document.getElementById("add-holiday-modal").classList.remove("hidden");
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("fechaFestivo").value = today;
-}
-
-// Función para cerrar el modal de días festivos
-function cerrarModalAgregarFestivo() {
-  document.getElementById("add-holiday-modal").classList.add("hidden");
-}
-
-// Función para abrir el modal de baja
-function abrirModalBajaEmpleado(idUsuario) {
-  fetch(`/api/empleado/${idUsuario}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("No se encontró el empleado");
-      return res.json();
-    })
-    .then((empleado) => {
-      document.getElementById("nombre-empleado-baja").textContent =
-        `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`;
-      document.getElementById("id-empleado-baja").textContent = idUsuario;
-      document.getElementById("baja-idUsuario").value = idUsuario;
-
-      document.getElementById("modal-baja-empleado").classList.remove("hidden");
-    })
-    .catch((err) => {
-      console.error("Error al cargar empleado:", err);
-      alert("No se pudo abrir el modal de baja.");
-    });
-}
-
-function cerrarModalBajaEmpleado() {
-  document.getElementById("modal-baja-empleado").classList.add("hidden");
-}
-
-// Enviar solicitud de baja
-document.getElementById("form-baja-empleado").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const idUsuario = document.getElementById("baja-idUsuario").value;
-  const fechaBaja = document.getElementById("baja-fecha").value;
-  const comentarioSalida = document.getElementById("baja-comentario").value;
-
-  if (!fechaBaja || !comentarioSalida) {
-    alert("Todos los campos son obligatorios");
-    return;
-  }
-
-  const body = {
-    fechaBaja,
-    comentarioSalida,
-  };
-
-  const submitBtn = this.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Procesando...";
-
-  fetch(`/api/empleado/baja/${idUsuario}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  })
-    .then(async res => {
-      let data = null;
-      try {
-        data = await res.json();
-      } catch (_) {}
-
-      if (!res.ok || !data) {
-        throw new Error(data?.error || "Error al dar de baja al empleado");
+      function abrirModalAgregarFestivo() {
+        document.getElementById("add-holiday-modal").classList.remove("hidden");
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("fechaFestivo").value = today;
       }
-      return data;
-    })
-    .then(data => {
-      alert("Empleado dado de baja correctamente.");
-      cerrarModalBajaEmpleado();
-      setTimeout(() => location.reload(), 1000);
-    })
-    .catch(err => {
-      console.error("Error al dar de baja:", err);
-      alert("Hubo un error al procesar la baja: " + err.message);
-    })
-    .finally(() => {
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-    });
-});
 
-// Enviar día festivo
-document.getElementById("holiday-form").addEventListener("submit", function (e) {
-  e.preventDefault();
+      // Función para cerrar el modal de días festivos
+      function cerrarModalAgregarFestivo() {
+        document.getElementById("add-holiday-modal").classList.add("hidden");
+      }
 
-  const fecha = document.getElementById("fechaFestivo").value;
-  const descripcion = document.getElementById("descripcionFestivo").value;
-  const anio = new Date(fecha).getFullYear();
+      // Función para abrir el modal de baja
+      function abrirModalBajaEmpleado(idUsuario) {
+        fetch(`/api/empleado/${idUsuario}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("No se encontró el empleado");
+            return res.json();
+          })
+          .then((empleado) => {
+            document.getElementById(
+              "nombre-empleado-baja"
+            ).textContent = `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`;
+            document.getElementById("id-empleado-baja").textContent = idUsuario;
+            document.getElementById("baja-idUsuario").value = idUsuario;
 
-  fetch("/api/diafestivo", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      fecha: fecha,
-      descripcion: descripcion,
-      anio: anio,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok)
-        throw new Error("Error al guardar el día festivo");
-      return response.json();
-    })
-    .then((data) => {
-      alert("Día festivo agregado correctamente");
-      cerrarModalAgregarFestivo();
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Error al guardar el día festivo: " + error.message);
-    });
-});
+            document
+              .getElementById("modal-baja-empleado")
+              .classList.remove("hidden");
+          })
+          .catch((err) => {
+            console.error("Error al cargar empleado:", err);
+            alert("No se pudo abrir el modal de baja.");
+          });
+      }
 
+      function cerrarModalBajaEmpleado() {
+        document.getElementById("modal-baja-empleado").classList.add("hidden");
+      }
 
+      // Enviar solicitud de baja
+      document
+        .getElementById("form-baja-empleado")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
+          const idUsuario = document.getElementById("baja-idUsuario").value;
+          const fechaBaja = document.getElementById("baja-fecha").value;
+          const comentarioSalida =
+            document.getElementById("baja-comentario").value;
+
+          if (!fechaBaja || !comentarioSalida) {
+            alert("Todos los campos son obligatorios");
+            return;
+          }
+
+          const body = {
+            fechaBaja,
+            comentarioSalida,
+          };
+
+          const submitBtn = this.querySelector('button[type="submit"]');
+          const originalText = submitBtn.textContent;
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Procesando...";
+
+          fetch(`/api/empleado/baja/${idUsuario}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          })
+            .then(async (res) => {
+              let data = null;
+              try {
+                data = await res.json();
+              } catch (_) {}
+
+              if (!res.ok || !data) {
+                throw new Error(
+                  data?.error || "Error al dar de baja al empleado"
+                );
+              }
+              return data;
+            })
+            .then((data) => {
+              alert("Empleado dado de baja correctamente.");
+              cerrarModalBajaEmpleado();
+              setTimeout(() => location.reload(), 1000);
+            })
+            .catch((err) => {
+              console.error("Error al dar de baja:", err);
+              alert("Hubo un error al procesar la baja: " + err.message);
+            })
+            .finally(() => {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            });
+        });
+
+      // Enviar día festivo
+      document
+        .getElementById("holiday-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const fecha = document.getElementById("fechaFestivo").value;
+          const descripcion =
+            document.getElementById("descripcionFestivo").value;
+          const anio = new Date(fecha).getFullYear();
+
+          fetch("/api/diafestivo", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fecha: fecha,
+              descripcion: descripcion,
+              anio: anio,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok)
+                throw new Error("Error al guardar el día festivo");
+              return response.json();
+            })
+            .then((data) => {
+              alert("Día festivo agregado correctamente");
+              cerrarModalAgregarFestivo();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error al guardar el día festivo: " + error.message);
+            });
+        });
     </script>
   </body>
 </html>

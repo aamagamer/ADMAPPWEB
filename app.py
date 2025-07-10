@@ -40,37 +40,42 @@ def obtener_areas_usuario(id):
 
 @app.route('/api/solicitarVacaciones', methods=['POST'])
 def solicitar_vacaciones():
+    conn = None  # Evita UnboundLocalError en el finally
+
     try:
         data = request.json
         id_usuario = data.get('idUsuario')
         fecha_salida = data.get('fechaInicio')
         fecha_regreso = data.get('fechaFin')
         motivo = data.get('motivo')
+        dias_solicitados = data.get('diasSolicitados')  # Se recibe desde el frontend
 
         # Validación de datos requeridos
-        if not all([id_usuario, fecha_salida, fecha_regreso, motivo]):
+        if not all([id_usuario, fecha_salida, fecha_regreso, motivo, dias_solicitados]):
             return jsonify({"error": "Faltan datos requeridos"}), 400
+
+        try:
+            dias_solicitados = int(dias_solicitados)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Días solicitados inválidos"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Verificar que el usuario existe y obtener sus días disponibles
+        # Verificar existencia del usuario y días disponibles
         cursor.execute("SELECT DiasDisponibles FROM Usuario WHERE idUsuario = ?", (id_usuario,))
-        usuario = cursor.fetchone()
-        if not usuario:
+        row = cursor.fetchone()
+        if not row:
             return jsonify({"error": "Usuario no encontrado"}), 404
 
-        dias_disponibles = usuario[0] or 0
-
-        # Calcular días solicitados
-        dias_solicitados = contar_dias_habiles(fecha_salida, fecha_regreso)
+        dias_disponibles = row[0] or 0
 
         if dias_solicitados > dias_disponibles:
             return jsonify({
                 "error": f"No tienes suficientes días disponibles. Disponibles: {dias_disponibles}, Solicitados: {dias_solicitados}"
             }), 400
 
-        # Obtener el ID de estado "Pendiente de aprobar por tu líder"
+        # Obtener el estado "Pendiente de aprobar por tu líder"
         cursor.execute("""
             SELECT idSolicitud FROM EstadoSolicitud 
             WHERE Estado = 'Pendiente de aprobar por tu líder'
@@ -94,7 +99,12 @@ def solicitar_vacaciones():
             ) VALUES (?, ?, ?, ?, ?, ?)
         """, (id_usuario, estado_id, dias_solicitados, fecha_salida, fecha_regreso, motivo))
 
-       
+        # Actualizar los días disponibles del usuario
+        cursor.execute("""
+            UPDATE Usuario
+            SET DiasDisponibles = DiasDisponibles - ?
+            WHERE idUsuario = ?
+        """, (dias_solicitados, id_usuario))
 
         conn.commit()
 
@@ -106,27 +116,12 @@ def solicitar_vacaciones():
     except Exception as e:
         print("ERROR EN SOLICITAR VACACIONES:", e)
         return jsonify({"error": "Error al registrar solicitud"}), 500
+
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
-def contar_dias_habiles(fecha_inicio, fecha_fin):
-    """Calcula los días hábiles entre dos fechas (excluyendo fines de semana)"""
-    try:
-        # Convertir strings a objetos date
-        from datetime import datetime, timedelta
-        inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
-        fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
-        
-        dias = 0
-        current = inicio
-        while current <= fin:
-            if current.weekday() < 5:  # 0-4 = lunes a viernes
-                dias += 1
-            current += timedelta(days=1)
-        return dias
-    except:
-        return 0  # En caso de error, retornar 0 (debería manejarse mejor)
 
 
 
