@@ -300,13 +300,16 @@ def actualizar_empleado(id):
     try:
         conn = get_connection()
         cursor = conn.cursor()
+
+        # Verifica que el usuario exista
         cursor.execute("SELECT 1 FROM Usuario WHERE idUsuario = ?", id)
         if not cursor.fetchone():
             return jsonify({"error": "Empleado no encontrado"}), 404
 
+        # Actualizar datos del usuario (sin Area_idArea porque ya no existe)
         cursor.execute("""
             UPDATE Usuario SET
-                Rol_idRol = ?, Area_idArea = ?, Nombres = ?, Paterno = ?, Materno = ?,
+                Rol_idRol = ?, Nombres = ?, Paterno = ?, Materno = ?,
                 FechaNacimiento = ?, Direccion = ?, CodigoPostal = ?, Correo = ?, NSS = ?, Telefono = ?,
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
                 TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
@@ -314,7 +317,6 @@ def actualizar_empleado(id):
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
-            data['area_id'],
             data['nombres'],
             data['paterno'],
             data['materno'],
@@ -339,12 +341,26 @@ def actualizar_empleado(id):
             int(data['diasDisponibles']),
             id
         ))
+
+        # 1. Eliminar áreas anteriores del usuario
+        cursor.execute("DELETE FROM Usuario_Area WHERE idUsuario = ?", id)
+
+        # 2. Insertar las nuevas áreas (si hay)
+        areas = data.get("areas", [])
+        for area_id in areas:
+            cursor.execute(
+                "INSERT INTO Usuario_Area (idUsuario, idArea) VALUES (?, ?)",
+                (id, area_id)
+            )
+
         conn.commit()
         return jsonify({"mensaje": "Empleado actualizado correctamente"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
 
 @app.route('/api/empleado', methods=['POST'])
 def agregar_empleado():

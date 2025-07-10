@@ -437,6 +437,7 @@
       .btn:hover {
         opacity: 0.9;
       }
+      
 
       @keyframes fadeIn {
         from {
@@ -631,14 +632,15 @@
           </div>
 
           <div class="form-group">
-  <label>Áreas:</label>
-  <div id="checkbox-areas" style="border: 1px solid #ccc; padding: 10px; height: 150px; overflow-y: auto;">
-    <!-- Se llenará con JS -->
-  </div>
-  <small>Puedes seleccionar una o más áreas.</small>
-</div>
-
-
+            <label>Áreas:</label>
+            <div
+              id="checkbox-areas"
+              style="border: 1px solid #ccc; padding: 10px"
+            >
+              <!-- Aquí se cargarán los checkboxes -->
+            </div>
+            <small>Puedes seleccionar una o más áreas.</small>
+          </div>
 
           <!-- Campo 4 -->
           <div class="form-group">
@@ -726,7 +728,7 @@
           <!-- Campo 17 -->
           <div class="form-group">
             <label for="nombreContactoEmergencia"
-              >Nombre Contacto Emergencia:</label
+              >Beneficiario/Contacto Emergencia:</label
             >
             <input
               type="text"
@@ -831,13 +833,18 @@
         <span class="close" onclick="cerrarModalEditarEmpleado()">&times;</span>
         <h2>Editar Empleado</h2>
         <form id="edit-employee-form" class="add-employee-form">
-          <!-- Campo 1 -->
+          <!-- ID -->
           <div class="form-group">
             <label for="edit-idUsuario">ID Usuario:</label>
-            <input type="number" id="edit-idUsuario" name="idUsuario" />
+            <input
+              type="number"
+              id="edit-idUsuario"
+              name="idUsuario"
+              readonly
+            />
           </div>
 
-          <!-- Campo 2 -->
+          <!-- Rol -->
           <div class="form-group">
             <label for="edit-tipoRol">Tipo de Rol:</label>
             <select id="edit-tipoRol" name="tipoRol" required>
@@ -845,33 +852,31 @@
             </select>
           </div>
 
-          <!-- Campo 3 -->
+          <!-- Áreas -->
           <div class="form-group">
-            <label for="edit-nombreArea">Área:</label>
-            <select id="edit-nombreArea" name="nombreArea" required>
-              <option value="">Cargando áreas...</option>
-            </select>
+            <label>Áreas:</label>
+            <div id="edit-checkbox-areas"></div>
           </div>
 
-          <!-- Campo 4 -->
+          <!-- Nombres -->
           <div class="form-group">
             <label for="edit-nombres">Nombres:</label>
             <input type="text" id="edit-nombres" name="nombres" required />
           </div>
 
-          <!-- Campo 5 -->
+          <!-- Paterno -->
           <div class="form-group">
             <label for="edit-paterno">Apellido Paterno:</label>
             <input type="text" id="edit-paterno" name="paterno" required />
           </div>
 
-          <!-- Campo 6 -->
+          <!-- Materno -->
           <div class="form-group">
             <label for="edit-materno">Apellido Materno:</label>
             <input type="text" id="edit-materno" name="materno" />
           </div>
 
-          <!-- Campo 7 -->
+          <!-- Fecha de Nacimiento -->
           <div class="form-group">
             <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
             <input
@@ -882,13 +887,13 @@
             />
           </div>
 
-          <!-- Campo 8 -->
+          <!-- Dirección -->
           <div class="form-group">
             <label for="edit-direccion">Dirección:</label>
             <input type="text" id="edit-direccion" name="direccion" required />
           </div>
 
-          <!-- Campo 9 -->
+          <!-- Código Postal -->
           <div class="form-group">
             <label for="edit-codigoPostal">Código Postal:</label>
             <input
@@ -899,25 +904,25 @@
             />
           </div>
 
-          <!-- Campo 10 -->
+          <!-- Correo -->
           <div class="form-group">
             <label for="edit-correo">Correo Electrónico:</label>
             <input type="email" id="edit-correo" name="correo" required />
           </div>
 
-          <!-- Campo 11 -->
+          <!-- NSS -->
           <div class="form-group">
             <label for="edit-nss">Número de Seguro Social (NSS):</label>
             <input type="text" id="edit-nss" name="nss" required />
           </div>
 
-          <!-- Campo 12 -->
+          <!-- Teléfono -->
           <div class="form-group">
             <label for="edit-telefono">Teléfono:</label>
             <input type="tel" id="edit-telefono" name="telefono" required />
           </div>
 
-          <!-- Campo 13 -->
+          <!-- Fecha de Ingreso -->
           <div class="form-group">
             <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
             <input
@@ -928,25 +933,25 @@
             />
           </div>
 
-          <!-- Campo 14 -->
+          <!-- RFC -->
           <div class="form-group">
             <label for="edit-rfc">RFC:</label>
             <input type="text" id="edit-rfc" name="rfc" required />
           </div>
 
-          <!-- Campo 15 -->
+          <!-- CURP -->
           <div class="form-group">
             <label for="edit-curp">CURP:</label>
             <input type="text" id="edit-curp" name="curp" required />
           </div>
 
-          <!-- Campo 16 -->
+          <!-- Puesto -->
           <div class="form-group">
             <label for="edit-puesto">Puesto:</label>
             <input type="text" id="edit-puesto" name="puesto" required />
           </div>
 
-          <!-- Campo 17 -->
+          <!-- Contacto de Emergencia -->
           <div class="form-group">
             <label for="edit-nombreContactoEmergencia"
               >Nombre Contacto Emergencia:</label
@@ -959,7 +964,7 @@
             />
           </div>
 
-          <!-- Campo 18 -->
+          <!-- Teléfono Emergencia -->
           <div class="form-group">
             <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
             <input
@@ -970,7 +975,7 @@
             />
           </div>
 
-          <!-- Campo 19 -->
+          <!-- Parentesco -->
           <div class="form-group">
             <label for="edit-parentesco">Parentesco:</label>
             <input
@@ -981,7 +986,7 @@
             />
           </div>
 
-          <!-- Campo 20 -->
+          <!-- Contraseña -->
           <div class="form-group">
             <label for="edit-contraseña">Contraseña:</label>
             <input
@@ -992,7 +997,7 @@
             />
           </div>
 
-          <!-- Campo 21 -->
+          <!-- Confirmar Contraseña -->
           <div class="form-group">
             <label for="edit-confirmarContraseña">Confirmar Contraseña:</label>
             <input
@@ -1003,7 +1008,7 @@
             />
           </div>
 
-          <!-- Campo Sueldo Diario -->
+          <!-- Sueldo Diario -->
           <div class="form-group">
             <label for="edit-sueldoDiario">Sueldo Diario:</label>
             <input
@@ -1014,7 +1019,7 @@
             />
           </div>
 
-          <!-- Campo Sueldo Semanal -->
+          <!-- Sueldo Semanal -->
           <div class="form-group">
             <label for="edit-sueldoSemanal">Sueldo Semanal:</label>
             <input
@@ -1025,7 +1030,7 @@
             />
           </div>
 
-          <!-- Campo Bono Semanal -->
+          <!-- Bono Semanal -->
           <div class="form-group">
             <label for="edit-bonoSemanal">Bono Semanal:</label>
             <input
@@ -1036,13 +1041,13 @@
             />
           </div>
 
-          <!-- Campo Fecha de Baja -->
+          <!-- Fecha de Baja -->
           <div class="form-group">
             <label for="edit-fechaBaja">Fecha de Baja:</label>
             <input type="date" id="edit-fechaBaja" name="fechaBaja" />
           </div>
 
-          <!-- Campo Comentario de Salida -->
+          <!-- Comentario de Salida -->
           <div class="form-group">
             <label for="edit-comentarioSalida">Comentario de Salida:</label>
             <input
@@ -1052,13 +1057,13 @@
             />
           </div>
 
-          <!-- Campo Vacaciones -->
+          <!-- Vacaciones -->
           <div class="form-group">
             <label for="edit-vacaciones">Vacaciones:</label>
             <input type="number" id="edit-vacaciones" name="Vacaciones" />
           </div>
 
-          <!-- Campo Vacaciones Disponibles -->
+          <!-- Vacaciones Disponibles -->
           <div class="form-group">
             <label for="edit-diasDisponibles">Vacaciones disponibles:</label>
             <input
@@ -1333,34 +1338,34 @@
         .catch((error) => {
           console.error("Error al cargar empleados:", error);
         });
-        
 
       function verEmpleado(id) {
-  fetch(`/api/empleado/${id}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("Error al cargar datos del empleado");
-      return res.json();
-    })
-    .then((data) => {
-      const modalBody = document.getElementById("modal-body");
+        fetch(`/api/empleado/${id}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Error al cargar datos del empleado");
+            return res.json();
+          })
+          .then((data) => {
+            const modalBody = document.getElementById("modal-body");
 
-      const renderField = (label, value) => {
-        const texto =
-          value === null ||
-          value === undefined ||
-          value === "" ||
-          value === "null"
-            ? "Sin información"
-            : value;
-        return `<p><strong>${label}:</strong> ${texto}</p>`;
-      };
+            const renderField = (label, value) => {
+              const texto =
+                value === null ||
+                value === undefined ||
+                value === "" ||
+                value === "null"
+                  ? "Sin información"
+                  : value;
+              return `<p><strong>${label}:</strong> ${texto}</p>`;
+            };
 
-      // Construir una cadena de texto con todas las áreas
-      const areasTexto = (data.Areas && data.Areas.length > 0)
-        ? data.Areas.map(area => area.NombreArea).join(", ")
-        : "Sin información";
+            // Construir una cadena de texto con todas las áreas
+            const areasTexto =
+              data.Areas && data.Areas.length > 0
+                ? data.Areas.map((area) => area.NombreArea).join(", ")
+                : "Sin información";
 
-      modalBody.innerHTML = `
+            modalBody.innerHTML = `
         ${renderField("ID", data.idUsuario)}
         ${renderField("Rol", data.TipoRol)}
         ${renderField("Áreas", areasTexto)}
@@ -1392,74 +1397,133 @@
         ${renderField("Vacaciones disponibles", data.DiasDisponibles)}
       `;
 
-      document.getElementById("modal").classList.remove("hidden");
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Error al cargar los datos del empleado");
-    });
-}
-
+            document.getElementById("modal").classList.remove("hidden");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Error al cargar los datos del empleado");
+          });
+      }
 
       function cerrarModal() {
         document.getElementById("modal").classList.add("hidden");
       }
 
       function abrirModalAltaEmpleado() {
-        document
-          .getElementById("add-employee-modal")
-          .classList.remove("hidden");
+  // Mostrar el modal
+  document.getElementById("add-employee-modal").classList.remove("hidden");
 
-        // Llenar roles
-        fetch("/api/roles")
+  // Llenar roles
+  fetch("/api/roles")
+    .then((res) => res.json())
+    .then((data) => {
+      const selectRol = document.getElementById("tipoRol");
+      selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+      data.forEach((rol) => {
+        const option = document.createElement("option");
+        option.value = rol.idRol;
+        option.textContent = rol.TipoRol;
+        selectRol.appendChild(option);
+      });
+    });
+
+  // Llenar áreas como checkboxes
+  fetch("/api/areas")
+    .then((res) => res.json())
+    .then((data) => {
+      const container = document.getElementById("checkbox-areas");
+      container.innerHTML = "";
+
+      data.forEach((area) => {
+        const item = document.createElement("div");
+        item.className = "area-item";
+
+        const label = document.createElement("label");
+        label.textContent = area.NombreArea;
+        label.className = "area-label";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = "areas";
+        checkbox.value = area.idArea;
+        checkbox.className = "area-checkbox";
+
+        item.appendChild(label);
+        item.appendChild(checkbox);
+        container.appendChild(item);
+      });
+
+      // Estilos iniciales para la animación
+      container.style.maxHeight = "0";
+      container.style.overflow = "hidden";
+      container.style.transition = "max-height 0.5s ease";
+    });
+
+  // Botón Mostrar/Ocultar Áreas
+  let toggleBtn = document.getElementById("toggle-areas");
+  if (!toggleBtn) {
+    toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.id = "toggle-areas";
+    toggleBtn.textContent = "Mostrar Áreas ▼";
+    toggleBtn.className = "toggle-btn";
+
+    const containerPadre = document.getElementById("checkbox-areas").parentNode;
+    containerPadre.insertBefore(toggleBtn, document.getElementById("checkbox-areas"));
+  }
+
+  // Evento de toggle
+  const checkboxContainer = document.getElementById("checkbox-areas");
+  toggleBtn.onclick = () => {
+    const isOpen = checkboxContainer.style.maxHeight !== "0px" && checkboxContainer.style.maxHeight !== "";
+
+    if (isOpen) {
+      checkboxContainer.style.maxHeight = "0";
+      toggleBtn.textContent = "Mostrar Áreas ▼";
+    } else {
+      checkboxContainer.style.maxHeight = checkboxContainer.scrollHeight + "px";
+      toggleBtn.textContent = "Ocultar Áreas ▲";
+    }
+  };
+}
+
+
+      function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
+        fetch("/api/areas")
           .then((res) => res.json())
-          .then((data) => {
-            const selectRol = document.getElementById("tipoRol");
-            selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-            data.forEach((rol) => {
-              const option = document.createElement("option");
-              option.value = rol.idRol;
-              option.textContent = rol.TipoRol;
-              selectRol.appendChild(option);
+          .then((areas) => {
+            const container = document.getElementById("edit-checkbox-areas");
+            container.innerHTML = "";
+
+            areas.forEach((area) => {
+              const item = document.createElement("div");
+              item.style.display = "flex";
+              item.style.justifyContent = "space-between";
+              item.style.alignItems = "center";
+              item.style.marginBottom = "8px";
+
+              const label = document.createElement("label");
+              label.textContent = area.NombreArea;
+              label.style.width = "200px";
+              label.style.textAlign = "left";
+
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.name = "areas";
+              checkbox.value = area.idArea;
+              checkbox.style.width = "20px";
+              checkbox.style.height = "20px";
+
+              // Si el área ya está asignada al usuario, marcarla
+              if (areasSeleccionadas.includes(area.idArea)) {
+                checkbox.checked = true;
+              }
+
+              item.appendChild(label);
+              item.appendChild(checkbox);
+              container.appendChild(item);
             });
           });
-
-        // Llenar áreas como checkboxes
-        fetch("/api/areas")
-  .then((res) => res.json())
-  .then((data) => {
-    const container = document.getElementById("checkbox-areas");
-    container.innerHTML = "";
-
-    data.forEach((area) => {
-      // Contenedor fila flex con espacio fijo para nombre y checkbox
-      const item = document.createElement("div");
-      item.style.display = "flex";
-      item.style.justifyContent = "space-between";
-      item.style.alignItems = "center";
-      item.style.marginBottom = "8px";
-
-      // Nombre fijo ancho y alineado izquierda
-      const label = document.createElement("label");
-      label.textContent = area.NombreArea;
-      label.style.width = "200px";   // ancho fijo para nombres
-      label.style.textAlign = "left";
-
-      // Checkbox en columna con ancho fijo
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.name = "areas";
-      checkbox.value = area.idArea;
-      checkbox.style.width = "20px";  // ancho fijo checkbox
-      checkbox.style.height = "20px";
-
-      item.appendChild(label);
-      item.appendChild(checkbox);
-      container.appendChild(item);
-    });
-  });
-
-
       }
 
       function cerrarModalAltaEmpleado() {
@@ -1500,101 +1564,105 @@
         };
       }
 
-
       //Dar de alta a empleado
 
       document
-  .getElementById("employee-form")
-  .addEventListener("submit", function (e) {
-    e.preventDefault();
+        .getElementById("employee-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-    const fechaIngreso = document.getElementById("fechaIngreso").value;
-    const diasVacaciones = calcularDiasVacaciones(fechaIngreso);
+          const fechaIngreso = document.getElementById("fechaIngreso").value;
+          const diasVacaciones = calcularDiasVacaciones(fechaIngreso);
 
-    const contraseña = document.getElementById("contraseña").value;
-    const confirmarContraseña = document.getElementById("confirmarContraseña").value;
+          const contraseña = document.getElementById("contraseña").value;
+          const confirmarContraseña = document.getElementById(
+            "confirmarContraseña"
+          ).value;
 
-    if (contraseña !== confirmarContraseña) {
-      alert("Las contraseñas no coinciden");
-      return;
-    }
+          if (contraseña !== confirmarContraseña) {
+            alert("Las contraseñas no coinciden");
+            return;
+          }
 
-    const formData = new FormData(this);
-    const empleadoData = {};
+          const formData = new FormData(this);
+          const empleadoData = {};
 
-    formData.forEach((value, key) => {
-      empleadoData[key] = value;
-    });
-
-    // Obtener las áreas seleccionadas (checkboxes)
-    const areasSeleccionadas = Array.from(
-      document.querySelectorAll('input[name="areas"]:checked')
-    ).map(cb => parseInt(cb.value));
-
-    if (areasSeleccionadas.length === 0) {
-      alert("Debes seleccionar al menos un área.");
-      return;
-    }
-
-    empleadoData.areas = areasSeleccionadas;
-
-    // Mapear y limpiar campos adicionales
-    empleadoData.rol_id = empleadoData.tipoRol;
-    delete empleadoData.tipoRol;
-    delete empleadoData.nombreArea; // ← ya no se usa
-
-    // Agregar días de vacaciones
-    empleadoData.Vacaciones = diasVacaciones;
-
-    // Convertir a número
-    empleadoData.idUsuario = Number(empleadoData.idUsuario);
-    empleadoData.nss = Number(empleadoData.nss);
-    empleadoData.telefono = Number(empleadoData.telefono);
-    empleadoData.telefonoEmergencia = Number(empleadoData.telefonoEmergencia);
-    empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
-    empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
-    empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
-    empleadoData.Vacaciones = Number(empleadoData.Vacaciones);
-    empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles);
-
-    // Validaciones finales
-    if (
-      isNaN(empleadoData.idUsuario) ||
-      isNaN(empleadoData.nss) ||
-      isNaN(empleadoData.telefono) ||
-      isNaN(empleadoData.telefonoEmergencia) ||
-      isNaN(empleadoData.SueldoDiario) ||
-      isNaN(empleadoData.SueldoSemanal) ||
-      isNaN(empleadoData.BonoSemanal)
-    ) {
-      alert("Por favor, ingresa valores numéricos válidos en los campos requeridos.");
-      return;
-    }
-
-    // Enviar al backend
-    fetch("/api/empleado", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(empleadoData),
-    })
-      .then((res) => {
-        if (!res.ok)
-          return res.json().then((data) => {
-            throw new Error(data.error || "Error al guardar el empleado");
+          formData.forEach((value, key) => {
+            empleadoData[key] = value;
           });
-        return res.json();
-      })
-      .then((data) => {
-        alert(data.mensaje);
-        cerrarModalAltaEmpleado();
-        location.reload(); // o actualiza tabla sin recargar
-      })
-      .catch((error) => {
-        console.error("Error al insertar:", error);
-        alert("Hubo un error al guardar el empleado: " + error.message);
-      });
-  });
 
+          // Obtener las áreas seleccionadas (checkboxes)
+          const areasSeleccionadas = Array.from(
+            document.querySelectorAll('input[name="areas"]:checked')
+          ).map((cb) => parseInt(cb.value));
+
+          if (areasSeleccionadas.length === 0) {
+            alert("Debes seleccionar al menos un área.");
+            return;
+          }
+
+          empleadoData.areas = areasSeleccionadas;
+
+          // Mapear y limpiar campos adicionales
+          empleadoData.rol_id = empleadoData.tipoRol;
+          delete empleadoData.tipoRol;
+          delete empleadoData.nombreArea; // ← ya no se usa
+
+          // Agregar días de vacaciones
+          empleadoData.Vacaciones = diasVacaciones;
+
+          // Convertir a número
+          empleadoData.idUsuario = Number(empleadoData.idUsuario);
+          empleadoData.nss = Number(empleadoData.nss);
+          empleadoData.telefono = Number(empleadoData.telefono);
+          empleadoData.telefonoEmergencia = Number(
+            empleadoData.telefonoEmergencia
+          );
+          empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
+          empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
+          empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
+          empleadoData.Vacaciones = Number(empleadoData.Vacaciones);
+          empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles);
+
+          // Validaciones finales
+          if (
+            isNaN(empleadoData.idUsuario) ||
+            isNaN(empleadoData.nss) ||
+            isNaN(empleadoData.telefono) ||
+            isNaN(empleadoData.telefonoEmergencia) ||
+            isNaN(empleadoData.SueldoDiario) ||
+            isNaN(empleadoData.SueldoSemanal) ||
+            isNaN(empleadoData.BonoSemanal)
+          ) {
+            alert(
+              "Por favor, ingresa valores numéricos válidos en los campos requeridos."
+            );
+            return;
+          }
+
+          // Enviar al backend
+          fetch("/api/empleado", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(empleadoData),
+          })
+            .then((res) => {
+              if (!res.ok)
+                return res.json().then((data) => {
+                  throw new Error(data.error || "Error al guardar el empleado");
+                });
+              return res.json();
+            })
+            .then((data) => {
+              alert(data.mensaje);
+              cerrarModalAltaEmpleado();
+              location.reload(); // o actualiza tabla sin recargar
+            })
+            .catch((error) => {
+              console.error("Error al insertar:", error);
+              alert("Hubo un error al guardar el empleado: " + error.message);
+            });
+        });
 
       // Alternativa para manejar zona horaria
       function formatoFechaParaInput(fecha) {
@@ -1629,7 +1697,6 @@
               fetch("/api/areas").then((res) => res.json()),
             ]).then(([roles, areas]) => {
               const selectRol = document.getElementById("edit-tipoRol");
-              const selectArea = document.getElementById("edit-nombreArea");
 
               // Llenar roles
               selectRol.innerHTML =
@@ -1641,23 +1708,11 @@
                 selectRol.appendChild(option);
               });
 
-              // Llenar áreas
-              selectArea.innerHTML =
-                '<option value="">Seleccione un área</option>';
-              areas.forEach((area) => {
-                const option = document.createElement("option");
-                option.value = area.idArea;
-                option.textContent = area.NombreArea;
-                selectArea.appendChild(option);
-              });
-
-              // Llenar campos de texto
+              // Llenar campos del formulario
               document.getElementById("edit-idUsuario").value =
                 data.idUsuario || "";
               document.getElementById("edit-tipoRol").value =
                 data.Rol_idRol || "";
-              document.getElementById("edit-nombreArea").value =
-                data.Area_idArea || "";
               document.getElementById("edit-nombres").value =
                 data.Nombres || "";
               document.getElementById("edit-paterno").value =
@@ -1698,14 +1753,12 @@
               document.getElementById("edit-comentarioSalida").value =
                 data.ComentarioSalida || "";
 
-              // Fecha de ingreso y recalcular vacaciones si cambia
               const fechaIngresoInput =
                 document.getElementById("edit-fechaIngreso");
               fechaIngresoInput.value = formatoFechaParaInput(
                 data.FechaIngreso
               );
 
-              // ✅ Vacaciones (si no hay valor, calcularlas automáticamente)
               const campoVacaciones =
                 document.getElementById("edit-vacaciones");
               campoVacaciones.value =
@@ -1713,11 +1766,14 @@
                   ? data.Vacaciones
                   : calcularDiasVacaciones(fechaIngresoInput.value);
 
-              // ✅ Vacaciones disponibles
               document.getElementById("edit-diasDisponibles").value =
                 data.DiasDisponibles || 0;
 
-              // Recalcular vacaciones si se cambia fecha de ingreso
+              // ✅ Cargar áreas como checkboxes
+              const idsDeAreas = (data.Areas || []).map((area) => area.idArea);
+              cargarAreasParaEditar(data.idUsuario, idsDeAreas);
+
+              // Recalcular vacaciones si cambia la fecha de ingreso
               fechaIngresoInput.addEventListener("change", function () {
                 const nuevaFecha = this.value;
                 const dias = calcularDiasVacaciones(nuevaFecha);
@@ -1800,7 +1856,6 @@
           const empleadoData = {
             idUsuario: Number(document.getElementById("edit-idUsuario").value),
             rol_id: document.getElementById("edit-tipoRol").value,
-            area_id: document.getElementById("edit-nombreArea").value,
             nombres: document.getElementById("edit-nombres").value,
             paterno: document.getElementById("edit-paterno").value,
             materno: document.getElementById("edit-materno").value,
@@ -1836,11 +1891,20 @@
             comentarioSalida:
               document.getElementById("edit-comentarioSalida").value || null,
             Vacaciones:
-              Number(document.getElementById("edit-vacaciones").value) || 0, // ✅ campo agregado
+              Number(document.getElementById("edit-vacaciones").value) || 0,
             diasDisponibles:
               Number(document.getElementById("edit-diasDisponibles").value) ||
-              0, //
+              0,
           };
+
+          // ✅ Agregar áreas seleccionadas
+          const checkboxes = document.querySelectorAll(
+            "#edit-checkbox-areas input[name='areas']:checked"
+          );
+          const areasSeleccionadas = Array.from(checkboxes).map((cb) =>
+            parseInt(cb.value)
+          );
+          empleadoData.areas = areasSeleccionadas;
 
           fetch(`/api/empleado/${empleadoData.idUsuario}`, {
             method: "PUT",
