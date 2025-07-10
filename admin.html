@@ -1333,31 +1333,37 @@
         .catch((error) => {
           console.error("Error al cargar empleados:", error);
         });
+        
 
       function verEmpleado(id) {
-        fetch(`/api/empleado/${id}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Error al cargar datos del empleado");
-            return res.json();
-          })
-          .then((data) => {
-            const modalBody = document.getElementById("modal-body");
+  fetch(`/api/empleado/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Error al cargar datos del empleado");
+      return res.json();
+    })
+    .then((data) => {
+      const modalBody = document.getElementById("modal-body");
 
-            const renderField = (label, value) => {
-              const texto =
-                value === null ||
-                value === undefined ||
-                value === "" ||
-                value === "null"
-                  ? "Sin información"
-                  : value;
-              return `<p><strong>${label}:</strong> ${texto}</p>`;
-            };
+      const renderField = (label, value) => {
+        const texto =
+          value === null ||
+          value === undefined ||
+          value === "" ||
+          value === "null"
+            ? "Sin información"
+            : value;
+        return `<p><strong>${label}:</strong> ${texto}</p>`;
+      };
 
-            modalBody.innerHTML = `
+      // Construir una cadena de texto con todas las áreas
+      const areasTexto = (data.Areas && data.Areas.length > 0)
+        ? data.Areas.map(area => area.NombreArea).join(", ")
+        : "Sin información";
+
+      modalBody.innerHTML = `
         ${renderField("ID", data.idUsuario)}
         ${renderField("Rol", data.TipoRol)}
-        ${renderField("Área", data.NombreArea)}
+        ${renderField("Áreas", areasTexto)}
         ${renderField(
           "Nombre Completo",
           `${data.Nombres} ${data.Paterno} ${data.Materno}`
@@ -1386,13 +1392,14 @@
         ${renderField("Vacaciones disponibles", data.DiasDisponibles)}
       `;
 
-            document.getElementById("modal").classList.remove("hidden");
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            alert("Error al cargar los datos del empleado");
-          });
-      }
+      document.getElementById("modal").classList.remove("hidden");
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error al cargar los datos del empleado");
+    });
+}
+
 
       function cerrarModal() {
         document.getElementById("modal").classList.add("hidden");

@@ -255,21 +255,44 @@ def obtener_empleados():
 
 @app.route('/api/empleado/<int:id>', methods=['GET'])
 def obtener_empleado(id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT u.*, r.TipoRol, a.NombreArea
-        FROM Usuario u
-        LEFT JOIN Rol r ON u.Rol_idRol = r.idRol
-        LEFT JOIN Area a ON u.Area_idArea = a.idArea
-        WHERE u.idUsuario = ?
-    """, id)
-    row = cursor.fetchone()
-    if not row:
-        return jsonify({"error": "Empleado no encontrado"}), 404
-    columns = [col[0] for col in cursor.description]
-    conn.close()
-    return jsonify(dict(zip(columns, row)))
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Consulta principal del usuario
+        cursor.execute("""
+            SELECT u.*, r.TipoRol
+            FROM Usuario u
+            LEFT JOIN Rol r ON u.Rol_idRol = r.idRol
+            WHERE u.idUsuario = ?
+        """, id)
+
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({"error": "Empleado no encontrado"}), 404
+
+        columns = [col[0] for col in cursor.description]
+        usuario = dict(zip(columns, row))
+
+        # Consulta de áreas corregida
+        cursor.execute("""
+            SELECT a.idArea, a.NombreArea
+            FROM Usuario_Area ua
+            JOIN Area a ON ua.idArea = a.idArea
+            WHERE ua.idUsuario = ?
+        """, id)
+
+        usuario["Areas"] = [{"idArea": r[0], "NombreArea": r[1]} for r in cursor.fetchall()]
+
+        return jsonify(usuario)
+
+    except Exception as e:
+        print(f"Error al obtener empleado: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+    finally:
+        conn.close()
+
+
 
 @app.route('/api/empleado/<int:id>', methods=['PUT'])
 def actualizar_empleado(id):
