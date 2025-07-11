@@ -247,6 +247,29 @@ def obtener_empleados():
     conn.close()
     return jsonify(empleados)
 
+@app.route('/api/actualizarEstadoSolicitud', methods=['POST'])
+def actualizar_estado_solicitud():
+    try:
+        data = request.json
+        id_vacacion = data.get("idVacaciones")
+        nuevo_estado = data.get("estadoNuevo")
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Vacaciones
+            SET EstadoSolicitud_idSolicitud = ?
+            WHERE idVacaciones = ?
+        """, (nuevo_estado, id_vacacion))
+
+        conn.commit()
+        return jsonify({"mensaje": "Estado actualizado"}), 200
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/empleado/<int:id>', methods=['GET'])
 def obtener_empleado(id):
     try:
@@ -565,10 +588,19 @@ def obtener_vacaciones(idUsuario):
 
         # Consulta con parámetro para obtener vacaciones solo del usuario con idUsuario dado
         cursor.execute("""
-            SELECT idUsuario, nombres, paterno, materno, vacaciones 
-            FROM Usuario 
-            WHERE idUsuario = ?
-        """, (idUsuario,))
+    SELECT 
+        u.idUsuario, 
+        u.nombres, 
+        u.paterno, 
+        u.materno, 
+        u.vacaciones
+    FROM 
+        Usuario u
+    JOIN 
+        Vacaciones v ON u.idUsuario = v.Usuario_idUsuario
+    WHERE 
+        u.idUsuario = ? AND v.EstadoSolicitud_idSolicitud = 18
+""", (idUsuario,))
 
         row = cursor.fetchone()
 
@@ -601,12 +633,12 @@ def obtener_vacaciones_por_areas(ids):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(f"""
-            SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
-            FROM Vacaciones v
-            JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
-            JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
-            WHERE ua.idArea IN ({placeholders})
-        """, lista_ids)
+    SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+    FROM Vacaciones v
+    JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+    JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+    WHERE ua.idArea IN ({placeholders}) AND EstadoSolicitud_idSolicitud = 18
+""", lista_ids)
 
         rows = cursor.fetchall()
         vacaciones = []

@@ -213,79 +213,119 @@
     </div>
 
     <script>
-      // Puedes personalizar el nombre del líder aquí
-      document.getElementById("employee-name").textContent = "Juan Pérez";
-const idUsuario = localStorage.getItem("idUsuario");
+  // Puedes personalizar el nombre del líder aquí
+  document.getElementById("employee-name").textContent = "Juan Pérez";
+  const idUsuario = localStorage.getItem("idUsuario");
 
-fetch(`/api/usuario/${idUsuario}/area`)
-  .then(res => res.json())
-  .then(areas => {
-    console.log("Áreas del usuario:", areas);
+  fetch(`/api/usuario/${idUsuario}/area`)
+    .then(res => res.json())
+    .then(areas => {
+      console.log("Áreas del usuario:", areas);
 
-    const ids = areas.map(a => a.idArea).join(",");  // <- CORREGIDO AQUÍ
-    return fetch(`/api/vacaciones/area/${ids}`);
-  })
-  .then(response => response.json())
-  .then(data => {
-    const box = document.getElementById("vacaciones-box");
+      const ids = areas.map(a => a.idArea).join(",");
+      return fetch(`/api/vacaciones/area/${ids}`);
+    })
+    .then(response => response.json())
+    .then(data => {
+      const box = document.getElementById("vacaciones-box");
 
-    if (!Array.isArray(data)) {
-      box.innerHTML = "Error al obtener las solicitudes.";
-      console.error("Respuesta inesperada:", data);
-      return;
-    }
+      if (!Array.isArray(data)) {
+        box.innerHTML = "Error al obtener las solicitudes.";
+        console.error("Respuesta inesperada:", data);
+        return;
+      }
 
-    if (data.length === 0) {
-      box.innerHTML = "No hay solicitudes de vacaciones.";
-      return;
-    }
+      if (data.length === 0) {
+        box.innerHTML = "No hay solicitudes de vacaciones.";
+        return;
+      }
 
-    box.innerHTML = "";
-    data.forEach(vacacion => {
-      const card = document.createElement("div");
-      card.classList.add("vacacion-card");
+      box.innerHTML = "";
+      data.forEach(vacacion => {
+        const card = document.createElement("div");
+        card.classList.add("vacacion-card");
 
-      const info = document.createElement("div");
-      info.classList.add("vacacion-info");
-      info.innerHTML = `
-        <strong>${vacacion.nombre}</strong><br/>
-        Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
-        al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
-      `;
+        const info = document.createElement("div");
+        info.classList.add("vacacion-info");
+        info.innerHTML = `
+          <strong>${vacacion.nombre}</strong><br/>
+          Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
+          al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
+        `;
 
-      const btnGroup = document.createElement("div");
-      btnGroup.classList.add("btn-group");
+        const btnGroup = document.createElement("div");
+        btnGroup.classList.add("btn-group");
 
-      const btnAceptar = document.createElement("button");
-      btnAceptar.classList.add("btn-aceptar");
-      btnAceptar.title = "Aceptar";
-      btnAceptar.innerHTML = "✔️";
-      btnAceptar.onclick = () => {
-        alert(`Aceptar solicitud ID: ${vacacion.id}`);
-      };
+        const btnAceptar = document.createElement("button");
+        btnAceptar.classList.add("btn-aceptar");
+        btnAceptar.title = "Aceptar";
+        btnAceptar.innerHTML = "✔️";
+        btnAceptar.onclick = async () => {
+          try {
+            const res = await fetch("/api/actualizarEstadoSolicitud", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                idVacaciones: vacacion.id,
+                estadoNuevo: 19 // Aceptado
+              })
+            });
 
-      const btnRechazar = document.createElement("button");
-      btnRechazar.classList.add("btn-rechazar");
-      btnRechazar.title = "Rechazar";
-      btnRechazar.innerHTML = "❌";
-      btnRechazar.onclick = () => {
-        alert(`Rechazar solicitud ID: ${vacacion.id}`);
-      };
+            const result = await res.json();
+            if (res.ok) {
+              alert("Solicitud aceptada.");
+              location.reload();
+            } else {
+              alert(result.error || "Error al aceptar la solicitud.");
+            }
+          } catch (error) {
+            console.error("Error al aceptar:", error);
+            alert("Error de red.");
+          }
+        };
 
-      btnGroup.appendChild(btnAceptar);
-      btnGroup.appendChild(btnRechazar);
+        const btnRechazar = document.createElement("button");
+        btnRechazar.classList.add("btn-rechazar");
+        btnRechazar.title = "Rechazar";
+        btnRechazar.innerHTML = "❌";
+        btnRechazar.onclick = async () => {
+          try {
+            const res = await fetch("/api/actualizarEstadoSolicitud", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                idVacaciones: vacacion.id,
+                estadoNuevo: 1 // Rechazado
+              })
+            });
 
-      card.appendChild(info);
-      card.appendChild(btnGroup);
+            const result = await res.json();
+            if (res.ok) {
+              alert("Solicitud rechazada.");
+              location.reload();
+            } else {
+              alert(result.error || "Error al rechazar la solicitud.");
+            }
+          } catch (error) {
+            console.error("Error al rechazar:", error);
+            alert("Error de red.");
+          }
+        };
 
-      box.appendChild(card);
+        btnGroup.appendChild(btnAceptar);
+        btnGroup.appendChild(btnRechazar);
+
+        card.appendChild(info);
+        card.appendChild(btnGroup);
+
+        box.appendChild(card);
+      });
+    })
+    .catch(error => {
+      document.getElementById("vacaciones-box").innerHTML = "Error al cargar datos.";
+      console.error("Error:", error);
     });
-  })
-  .catch(error => {
-    document.getElementById("vacaciones-box").innerHTML = "Error al cargar datos.";
-    console.error("Error:", error);
-  });
-
 </script>
+
   </body>
 </html>

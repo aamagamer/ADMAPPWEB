@@ -213,13 +213,13 @@
       }
 
       .flatpickr-day.selected {
-        background: #ff5722;
+        background: #0f2b56;
         border-radius: 50%;
         color: white;
       }
 
       .flatpickr-day:hover {
-        background: #ff7043;
+        background: #0f2b56;
         color: white;
       }
 
@@ -632,20 +632,23 @@
           return dia === 0 || dia === 6;
         };
 
-        function contarDiasHabiles(fechaInicio, fechaFin, festivos = []) {
-          const inicio = new Date(fechaInicio);
-          const fin = new Date(fechaFin);
-          let contador = 0;
+       function contarDiasHabiles(fechaInicio, fechaFin, festivos = []) {
+  const inicio = new Date(fechaInicio + "T00:00:00");
+  const fin = new Date(fechaFin + "T00:00:00");
+  let contador = 0;
 
-          for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
-            const dia = d.getDay();
-            const formato = d.toISOString().split("T")[0];
-            if (dia !== 0 && dia !== 6 && !festivos.includes(formato)) {
-              contador++;
-            }
-          }
-          return contador;
-        }
+  for (let d = new Date(inicio.getTime()); d <= fin; d.setDate(d.getDate() + 1)) {
+    const dia = d.getDay();
+    const formato = d.toISOString().split("T")[0];
+    const esHabil = dia !== 0 && dia !== 6 && !festivos.includes(formato);
+    console.log(`Evaluando: ${formato}, Día: ${dia}, Hábil: ${esHabil}`);
+    if (esHabil) contador++;
+  }
+
+  return contador;
+}
+
+
 
         function sumarDiasHabiles(fechaInicio, cantidadDias, festivos = []) {
           const resultado = new Date(fechaInicio);
