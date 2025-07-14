@@ -547,16 +547,17 @@ def obtener_compensaciones():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT TipoCompensacion FROM Compensacion")
+        cursor.execute("SELECT idCompensacion, TipoCompensacion FROM Compensacion")
         resultados = cursor.fetchall()
         cursor.close()
         conn.close()
 
-        compensaciones = [row[0] for row in resultados]
+        compensaciones = [{"id": row[0], "nombre": row[1]} for row in resultados]
         return jsonify({"compensaciones": compensaciones})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
     
     
 
@@ -738,6 +739,66 @@ def obtener_permisos_por_areas(ids):
     finally:
         cursor.close()
         conn.close()
+
+@app.route('/api/solicitarPermiso', methods=['POST'])
+def solicitar_permiso():
+    try:
+        data = request.get_json()
+        print("📥 JSON recibido:", data)  # <== imprime lo que llega
+
+        id_usuario = data.get("idUsuario")
+        fecha = data.get("fecha")
+        hora_inicio = data.get("horaInicio")
+        hora_fin = data.get("horaFin")
+        razon = data.get("razon")
+        id_compensacion = data.get("idCompensacion")
+
+        print("🧩 Datos individuales:")
+        print("Usuario:", id_usuario)
+        print("Fecha:", fecha)
+        print("Hora inicio:", hora_inicio)
+        print("Hora fin:", hora_fin)
+        print("Razon:", razon)
+        print("ID compensación:", id_compensacion)
+
+        if not all([id_usuario, fecha, hora_inicio, hora_fin, razon, id_compensacion]):
+            print("❌ Campos faltantes")
+            return jsonify({"error": "Faltan campos obligatorios"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Estado "pendiente"
+        cursor.execute("SELECT idSolicitud FROM EstadoSolicitud WHERE Estado = 'Pendiente de aprobar por tu líder'")
+        estado_row = cursor.fetchone()
+        print("🟢 Estado obtenido:", estado_row)
+        if not estado_row:
+            return jsonify({"error": "Estado pendiente no encontrado"}), 500
+        estado_id = estado_row[0]
+
+        # INSERT
+        print("📤 Ejecutando INSERT...")
+        cursor.execute("""
+            INSERT INTO Permiso (
+                Usuario_idUsuario, EstadoSolicitud_idSolicitud, DiaSolicitado,
+                HoraInicio, HoraFin, Razon, Compensacion_idCompensacion
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (id_usuario, estado_id, fecha, hora_inicio, hora_fin, razon, id_compensacion))
+
+        conn.commit()
+        print("✅ INSERT hecho y commit ejecutado")
+        return jsonify({"mensaje": "Permiso solicitado correctamente"}), 201
+
+    except Exception as e:
+        print("❌ ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+
 
 
 
