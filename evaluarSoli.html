@@ -370,11 +370,16 @@ function confirmarAccion() {
 
 // ------------------------ Cargar VACACIONES ------------------------
 
+
+
+
+
 fetch(`/api/usuario/${idUsuario}/area`)
   .then(res => res.json())
   .then(areas => {
     const ids = areas.map(a => a.idArea).join(",");
-    return fetch(`/api/vacaciones/area/${ids}`);
+    return fetch(`/api/vacaciones/area/${ids}?idUsuario=${idUsuario}`);
+
   })
   .then(res => res.json())
   .then(data => {
@@ -399,10 +404,11 @@ fetch(`/api/usuario/${idUsuario}/area`)
       const info = document.createElement("div");
       info.classList.add("vacacion-info");
       info.innerHTML = `
-        <strong>${vacacion.nombre}</strong><br/>
-        Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
-        al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
-      `;
+  <strong>${vacacion.nombre}</strong><br/>
+  Del <strong>${vacacion.inicio.split("T")[0].split("-").reverse().join("/")}</strong> 
+  al <strong>${vacacion.fin.split("T")[0].split("-").reverse().join("/")}</strong><br/>
+`;
+
 
       const btnGroup = document.createElement("div");
       btnGroup.classList.add("btn-group");
@@ -465,7 +471,7 @@ fetch(`/api/usuario/${idUsuario}/area`)
       info.classList.add("vacacion-info");
       info.innerHTML = `
         <strong>${permiso.nombre}</strong><br/>
-        ${new Date(permiso.fecha).toLocaleDateString()}<br/>
+        ${permiso.fecha.split("T")[0].split("-").reverse().join("/")}<br/>
         ${permiso.inicio} - ${permiso.fin}<br/>
         <em>${permiso.razon}</em><br/>
         <small>${permiso.compensacion}</small>

@@ -40,7 +40,7 @@ def obtener_areas_usuario(id):
 
 @app.route('/api/solicitarVacaciones', methods=['POST'])
 def solicitar_vacaciones():
-    conn = None  # Evita UnboundLocalError en el finally
+    conn = None
 
     try:
         data = request.json
@@ -48,9 +48,8 @@ def solicitar_vacaciones():
         fecha_salida = data.get('fechaInicio')
         fecha_regreso = data.get('fechaFin')
         motivo = data.get('motivo')
-        dias_solicitados = data.get('diasSolicitados')  # Se recibe desde el frontend
+        dias_solicitados = data.get('diasSolicitados')
 
-        # Validación de datos requeridos
         if not all([id_usuario, fecha_salida, fecha_regreso, dias_solicitados]):
             return jsonify({"error": "Faltan datos requeridos"}), 400
 
@@ -75,26 +74,36 @@ def solicitar_vacaciones():
                 "error": f"No tienes suficientes días disponibles. Disponibles: {dias_disponibles}, Solicitados: {dias_solicitados}"
             }), 400
 
-        # Obtener el estado "Pendiente de aprobar por tu líder"
+        # Obtener el TipoRol del usuario
         cursor.execute("""
-            SELECT idSolicitud FROM EstadoSolicitud 
-            WHERE Estado = 'Pendiente de aprobar por tu líder'
-        """)
-        estado_result = cursor.fetchone()
+            SELECT r.idRol FROM Usuario u
+            JOIN Rol r ON u.Rol_idRol = r.idRol
+            WHERE u.idUsuario = ?
+        """, (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Rol del usuario no encontrado"}), 400
 
-        if not estado_result:
-            return jsonify({"error": "Estado de solicitud no encontrado"}), 404
+        tipo_rol = rol_row[0]
 
-        estado_id = estado_result[0]
+        # Asignar estado_id según el tipo de rol
+        if tipo_rol == 1:  # Empleado
+            estado_id = 18  
+        elif tipo_rol == 4:  # Líder de Área
+            estado_id = 19
+        elif tipo_rol == 3:  # RH
+            estado_id = 20
+        else:
+            return jsonify({"error": f"Rol no válido o no autorizado: {tipo_rol}"}), 400
 
         # Insertar la solicitud de vacaciones
         cursor.execute("""
             INSERT INTO Vacaciones (
-                Usuario_idUsuario, 
-                EstadoSolicitud_idSolicitud, 
+                Usuario_idUsuario,
+                EstadoSolicitud_idSolicitud,
                 DiasSolicitados,
-                FechaSalida, 
-                FechaRegreso 
+                FechaSalida,
+                FechaRegreso
             ) VALUES (?, ?, ?, ?, ?)
         """, (id_usuario, estado_id, dias_solicitados, fecha_salida, fecha_regreso))
 
@@ -109,7 +118,8 @@ def solicitar_vacaciones():
 
         return jsonify({
             "mensaje": "Solicitud registrada correctamente",
-            "dias_solicitados": dias_solicitados
+            "dias_solicitados": dias_solicitados,
+            "estadoInicial_id": estado_id
         }), 201
 
     except Exception as e:
@@ -119,6 +129,8 @@ def solicitar_vacaciones():
     finally:
         if conn:
             conn.close()
+
+
 
 
 
@@ -608,69 +620,82 @@ def obtener_festivos():
         cursor.close()
         conn.close()
 
-@app.route('/api/vacacionesUsuario/<int:idUsuario>', methods=['GET'])
-def obtener_vacaciones(idUsuario):
-    try: 
-        conn = get_connection()
-        cursor = conn.cursor()
 
-        # Consulta con parámetro para obtener vacaciones solo del usuario con idUsuario dado
-        cursor.execute("""
-    SELECT 
-        u.idUsuario, 
-        u.nombres, 
-        u.paterno, 
-        u.materno, 
-        u.vacaciones
-    FROM 
-        Usuario u
-    JOIN 
-        Vacaciones v ON u.idUsuario = v.Usuario_idUsuario
-    WHERE 
-        u.idUsuario = ? AND v.EstadoSolicitud_idSolicitud = 18
-""", (idUsuario,))
-
-        row = cursor.fetchone()
-
-        if row:
-            vacaciones = {
-                "idUsuario": row[0],
-                "nombreCompleto": f"{row[1]} {row[2]} {row[3]}",
-                "vacaciones": row[4]
-            }
-            return jsonify(vacaciones), 200
-        else:
-            return jsonify({"error": "Usuario no encontrado"}), 404
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        cursor.close()
-        conn.close()
 
 
 
 
 @app.route('/api/vacaciones/area/<ids>', methods=['GET'])
 def obtener_vacaciones_por_areas(ids):
+    conn = None
+    cursor = None
+
     try:
-        lista_ids = ids.split(",")  # ["13", "14"]
-        placeholders = ",".join("?" for _ in lista_ids)
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(f"""
-    SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
-    FROM Vacaciones v
-    JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
-    JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
-    WHERE ua.idArea IN ({placeholders}) AND EstadoSolicitud_idSolicitud = 18
-""", lista_ids)
 
+        # Obtener el rol del usuario
+        cursor.execute("""
+            SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?
+        """, (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = rol_row[0]
+
+        lista_ids = ids.split(",")
+        placeholders = ",".join("?" for _ in lista_ids)
+
+        # Según el tipo de rol, definimos qué estado y qué tipo de usuarios mostrar
+        if tipo_rol == 4:  # Líder de área → ve empleados (estado 18)
+            estado = 18
+            query = f"""
+                SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+                FROM Vacaciones v
+                JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+                JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                WHERE ua.idArea IN ({placeholders}) 
+                  AND v.EstadoSolicitud_idSolicitud = ?
+                  AND u.Rol_idRol = 1 -- Empleados
+            """
+            params = lista_ids + [estado]
+
+        elif tipo_rol == 3:  # RH → ve líderes (estado 19)
+            estado = 19
+            query = f"""
+                SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+                FROM Vacaciones v
+                JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+                
+                WHERE v.EstadoSolicitud_idSolicitud = ?
+                 
+            """
+            params = [estado]
+
+        elif tipo_rol == 2:  # Admin → ve RH (estado 20)
+            estado = 20
+            query = f"""
+                SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+                FROM Vacaciones v
+                JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+                
+                WHERE v.EstadoSolicitud_idSolicitud = ?
+            """
+            params = [estado]
+
+        else:
+            return jsonify({"error": "Rol no autorizado para esta operación"}), 403
+
+        # Ejecutar consulta
+        cursor.execute(query, params)
         rows = cursor.fetchall()
-        vacaciones = []
 
+        vacaciones = []
         for row in rows:
             inicio = row[1].strftime('%Y-%m-%d') if row[1] else ""
             fin = row[2].strftime('%Y-%m-%d') if row[2] else ""
@@ -685,12 +710,15 @@ def obtener_vacaciones_por_areas(ids):
         return jsonify(vacaciones)
 
     except Exception as e:
-        print("ERROR EN /api/vacaciones/area/<ids>:", str(e))
+        print("❌ ERROR EN /api/vacaciones/area/<ids>:", str(e))
         return jsonify({"error": str(e)}), 500
 
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 @app.route('/api/permisos/area/<ids>', methods=['GET'])
 def obtener_permisos_por_areas(ids):
