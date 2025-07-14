@@ -166,6 +166,83 @@
     background-color: #f8d7da;
   }
 
+  /* Estilos del modal */
+#modal-confirmacion {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+#modal-confirmacion .modal-content {
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 16px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-in-out;
+}
+
+#modal-contenido {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+
+#modal-confirmacion button {
+  padding: 10px 18px;
+  font-size: 15px;
+  margin: 10px 5px 0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#modal-confirmacion button:first-of-type {
+  background-color: #28a745;
+  color: white;
+}
+
+#modal-confirmacion button:first-of-type:hover {
+  background-color: #218838;
+}
+
+#modal-confirmacion button:last-of-type {
+  background-color: #dc3545;
+  color: white;
+}
+
+#modal-confirmacion button:last-of-type:hover {
+  background-color: #c82333;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
   @media (max-width: 768px) {
     .section {
       width: 100%;
@@ -198,7 +275,7 @@
       <div class="sections-container">
         <div class="section">
           <h2 class="section-title">Evaluar Permisos</h2>
-          <div class="content-box">
+          <div class="content-box" id="permisos-box">
             Contenido de permisos pendientes se cargará aquí
           </div>
         </div>
@@ -212,120 +289,217 @@
       </div>
     </div>
 
+    <!-- MODAL de Confirmación -->
+<div id="modal-confirmacion" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0008; justify-content:center; align-items:center; z-index:9999;">
+  <div class = "modal-content">
+    <div id="modal-contenido"></div>
+    <br />
+    <button onclick="confirmarAccion()" style="margin-right:10px;">Confirmar</button>
+    <button onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
+
+
     <script>
-  // Puedes personalizar el nombre del líder aquí
-  document.getElementById("employee-name").textContent = "Juan Pérez";
-  const idUsuario = localStorage.getItem("idUsuario");
+document.getElementById("employee-name").textContent = "Juan Pérez";
+const idUsuario = localStorage.getItem("idUsuario");
 
-  fetch(`/api/usuario/${idUsuario}/area`)
+let accionPendiente = null;
+
+function mostrarModal(tipo, datos, tipoSolicitud) {
+  const modal = document.getElementById("modal-confirmacion");
+  const contenido = document.getElementById("modal-contenido");
+
+  let resumen = `<strong>${datos.nombre}</strong><br/>`;
+
+  if (tipoSolicitud === "vacacion") {
+    resumen += `
+      Del <strong>${new Date(datos.inicio).toLocaleDateString()}</strong> 
+      al <strong>${new Date(datos.fin).toLocaleDateString()}</strong><br/>
+    `;
+  } else if (tipoSolicitud === "permiso") {
+    resumen += `
+      Fecha: ${new Date(datos.fecha).toLocaleDateString()}<br/>
+      Horario: ${datos.inicio} - ${datos.fin}<br/>
+      Motivo: <em>${datos.razon}</em><br/>
+      Compensación: ${datos.compensacion}<br/>
+    `;
+  }
+
+  resumen += `<hr>¿Deseas <strong>${tipo === 'aceptar' ? 'aceptar' : 'rechazar'}</strong> esta solicitud?`;
+
+  contenido.innerHTML = resumen;
+  modal.style.display = "flex";
+
+  accionPendiente = () => {
+    const url = tipoSolicitud === "vacacion" ? "/api/actualizarEstadoSolicitud" : "/api/actualizarEstadoPermiso";
+    const payload = tipoSolicitud === "vacacion"
+      ? { idVacaciones: datos.id, estadoNuevo: tipo === 'aceptar' ? 19 : 1 }
+      : { idPermiso: datos.id, estadoNuevo: tipo === 'aceptar' ? 19 : 1 };
+
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
     .then(res => res.json())
-    .then(areas => {
-      console.log("Áreas del usuario:", areas);
-
-      const ids = areas.map(a => a.idArea).join(",");
-      return fetch(`/api/vacaciones/area/${ids}`);
-    })
-    .then(response => response.json())
-    .then(data => {
-      const box = document.getElementById("vacaciones-box");
-
-      if (!Array.isArray(data)) {
-        box.innerHTML = "Error al obtener las solicitudes.";
-        console.error("Respuesta inesperada:", data);
-        return;
+    .then(result => {
+      if (result && result.ok !== false) {
+        //alert(`${tipoSolicitud === 'vacacion' ? 'Vacación' : 'Permiso'} ${tipo === 'aceptar' ? 'aceptado' : 'rechazado'}.`);
+        location.reload();
+      } else {
+        alert(result.error || "Ocurrió un error.");
       }
-
-      if (data.length === 0) {
-        box.innerHTML = "No hay solicitudes de vacaciones.";
-        return;
-      }
-
-      box.innerHTML = "";
-      data.forEach(vacacion => {
-        const card = document.createElement("div");
-        card.classList.add("vacacion-card");
-
-        const info = document.createElement("div");
-        info.classList.add("vacacion-info");
-        info.innerHTML = `
-          <strong>${vacacion.nombre}</strong><br/>
-          Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
-          al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
-        `;
-
-        const btnGroup = document.createElement("div");
-        btnGroup.classList.add("btn-group");
-
-        const btnAceptar = document.createElement("button");
-        btnAceptar.classList.add("btn-aceptar");
-        btnAceptar.title = "Aceptar";
-        btnAceptar.innerHTML = "✔️";
-        btnAceptar.onclick = async () => {
-          try {
-            const res = await fetch("/api/actualizarEstadoSolicitud", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                idVacaciones: vacacion.id,
-                estadoNuevo: 19 // Aceptado
-              })
-            });
-
-            const result = await res.json();
-            if (res.ok) {
-              alert("Solicitud aceptada.");
-              location.reload();
-            } else {
-              alert(result.error || "Error al aceptar la solicitud.");
-            }
-          } catch (error) {
-            console.error("Error al aceptar:", error);
-            alert("Error de red.");
-          }
-        };
-
-        const btnRechazar = document.createElement("button");
-        btnRechazar.classList.add("btn-rechazar");
-        btnRechazar.title = "Rechazar";
-        btnRechazar.innerHTML = "❌";
-        btnRechazar.onclick = async () => {
-          try {
-            const res = await fetch("/api/actualizarEstadoSolicitud", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                idVacaciones: vacacion.id,
-                estadoNuevo: 1 // Rechazado
-              })
-            });
-
-            const result = await res.json();
-            if (res.ok) {
-              alert("Solicitud rechazada.");
-              location.reload();
-            } else {
-              alert(result.error || "Error al rechazar la solicitud.");
-            }
-          } catch (error) {
-            console.error("Error al rechazar:", error);
-            alert("Error de red.");
-          }
-        };
-
-        btnGroup.appendChild(btnAceptar);
-        btnGroup.appendChild(btnRechazar);
-
-        card.appendChild(info);
-        card.appendChild(btnGroup);
-
-        box.appendChild(card);
-      });
     })
-    .catch(error => {
-      document.getElementById("vacaciones-box").innerHTML = "Error al cargar datos.";
-      console.error("Error:", error);
+    .catch(err => {
+      console.error("Error:", err);
+      alert("Error de red.");
     });
+  };
+}
+
+function cerrarModal() {
+  document.getElementById("modal-confirmacion").style.display = "none";
+  accionPendiente = null;
+}
+
+function confirmarAccion() {
+  if (accionPendiente) accionPendiente();
+  cerrarModal();
+}
+
+// ------------------------ Cargar VACACIONES ------------------------
+
+fetch(`/api/usuario/${idUsuario}/area`)
+  .then(res => res.json())
+  .then(areas => {
+    const ids = areas.map(a => a.idArea).join(",");
+    return fetch(`/api/vacaciones/area/${ids}`);
+  })
+  .then(res => res.json())
+  .then(data => {
+    const box = document.getElementById("vacaciones-box");
+
+    if (!Array.isArray(data)) {
+      box.innerHTML = "Error al obtener las solicitudes.";
+      console.error("Respuesta inesperada:", data);
+      return;
+    }
+
+    if (data.length === 0) {
+      box.innerHTML = "No hay solicitudes de vacaciones.";
+      return;
+    }
+
+    box.innerHTML = "";
+    data.forEach(vacacion => {
+      const card = document.createElement("div");
+      card.classList.add("vacacion-card");
+
+      const info = document.createElement("div");
+      info.classList.add("vacacion-info");
+      info.innerHTML = `
+        <strong>${vacacion.nombre}</strong><br/>
+        Del <strong>${new Date(vacacion.inicio).toLocaleDateString()}</strong> 
+        al <strong>${new Date(vacacion.fin).toLocaleDateString()}</strong><br/>
+      `;
+
+      const btnGroup = document.createElement("div");
+      btnGroup.classList.add("btn-group");
+
+      const btnAceptar = document.createElement("button");
+      btnAceptar.classList.add("btn-aceptar");
+      btnAceptar.title = "Aceptar";
+      btnAceptar.innerHTML = "✔️";
+      btnAceptar.onclick = () => mostrarModal("aceptar", vacacion, "vacacion");
+
+      const btnRechazar = document.createElement("button");
+      btnRechazar.classList.add("btn-rechazar");
+      btnRechazar.title = "Rechazar";
+      btnRechazar.innerHTML = "❌";
+      btnRechazar.onclick = () => mostrarModal("rechazar", vacacion, "vacacion");
+
+      btnGroup.appendChild(btnAceptar);
+      btnGroup.appendChild(btnRechazar);
+
+      card.appendChild(info);
+      card.appendChild(btnGroup);
+
+      box.appendChild(card);
+    });
+  })
+  .catch(error => {
+    document.getElementById("vacaciones-box").innerHTML = "Error al cargar datos.";
+    console.error("Error:", error);
+  });
+
+// ------------------------ Cargar PERMISOS ------------------------
+
+fetch(`/api/usuario/${idUsuario}/area`)
+  .then(res => res.json())
+  .then(areas => {
+    const ids = areas.map(a => a.idArea).join(",");
+    return fetch(`/api/permisos/area/${ids}`);
+  })
+  .then(res => res.json())
+  .then(permisos => {
+    const box = document.getElementById("permisos-box");
+
+    if (!Array.isArray(permisos)) {
+      box.innerHTML = "Error al obtener los permisos.";
+      console.error("Respuesta inesperada:", permisos);
+      return;
+    }
+
+    if (permisos.length === 0) {
+      box.innerHTML = "No hay solicitudes de permisos.";
+      return;
+    }
+
+    box.innerHTML = "";
+    permisos.forEach(permiso => {
+      const card = document.createElement("div");
+      card.classList.add("vacacion-card");
+
+      const info = document.createElement("div");
+      info.classList.add("vacacion-info");
+      info.innerHTML = `
+        <strong>${permiso.nombre}</strong><br/>
+        ${new Date(permiso.fecha).toLocaleDateString()}<br/>
+        ${permiso.inicio} - ${permiso.fin}<br/>
+        <em>${permiso.razon}</em><br/>
+        <small>${permiso.compensacion}</small>
+      `;
+
+      const btnGroup = document.createElement("div");
+      btnGroup.classList.add("btn-group");
+
+      const btnAceptar = document.createElement("button");
+      btnAceptar.classList.add("btn-aceptar");
+      btnAceptar.title = "Aceptar";
+      btnAceptar.innerHTML = "✔️";
+      btnAceptar.onclick = () => mostrarModal("aceptar", permiso, "permiso");
+
+      const btnRechazar = document.createElement("button");
+      btnRechazar.classList.add("btn-rechazar");
+      btnRechazar.title = "Rechazar";
+      btnRechazar.innerHTML = "❌";
+      btnRechazar.onclick = () => mostrarModal("rechazar", permiso, "permiso");
+
+      btnGroup.appendChild(btnAceptar);
+      btnGroup.appendChild(btnRechazar);
+
+      card.appendChild(info);
+      card.appendChild(btnGroup);
+      box.appendChild(card);
+    });
+  })
+  .catch(error => {
+    document.getElementById("permisos-box").innerHTML = "Error al cargar permisos.";
+    console.error("Error:", error);
+  });
 </script>
+
 
   </body>
 </html>

@@ -570,213 +570,191 @@
     </style>
 
     <script>
-      document.addEventListener("DOMContentLoaded", async function () {
-        const idUsuario = localStorage.getItem("idUsuario");
-        cargarContadoresVacaciones(idUsuario);
-        let diasFestivos = [];
-        let diasDisponibles = 0;
+  document.addEventListener("DOMContentLoaded", async function () {
+    const idUsuario = localStorage.getItem("idUsuario");
+    let diasFestivos = [];
+    let diasDisponibles = 0;
 
-        if (!idUsuario) {
-          alert("No se encontró el ID del usuario. Inicia sesión nuevamente.");
-          window.location.href = "login.html";
+    if (!idUsuario) {
+      alert("No se encontró el ID del usuario. Inicia sesión nuevamente.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    await cargarContadoresVacaciones(idUsuario); // ✅ Esperamos a que cargue correctamente
+
+    // Mostrar nombre del usuario
+    try {
+      const res = await fetch("/api/usuario/nombre", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idUsuario }),
+      });
+
+      const data = await res.json();
+      if (data.nombres) {
+        const nombreCompleto = `${data.nombres} ${data.paterno} ${data.materno}`;
+        const nombreElemento = document.getElementById("employee-name");
+        if (nombreElemento) nombreElemento.textContent = nombreCompleto;
+      }
+    } catch (err) {
+      console.error("Error al obtener nombre del usuario:", err);
+    }
+
+    // Obtener días festivos
+    try {
+      const res = await fetch("/api/festivos");
+      diasFestivos = await res.json();
+    } catch (error) {
+      console.error("Error al obtener días festivos:", error);
+      diasFestivos = [];
+    }
+
+    // Utilidades
+    const bloquearFinesDeSemana = (date) => {
+      const dia = date.getDay();
+      return dia === 0 || dia === 6;
+    };
+
+    function contarDiasHabiles(fechaInicio, fechaFin, festivos = []) {
+      const inicio = new Date(fechaInicio + "T00:00:00");
+      const fin = new Date(fechaFin + "T00:00:00");
+      let contador = 0;
+
+      for (let d = new Date(inicio.getTime()); d <= fin; d.setDate(d.getDate() + 1)) {
+        const dia = d.getDay();
+        const formato = d.toISOString().split("T")[0];
+        const esHabil = dia !== 0 && dia !== 6 && !festivos.includes(formato);
+        if (esHabil) contador++;
+      }
+
+      return contador;
+    }
+
+    function sumarDiasHabiles(fechaInicio, cantidadDias, festivos = []) {
+      const resultado = new Date(fechaInicio);
+      let sumados = 0;
+
+      while (sumados < cantidadDias) {
+        resultado.setDate(resultado.getDate() + 1);
+        const dia = resultado.getDay();
+        const formato = resultado.toISOString().split("T")[0];
+
+        if (dia !== 0 && dia !== 6 && !festivos.includes(formato)) {
+          sumados++;
+        }
+      }
+
+      return resultado;
+    }
+
+    // Calendarios
+    const fechaInicioInput = document.getElementById("fecha-inicio");
+    const fechaFinInput = document.getElementById("fecha-fin");
+
+    let fechaInicioSeleccionada = null;
+
+    flatpickr(fechaInicioInput, {
+      disable: [...diasFestivos, bloquearFinesDeSemana],
+      minDate: new Date().fp_incr(7),
+      dateFormat: "Y-m-d",
+      locale: "es",
+      onChange: function (selectedDates) {
+        if (!selectedDates.length) return;
+
+        fechaInicioSeleccionada = selectedDates[0];
+        const fechaLimite = sumarDiasHabiles(
+          fechaInicioSeleccionada,
+          diasDisponibles - 1,
+          diasFestivos
+        );
+
+        flatpickr(fechaFinInput, {
+          disable: [...diasFestivos, bloquearFinesDeSemana],
+          minDate: fechaInicioSeleccionada,
+          maxDate: fechaLimite,
+          dateFormat: "Y-m-d",
+          locale: "es",
+        });
+      },
+    });
+
+    // Envío del formulario
+    document
+      .getElementById("vacation-form")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const fechaInicio = fechaInicioInput.value;
+        const fechaFin = fechaFinInput.value;
+
+        if (!fechaInicio || !fechaFin) {
+          alert("Por favor completa todos los campos.");
           return;
         }
 
-        // Mostrar nombre del usuario
+        const diasSolicitados = contarDiasHabiles(
+          fechaInicio,
+          fechaFin,
+          diasFestivos
+        );
+
+        if (diasSolicitados > diasDisponibles) {
+          alert(
+            `Estás solicitando ${diasSolicitados} días hábiles, pero solo tienes ${diasDisponibles} disponibles.`
+          );
+          return;
+        }
+
+        const confirmar = confirm(
+          `¿Deseas solicitar ${diasSolicitados} días de vacaciones?`
+        );
+        if (!confirmar) return;
+
         try {
-          const res = await fetch("/api/usuario/nombre", {
+          const res = await fetch("/api/solicitarVacaciones", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idUsuario }),
-          });
-
-          const data = await res.json();
-          if (data.nombres) {
-            const nombreCompleto = `${data.nombres} ${data.paterno} ${data.materno}`;
-            const nombreElemento = document.getElementById("employee-name");
-            if (nombreElemento) nombreElemento.textContent = nombreCompleto;
-          }
-        } catch (err) {
-          console.error("Error al obtener nombre del usuario:", err);
-        }
-
-        // Obtener vacaciones disponibles
-        try {
-          const resVac = await fetch(`/api/vacacionesUsuario/${idUsuario}`);
-          if (!resVac.ok)
-            throw new Error("No se pudieron obtener las vacaciones");
-          const vacData = await resVac.json();
-
-          diasDisponibles = parseInt(vacData.vacaciones ?? "0");
-
-          document.querySelector(".total-days").textContent = diasDisponibles;
-          document.querySelector(".used-days").textContent = "0";
-          document.querySelector(".available-days").textContent =
-            diasDisponibles;
-        } catch (error) {
-          console.error("Error al obtener vacaciones:", error);
-        }
-
-        // Obtener días festivos
-        try {
-          const res = await fetch("/api/festivos");
-          diasFestivos = await res.json();
-        } catch (error) {
-          console.error("Error al obtener días festivos:", error);
-          diasFestivos = [];
-        }
-
-        // Utilidades
-        const bloquearFinesDeSemana = (date) => {
-          const dia = date.getDay();
-          return dia === 0 || dia === 6;
-        };
-
-       function contarDiasHabiles(fechaInicio, fechaFin, festivos = []) {
-  const inicio = new Date(fechaInicio + "T00:00:00");
-  const fin = new Date(fechaFin + "T00:00:00");
-  let contador = 0;
-
-  for (let d = new Date(inicio.getTime()); d <= fin; d.setDate(d.getDate() + 1)) {
-    const dia = d.getDay();
-    const formato = d.toISOString().split("T")[0];
-    const esHabil = dia !== 0 && dia !== 6 && !festivos.includes(formato);
-    console.log(`Evaluando: ${formato}, Día: ${dia}, Hábil: ${esHabil}`);
-    if (esHabil) contador++;
-  }
-
-  return contador;
-}
-
-
-
-        function sumarDiasHabiles(fechaInicio, cantidadDias, festivos = []) {
-          const resultado = new Date(fechaInicio);
-          let sumados = 0;
-
-          while (sumados < cantidadDias) {
-            resultado.setDate(resultado.getDate() + 1);
-            const dia = resultado.getDay();
-            const formato = resultado.toISOString().split("T")[0];
-
-            if (dia !== 0 && dia !== 6 && !festivos.includes(formato)) {
-              sumados++;
-            }
-          }
-
-          return resultado;
-        }
-
-        // Calendarios
-        const fechaInicioInput = document.getElementById("fecha-inicio");
-        const fechaFinInput = document.getElementById("fecha-fin");
-
-        let fechaInicioSeleccionada = null;
-
-        flatpickr(fechaInicioInput, {
-          disable: [...diasFestivos, bloquearFinesDeSemana],
-          minDate: new Date().fp_incr(7),
-          dateFormat: "Y-m-d",
-          locale: "es",
-          onChange: function (selectedDates) {
-            if (!selectedDates.length) return;
-
-            fechaInicioSeleccionada = selectedDates[0];
-            const fechaLimite = sumarDiasHabiles(
-              fechaInicioSeleccionada,
-              diasDisponibles - 1,
-              diasFestivos
-            );
-
-            flatpickr(fechaFinInput, {
-              disable: [...diasFestivos, bloquearFinesDeSemana],
-              minDate: fechaInicioSeleccionada,
-              maxDate: fechaLimite,
-              dateFormat: "Y-m-d",
-              locale: "es",
-            });
-          },
-        });
-
-        // Envío del formulario
-        document
-          .getElementById("vacation-form")
-          .addEventListener("submit", async function (e) {
-            e.preventDefault();
-
-            const fechaInicio = fechaInicioInput.value;
-            const fechaFin = fechaFinInput.value;
-          
-
-            if (!fechaInicio || !fechaFin ) {
-              alert("Por favor completa todos los campos.");
-              return;
-            }
-
-            const diasSolicitados = contarDiasHabiles(
+            body: JSON.stringify({
+              idUsuario,
               fechaInicio,
               fechaFin,
-              diasFestivos
-            );
-
-            if (diasSolicitados > diasDisponibles) {
-              alert(
-                `Estás solicitando ${diasSolicitados} días hábiles, pero solo tienes ${diasDisponibles} disponibles.`
-              );
-              return;
-            }
-
-            const confirmar = confirm(
-              `¿Deseas solicitar ${diasSolicitados} días de vacaciones?`
-            );
-            if (!confirmar) return;
-
-            try {
-              const res = await fetch("/api/solicitarVacaciones", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  idUsuario,
-                  fechaInicio,
-                  fechaFin,
-                  diasSolicitados
-                }),
-              });
-
-              const result = await res.json();
-              if (res.ok) {
-                alert("Solicitud enviada correctamente.");
-                location.reload();
-              } else {
-                alert(
-                  result.error || "Ocurrió un error al enviar la solicitud."
-                );
-              }
-            } catch (err) {
-              console.error("Error al enviar solicitud:", err);
-              alert("Error de red o del servidor.");
-            }
+              diasSolicitados,
+            }),
           });
+
+          const result = await res.json();
+          if (res.ok) {
+            alert("Solicitud enviada correctamente.");
+            location.reload();
+          } else {
+            alert(result.error || "Ocurrió un error al enviar la solicitud.");
+          }
+        } catch (err) {
+          console.error("Error al enviar solicitud:", err);
+          alert("Error de red o del servidor.");
+        }
       });
 
-      function cargarContadoresVacaciones(idUsuario) {
-        fetch(`/api/empleado/${idUsuario}`)
-          .then((res) => res.json())
-          .then((data) => {
-            const vacacionesTotales = data.Vacaciones || 0;
-            const diasDisponibles = data.DiasDisponibles || 0;
-            const diasUsados = vacacionesTotales - diasDisponibles;
+    // Carga contadores y actualiza variable global
+    async function cargarContadoresVacaciones(idUsuario) {
+      try {
+        const res = await fetch(`/api/empleado/${idUsuario}`);
+        const data = await res.json();
 
-            document.querySelector(".total-days").textContent =
-              vacacionesTotales;
-            document.querySelector(".available-days").textContent =
-              diasDisponibles;
-            document.querySelector(".used-days").textContent = diasUsados;
-          })
-          .catch((error) => {
-            console.error("Error al cargar contadores de vacaciones:", error);
-          });
+        const vacacionesTotales = data.Vacaciones || 0;
+        diasDisponibles = data.DiasDisponibles || 0;
+        const diasUsados = vacacionesTotales - diasDisponibles;
+
+        document.querySelector(".total-days").textContent = vacacionesTotales;
+        document.querySelector(".available-days").textContent = diasDisponibles;
+        document.querySelector(".used-days").textContent = diasUsados;
+      } catch (error) {
+        console.error("Error al cargar contadores de vacaciones:", error);
       }
-    </script>
+    }
+  });
+</script>
+
   </body>
 </html>

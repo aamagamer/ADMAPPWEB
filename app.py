@@ -252,22 +252,49 @@ def actualizar_estado_solicitud():
     try:
         data = request.json
         id_vacacion = data.get("idVacaciones")
-        nuevo_estado = data.get("estadoNuevo")
+        nuevo_estado = int(data.get("estadoNuevo"))
 
         conn = get_connection()
         cursor = conn.cursor()
 
+        # Actualiza el estado de la solicitud
         cursor.execute("""
             UPDATE Vacaciones
             SET EstadoSolicitud_idSolicitud = ?
             WHERE idVacaciones = ?
         """, (nuevo_estado, id_vacacion))
 
+        # Si se rechaza la solicitud, recuperar los días solicitados REALES
+        if nuevo_estado == 1:
+            cursor.execute("""
+                SELECT Usuario_idUsuario, DiasSolicitados
+                FROM Vacaciones
+                WHERE idVacaciones = ?
+            """, (id_vacacion,))
+            result = cursor.fetchone()
+
+            if result:
+                id_usuario, dias_solicitados = result
+
+                # Asegurar que solo se sumen días positivos
+                if dias_solicitados > 0:
+                    cursor.execute("""
+                        UPDATE Usuario
+                        SET DiasDisponibles = DiasDisponibles + ?
+                        WHERE idUsuario = ?
+                    """, (dias_solicitados, id_usuario))
+
         conn.commit()
         return jsonify({"mensaje": "Estado actualizado"}), 200
+
     except Exception as e:
         print("Error:", e)
         return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+
 
 
 @app.route('/api/empleado/<int:id>', methods=['GET'])
@@ -664,6 +691,53 @@ def obtener_vacaciones_por_areas(ids):
         cursor.close()
         conn.close()
 
+@app.route('/api/permisos/area/<ids>', methods=['GET'])
+def obtener_permisos_por_areas(ids):
+    try:
+        lista_ids = ids.split(",")  # Ej. ["13", "14"]
+        placeholders = ",".join("?" for _ in lista_ids)
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"""
+            SELECT 
+                p.idPermiso, 
+                p.DiaSolicitado, 
+                p.HoraInicio, 
+                p.HoraFin,
+                p.Razon,
+                ISNULL(c.TipoCompensacion, 'Sin compensación'),
+                u.Nombres, u.Paterno, u.Materno
+            FROM Permiso p
+            JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+            JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+            LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+            WHERE ua.idArea IN ({placeholders}) AND p.EstadoSolicitud_idSolicitud = 18
+        """, tuple(int(i) for i in lista_ids))
+
+        rows = cursor.fetchall()
+        permisos = []
+
+        for row in rows:
+            permisos.append({
+                "id": row[0],
+                "fecha": row[1].strftime('%Y-%m-%d') if row[1] else "",
+                "inicio": row[2].strftime('%H:%M') if row[2] else "",
+                "fin": row[3].strftime('%H:%M') if row[3] else "",
+                "razon": row[4],
+                "compensacion": row[5],
+                "nombre": f"{row[6]} {row[7]} {row[8]}"
+            })
+
+        return jsonify(permisos)
+
+    except Exception as e:
+        print("❌ ERROR EN /api/permisos/area/<ids>:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
