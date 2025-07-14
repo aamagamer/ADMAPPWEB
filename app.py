@@ -264,46 +264,83 @@ def actualizar_estado_solicitud():
     try:
         data = request.json
         id_vacacion = data.get("idVacaciones")
-        nuevo_estado = int(data.get("estadoNuevo"))
+        accion = data.get("accion")  # 'aceptar' o 'rechazar'
+        id_usuario = data.get("idUsuario")  # ID del usuario que hace la acción
+
+        if not all([id_vacacion, accion, id_usuario]):
+            return jsonify({"error": "Faltan datos"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Actualiza el estado de la solicitud
+        # Obtener rol del usuario que actualiza
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        tipo_rol = rol_row[0]
+
+        # Obtener estado actual de la solicitud
+        cursor.execute("SELECT EstadoSolicitud_idSolicitud FROM Vacaciones WHERE idVacaciones = ?", (id_vacacion,))
+        estado_actual = cursor.fetchone()
+        if not estado_actual:
+            return jsonify({"error": "Solicitud no encontrada"}), 404
+        estado_actual = estado_actual[0]
+
+        # Decidir nuevo estado según rol y acción
+        nuevo_estado = None
+
+        if accion == "rechazar":
+            nuevo_estado = 1  # Rechazado
+
+        elif accion == "aceptar":
+            if tipo_rol == 4:       # Líder
+                nuevo_estado = 19   # Pendiente RH
+            elif tipo_rol == 3:     # RH
+                nuevo_estado = 2   # Aceptado
+            elif tipo_rol == 2:     # Admin
+                nuevo_estado = 2    # Aceptado
+            else:
+                return jsonify({"error": "Rol no autorizado para aceptar"}), 403
+
+        else:
+            return jsonify({"error": "Acción inválida"}), 400
+
+        # Actualizar estado
         cursor.execute("""
             UPDATE Vacaciones
             SET EstadoSolicitud_idSolicitud = ?
             WHERE idVacaciones = ?
         """, (nuevo_estado, id_vacacion))
 
-        # Si se rechaza la solicitud, recuperar los días solicitados REALES
+        # Si rechazó, devolver días disponibles
         if nuevo_estado == 1:
             cursor.execute("""
                 SELECT Usuario_idUsuario, DiasSolicitados
                 FROM Vacaciones
                 WHERE idVacaciones = ?
             """, (id_vacacion,))
-            result = cursor.fetchone()
-
-            if result:
-                id_usuario, dias_solicitados = result
-
-                # Asegurar que solo se sumen días positivos
+            res = cursor.fetchone()
+            if res:
+                id_usuario_solicitud, dias_solicitados = res
                 if dias_solicitados > 0:
                     cursor.execute("""
                         UPDATE Usuario
                         SET DiasDisponibles = DiasDisponibles + ?
                         WHERE idUsuario = ?
-                    """, (dias_solicitados, id_usuario))
+                    """, (dias_solicitados, id_usuario_solicitud))
 
         conn.commit()
-        return jsonify({"mensaje": "Estado actualizado"}), 200
+        return jsonify({"mensaje": "Estado actualizado", "nuevo_estado": nuevo_estado}), 200
 
     except Exception as e:
         print("Error:", e)
         return jsonify({"error": str(e)}), 500
+
     finally:
-        conn.close()
+        if conn:
+            conn.close()
+
 
 
 

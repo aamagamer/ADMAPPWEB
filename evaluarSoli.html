@@ -334,8 +334,17 @@ function mostrarModal(tipo, datos, tipoSolicitud) {
   accionPendiente = () => {
     const url = tipoSolicitud === "vacacion" ? "/api/actualizarEstadoSolicitud" : "/api/actualizarEstadoPermiso";
     const payload = tipoSolicitud === "vacacion"
-      ? { idVacaciones: datos.id, estadoNuevo: tipo === 'aceptar' ? 19 : 1 }
-      : { idPermiso: datos.id, estadoNuevo: tipo === 'aceptar' ? 19 : 1 };
+  ? { 
+      idVacaciones: datos.id,
+      accion: tipo === 'aceptar' ? 'aceptar' : 'rechazar',
+      idUsuario: idUsuario
+    }
+  : { 
+      idPermiso: datos.id,
+      accion: tipo === 'aceptar' ? 'aceptar' : 'rechazar',
+      idUsuario: idUsuario
+    };
+
 
     fetch(url, {
       method: "POST",
