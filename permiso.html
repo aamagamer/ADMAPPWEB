@@ -526,6 +526,21 @@
             return;
           }
 
+          function formatHumanDate(fechaISO) {
+  const [year, month, day] = fechaISO.split('-'); // Evita el UTC
+  const fecha = new Date(year, month - 1, day);   // mes base 0
+
+  const formateada = fecha.toLocaleDateString('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  // Capitaliza la primera letra (opcional)
+  return formateada.charAt(0).toUpperCase() + formateada.slice(1);
+}
+
           // Mostrar modal con los datos del permiso
           const fechaFormateada = formatHumanDate(fechaInput.value);
           const descripcion = actividades.value.trim();

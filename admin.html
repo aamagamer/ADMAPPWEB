@@ -206,25 +206,37 @@
       }
 
       /* Agrega esto al estilo CSS */
-.checkbox-areas-container {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 4px;
-  margin-top: 5px;
-  max-height: 200px;
-  overflow-y: auto;
-}
+      .checkbox-areas-container {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
 
-.area-item {
+      .area-item {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.area-item:last-child {
+  border-bottom: none;
+}
+
+.area-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  accent-color: #2c3e50; /* bonito color al marcar */
 }
 
 .area-label {
-  margin-left: 8px;
   font-size: 14px;
 }
+
 
       .modal-content span.close {
         position: absolute;
@@ -470,6 +482,38 @@
         opacity: 0.9;
       }
 
+      .desplegable-container {
+  border: 1px solid #ccc;
+  border-top: none; /* <- elimina la línea debajo del botón */
+  border-radius: 0 0 6px 6px;
+  background-color: #fff;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+      .desplegable-container.abierto {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .toggle-desplegable {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px 6px 0 0; /* arriba redondeado */
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+
+
+  
+
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -528,7 +572,6 @@
           <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">
             Agregar empleado +
           </button>
-
 
           <button
             class="add-employee-btn"
@@ -612,20 +655,22 @@
           <p>Agregar</p>
         </a>
 
-        <a href="#" class="option-button" onclick="abrirModalAgregarFestivo()" style="text-decoration: none;">
-  <i class="bi bi-calendar-plus" style="font-size: 24px;"></i>
-  <h2>Día Festivo</h2>
-  <p>Agregar un nuevo día festivo</p>
-</a>
-
+        <a
+          href="#"
+          class="option-button"
+          onclick="abrirModalAgregarFestivo()"
+          style="text-decoration: none"
+        >
+          <i class="bi bi-calendar-plus" style="font-size: 24px"></i>
+          <h2>Día Festivo</h2>
+          <p>Agregar un nuevo día festivo</p>
+        </a>
 
         <a href="pendiente.html" class="option-button">
           <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
           <h2>Reportes</h2>
           <p>Ver</p>
         </a>
-
-        
 
         <a href="pendiente.html" class="option-button">
           <i class="bi bi-pin-map" style="font-size: 24px"></i>
@@ -666,11 +711,17 @@
 
           <div class="form-group">
             <label>Áreas:</label>
-            <div
-              id="checkbox-areas"
-              style="border: 1px solid #ccc; padding: 10px"
+            <button
+              type="button"
+              class="toggle-desplegable"
+              id="toggle-areas"
+              onclick="toggleAreas()"
             >
-              <!-- Aquí se cargarán los checkboxes -->
+              Mostrar Áreas ▼
+            </button>
+
+            <div id="checkbox-areas" class="desplegable-container">
+              <!-- Checkboxes se cargarán aquí -->
             </div>
             <small>Puedes seleccionar una o más áreas.</small>
           </div>
@@ -885,11 +936,16 @@
             </select>
           </div>
 
-          <!-- Áreas -->
-          <div class="form-group">
-            <label>Áreas:</label>
-            <div id="edit-checkbox-areas"></div>
-          </div>
+          <!-- Botón de toggle (igual al de alta) -->
+<button type="button" class="toggle-desplegable" id="edit-toggle-areas" onclick="toggleAreas('edit')">
+  Mostrar Áreas ▼
+</button>
+
+<!-- Contenedor con misma clase de animación -->
+<div id="edit-checkbox-areas" class="desplegable-container">
+  <!-- checkboxes se insertan dinámicamente -->
+</div>
+
 
           <!-- Nombres -->
           <div class="form-group">
@@ -1288,6 +1344,24 @@
     </div>
 
     <script>
+
+      function toggleAreas(context = '') {
+  const prefix = context ? context + '-' : '';
+
+  const contenedor = document.getElementById(`${prefix}checkbox-areas`);
+  const boton = document.getElementById(`${prefix}toggle-areas`);
+
+  if (!contenedor || !boton) return;
+
+  if (contenedor.classList.contains("abierto")) {
+    contenedor.classList.remove("abierto");
+    boton.textContent = "Mostrar Áreas ▼";
+  } else {
+    contenedor.classList.add("abierto");
+    boton.textContent = "Ocultar Áreas ▲";
+  }
+}
+
       // Verificar si el usuario está logueado
       function verificarSesion() {
         const idUsuario = localStorage.getItem("idUsuario");
@@ -1523,45 +1597,8 @@
               container.appendChild(item);
             });
 
-            // Estilos iniciales para la animación
-            container.style.maxHeight = "0";
-            container.style.overflow = "hidden";
-            container.style.transition = "max-height 0.5s ease";
+           
           });
-
-        // Botón Mostrar/Ocultar Áreas
-        let toggleBtn = document.getElementById("toggle-areas");
-        if (!toggleBtn) {
-          toggleBtn = document.createElement("button");
-          toggleBtn.type = "button";
-          toggleBtn.id = "toggle-areas";
-          toggleBtn.textContent = "Mostrar Áreas ▼";
-          toggleBtn.className = "toggle-btn";
-
-          const containerPadre =
-            document.getElementById("checkbox-areas").parentNode;
-          containerPadre.insertBefore(
-            toggleBtn,
-            document.getElementById("checkbox-areas")
-          );
-        }
-
-        // Evento de toggle
-        const checkboxContainer = document.getElementById("checkbox-areas");
-        toggleBtn.onclick = () => {
-          const isOpen =
-            checkboxContainer.style.maxHeight !== "0px" &&
-            checkboxContainer.style.maxHeight !== "";
-
-          if (isOpen) {
-            checkboxContainer.style.maxHeight = "0";
-            toggleBtn.textContent = "Mostrar Áreas ▼";
-          } else {
-            checkboxContainer.style.maxHeight =
-              checkboxContainer.scrollHeight + "px";
-            toggleBtn.textContent = "Ocultar Áreas ▲";
-          }
-        };
       }
 
       function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
@@ -1572,33 +1609,27 @@
             container.innerHTML = "";
 
             areas.forEach((area) => {
-              const item = document.createElement("div");
-              item.style.display = "flex";
-              item.style.justifyContent = "space-between";
-              item.style.alignItems = "center";
-              item.style.marginBottom = "8px";
+  const wrapper = document.createElement("div");
+  wrapper.className = "area-item";
 
-              const label = document.createElement("label");
-              label.textContent = area.NombreArea;
-              label.style.width = "200px";
-              label.style.textAlign = "left";
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.name = "areas";
+  checkbox.value = area.idArea;
+  checkbox.id = `area-${area.idArea}`;
+  checkbox.checked = areasSeleccionadas.includes(area.idArea);
+  checkbox.className = "area-checkbox";
 
-              const checkbox = document.createElement("input");
-              checkbox.type = "checkbox";
-              checkbox.name = "areas";
-              checkbox.value = area.idArea;
-              checkbox.style.width = "20px";
-              checkbox.style.height = "20px";
+  const label = document.createElement("label");
+  label.htmlFor = checkbox.id;
+  label.className = "area-label";
+  label.textContent = area.NombreArea;
 
-              // Si el área ya está asignada al usuario, marcarla
-              if (areasSeleccionadas.includes(area.idArea)) {
-                checkbox.checked = true;
-              }
+  wrapper.appendChild(checkbox);
+  wrapper.appendChild(label);
+  container.appendChild(wrapper);
+});
 
-              item.appendChild(label);
-              item.appendChild(checkbox);
-              container.appendChild(item);
-            });
           });
       }
 
@@ -2405,6 +2436,7 @@
               alert("Error al guardar el día festivo: " + error.message);
             });
         });
+      
     </script>
   </body>
 </html>

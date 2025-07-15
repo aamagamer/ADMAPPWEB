@@ -454,7 +454,8 @@ fetch(`/api/usuario/${idUsuario}/area`)
   .then(res => res.json())
   .then(areas => {
     const ids = areas.map(a => a.idArea).join(",");
-    return fetch(`/api/permisos/area/${ids}`);
+    return fetch(`/api/permisos/area/${ids}?idUsuario=${idUsuario}`);
+
   })
   .then(res => res.json())
   .then(permisos => {

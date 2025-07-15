@@ -341,6 +341,70 @@ def actualizar_estado_solicitud():
         if conn:
             conn.close()
 
+@app.route('/api/actualizarEstadoPermiso', methods=['POST'])
+def actualizar_estado_permiso():
+    conn = None
+    try:
+        data = request.json
+        id_permiso = data.get("idPermiso")
+        accion = data.get("accion")  # 'aceptar' o 'rechazar'
+        id_usuario = data.get("idUsuario")  # ID del usuario que hace la acción
+
+        if not all([id_permiso, accion, id_usuario]):
+            return jsonify({"error": "Faltan datos"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener rol del usuario que realiza la acción
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        tipo_rol = rol_row[0]
+
+        # Obtener estado actual del permiso (opcional, pero lo dejamos por consistencia)
+        cursor.execute("SELECT EstadoSolicitud_idSolicitud FROM Permiso WHERE idPermiso = ?", (id_permiso,))
+        estado_actual = cursor.fetchone()
+        if not estado_actual:
+            return jsonify({"error": "Permiso no encontrado"}), 404
+        estado_actual = estado_actual[0]
+
+        # Determinar el nuevo estado
+        if accion == "rechazar":
+            nuevo_estado = 1  # Rechazado
+        elif accion == "aceptar":
+            if tipo_rol == 4:       # Líder de Área
+                nuevo_estado = 19   # Pendiente RH
+            elif tipo_rol in (3, 2):  # RH o Admin
+                nuevo_estado = 2    # Aceptado
+            else:
+                return jsonify({"error": "Rol no autorizado para aceptar"}), 403
+        else:
+            return jsonify({"error": "Acción inválida"}), 400
+
+        # Actualizar el estado de la solicitud
+        cursor.execute("""
+            UPDATE Permiso
+            SET EstadoSolicitud_idSolicitud = ?
+            WHERE idPermiso = ?
+        """, (nuevo_estado, id_permiso))
+
+        conn.commit()
+        return jsonify({
+            "mensaje": "Estado actualizado correctamente",
+            "nuevo_estado": nuevo_estado
+        }), 200
+
+    except Exception as e:
+        print("❌ ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+
 
 
 
@@ -759,31 +823,96 @@ def obtener_vacaciones_por_areas(ids):
 
 @app.route('/api/permisos/area/<ids>', methods=['GET'])
 def obtener_permisos_por_areas(ids):
+    conn = None
+    cursor = None
+
     try:
-        lista_ids = ids.split(",")  # Ej. ["13", "14"]
-        placeholders = ",".join("?" for _ in lista_ids)
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(f"""
-            SELECT 
-                p.idPermiso, 
-                p.DiaSolicitado, 
-                p.HoraInicio, 
-                p.HoraFin,
-                p.Razon,
-                ISNULL(c.TipoCompensacion, 'Sin compensación'),
-                u.Nombres, u.Paterno, u.Materno
-            FROM Permiso p
-            JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
-            JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
-            LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
-            WHERE ua.idArea IN ({placeholders}) AND p.EstadoSolicitud_idSolicitud = 18
-        """, tuple(int(i) for i in lista_ids))
 
+        # Obtener el rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = rol_row[0]
+
+        lista_ids = ids.split(",")
+        placeholders = ",".join("?" for _ in lista_ids)
+
+        # Definir filtros según el rol
+        if tipo_rol == 4:  # Líder → ve solicitudes de empleados, estado 18
+            estado = 18
+            query = f"""
+                SELECT 
+                    p.idPermiso, 
+                    p.DiaSolicitado, 
+                    p.HoraInicio, 
+                    p.HoraFin,
+                    p.Razon,
+                    ISNULL(c.TipoCompensacion, 'Sin compensación'),
+                    u.Nombres, u.Paterno, u.Materno
+                FROM Permiso p
+                JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+                JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+                WHERE ua.idArea IN ({placeholders})
+                  AND p.EstadoSolicitud_idSolicitud = ?
+                  AND u.Rol_idRol = 1  -- Empleados
+            """
+            params = lista_ids + [estado]
+
+        elif tipo_rol == 3:  # RH → ve solicitudes de líderes, estado 19
+            estado = 19
+            query = """
+                SELECT 
+                    p.idPermiso, 
+                    p.DiaSolicitado, 
+                    p.HoraInicio, 
+                    p.HoraFin,
+                    p.Razon,
+                    ISNULL(c.TipoCompensacion, 'Sin compensación'),
+                    u.Nombres, u.Paterno, u.Materno
+                FROM Permiso p
+                JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+                LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+                WHERE p.EstadoSolicitud_idSolicitud = ?
+                  
+            """
+            params = [estado]
+
+        elif tipo_rol == 2:  # Admin → ve solicitudes de RH, estado 20
+            estado = 20
+            query = """
+                SELECT 
+                    p.idPermiso, 
+                    p.DiaSolicitado, 
+                    p.HoraInicio, 
+                    p.HoraFin,
+                    p.Razon,
+                    ISNULL(c.TipoCompensacion, 'Sin compensación'),
+                    u.Nombres, u.Paterno, u.Materno
+                FROM Permiso p
+                JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+                LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+                WHERE p.EstadoSolicitud_idSolicitud = ?
+                
+            """
+            params = [estado]
+
+        else:
+            return jsonify({"error": "Rol no autorizado para esta operación"}), 403
+
+        # Ejecutar consulta y formatear respuesta
+        cursor.execute(query, params)
         rows = cursor.fetchall()
-        permisos = []
 
+        permisos = []
         for row in rows:
             permisos.append({
                 "id": row[0],
@@ -802,14 +931,18 @@ def obtener_permisos_por_areas(ids):
         return jsonify({"error": str(e)}), 500
 
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 @app.route('/api/solicitarPermiso', methods=['POST'])
 def solicitar_permiso():
+    conn = None
     try:
         data = request.get_json()
-        print("📥 JSON recibido:", data)  # <== imprime lo que llega
+        print("📥 JSON recibido:", data)
 
         id_usuario = data.get("idUsuario")
         fecha = data.get("fecha")
@@ -818,14 +951,6 @@ def solicitar_permiso():
         razon = data.get("razon")
         id_compensacion = data.get("idCompensacion")
 
-        print("🧩 Datos individuales:")
-        print("Usuario:", id_usuario)
-        print("Fecha:", fecha)
-        print("Hora inicio:", hora_inicio)
-        print("Hora fin:", hora_fin)
-        print("Razon:", razon)
-        print("ID compensación:", id_compensacion)
-
         if not all([id_usuario, fecha, hora_inicio, hora_fin, razon, id_compensacion]):
             print("❌ Campos faltantes")
             return jsonify({"error": "Faltan campos obligatorios"}), 400
@@ -833,16 +958,31 @@ def solicitar_permiso():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Estado "pendiente"
-        cursor.execute("SELECT idSolicitud FROM EstadoSolicitud WHERE Estado = 'Pendiente de aprobar por tu líder'")
-        estado_row = cursor.fetchone()
-        print("🟢 Estado obtenido:", estado_row)
-        if not estado_row:
-            return jsonify({"error": "Estado pendiente no encontrado"}), 500
-        estado_id = estado_row[0]
+        # Obtener el TipoRol del usuario
+        cursor.execute("""
+            SELECT r.idRol FROM Usuario u
+            JOIN Rol r ON u.Rol_idRol = r.idRol
+            WHERE u.idUsuario = ?
+        """, (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Rol del usuario no encontrado"}), 400
+
+        tipo_rol = rol_row[0]
+        print("🧑 Rol del usuario:", tipo_rol)
+
+        # Asignar estado_id según el tipo de rol
+        if tipo_rol == 1:  # Empleado
+            estado_id = 18
+        elif tipo_rol == 4:  # Líder de Área
+            estado_id = 19
+        elif tipo_rol == 3:  # RH
+            estado_id = 20
+        else:
+            return jsonify({"error": f"Rol no válido o no autorizado: {tipo_rol}"}), 400
 
         # INSERT
-        print("📤 Ejecutando INSERT...")
+        print("📤 Ejecutando INSERT con estado_id:", estado_id)
         cursor.execute("""
             INSERT INTO Permiso (
                 Usuario_idUsuario, EstadoSolicitud_idSolicitud, DiaSolicitado,
@@ -852,8 +992,11 @@ def solicitar_permiso():
         """, (id_usuario, estado_id, fecha, hora_inicio, hora_fin, razon, id_compensacion))
 
         conn.commit()
-        print("✅ INSERT hecho y commit ejecutado")
-        return jsonify({"mensaje": "Permiso solicitado correctamente"}), 201
+        print("✅ Permiso solicitado correctamente")
+        return jsonify({
+            "mensaje": "Permiso solicitado correctamente",
+            "estadoInicial_id": estado_id
+        }), 201
 
     except Exception as e:
         print("❌ ERROR:", e)
@@ -862,6 +1005,7 @@ def solicitar_permiso():
     finally:
         if conn:
             conn.close()
+
 
 
 
