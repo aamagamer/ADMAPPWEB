@@ -1006,12 +1006,68 @@ def solicitar_permiso():
         if conn:
             conn.close()
 
+@app.route('/api/usuario/solicitudes/<int:id>', methods=['GET'])
+def obtener_solicitudes_usuario(id):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
+        # VACACIONES: Traer datos + estado en texto
+        cursor.execute("""
+    SELECT v.DiasSolicitados, v.FechaSalida, v.FechaRegreso, es.Estado
+    FROM Vacaciones v
+    JOIN EstadoSolicitud es ON v.EstadoSolicitud_idSolicitud = es.idSolicitud
+    WHERE v.Usuario_idUsuario = ?
+    ORDER BY v.idVacaciones DESC
+""", id)
+        vacaciones_rows = cursor.fetchall()
+        vacaciones = []
+        for row in vacaciones_rows:
+            vacaciones.append({
+                "estadoSolicitud": row[3],
+                "diasSolicitados": row[0],
+                "fechaSalida": row[1].strftime('%Y-%m-%d') if row[1] else None,
+                "fechaRegreso": row[2].strftime('%Y-%m-%d') if row[2] else None
+            })
 
+        # PERMISOS: Traer datos + estado + tipo compensación
+        cursor.execute("""
+    SELECT p.DiaSolicitado, p.HoraInicio, p.HoraFin, p.Razon,
+           es.Estado, c.TipoCompensacion
+    FROM Permiso p
+    JOIN EstadoSolicitud es ON p.EstadoSolicitud_idSolicitud = es.idSolicitud
+    JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+    WHERE p.Usuario_idUsuario = ?
+    ORDER BY p.idPermiso DESC
+""", id)
+        permisos_rows = cursor.fetchall()
+        permisos = []
+        for row in permisos_rows:
+            permisos.append({
+                "estadoSolicitud": row[4],
+                "diaSolicitado": row[0].strftime('%Y-%m-%d') if row[0] else None,
+                "horaInicio": row[1].strftime('%H:%M:%S') if row[1] else None,
+                "horaFin": row[2].strftime('%H:%M:%S') if row[2] else None,
+                "razon": row[3],
+                "tipoCompensacion": row[5]
+            })
 
+        return jsonify({
+            "vacaciones": vacaciones,
+            "permisos": permisos
+        })
 
+    except Exception as e:
+        print("❌ Error en /api/usuario/solicitudes:", e)
+        return jsonify({"error": str(e)}), 500
 
-
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 @app.route('/<path:filename>')
