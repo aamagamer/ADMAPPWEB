@@ -671,6 +671,37 @@ def obtener_compensaciones():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/vacante', methods=['POST'])
+def crear_vacante():
+    data = request.get_json()
+
+    # Validación básica (puedes mejorarla si quieres)
+    required_fields = ['area_idarea', 'Usuario_idUsuario', 'Puesto', 'Perfil', 'Habilidades']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Faltan campos requeridos'}), 400
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO Vacante (area_idarea, Usuario_idUsuario, Puesto, Perfil, Habilidades)
+            VALUES (?, ?, ?, ?, ?)
+        """
+        cursor.execute(query, (
+            data['area_idarea'],
+            data['Usuario_idUsuario'],
+            data['Puesto'],
+            data['Perfil'],
+            data['Habilidades']
+        ))
+        conn.commit()
+        conn.close()
+        return jsonify({'message': 'Vacante creada exitosamente'}), 201
+
+    except Exception as e:
+        print(f"❌ ERROR en /api/vacante: {e}")
+        return jsonify({'error': 'Error al crear la vacante'}), 500
+
     
     
 
