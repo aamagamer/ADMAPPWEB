@@ -1100,6 +1100,111 @@ def obtener_solicitudes_usuario(id):
         if conn:
             conn.close()
 
+@app.route('/api/vacantes', methods=['GET'])
+def obtener_vacantes():
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = '''
+            SELECT 
+                Area.NombreArea, 
+                Vacante.Puesto, 
+                Vacante.Perfil, 
+                Vacante.Habilidades
+            FROM 
+                Area 
+            INNER JOIN Vacante ON Area.idArea = Vacante.Area_idArea
+        '''
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        columnas = [column[0] for column in cursor.description]
+        vacantes = [dict(zip(columnas, row)) for row in rows]
+
+        return jsonify({'vacantes': vacantes}), 200
+
+    except Exception as e:
+        print(f'❌ ERROR EN /api/vacantes: {e}')
+        return jsonify({'error': 'Error al obtener las vacantes'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/reportes', methods=['POST'])
+def crear_reporte():
+    conn = None
+    cursor = None
+
+    try:
+        data = request.get_json()
+
+        id_usuario = data.get('Usuario_idUsuario')
+        asunto = data.get('Asunto')
+        observaciones = data.get('Observaciones')
+
+        if not id_usuario or not asunto or not observaciones:
+            return jsonify({'error': 'Faltan datos requeridos'}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = '''
+            INSERT INTO Reporte (Usuario_idUsuario, Asunto, Observaciones)
+            VALUES (?, ?, ?)
+        '''
+        cursor.execute(query, (id_usuario, asunto, observaciones))
+        conn.commit()
+
+        return jsonify({'mensaje': 'Reporte creado correctamente'}), 201
+
+    except Exception as e:
+        print(f'❌ ERROR EN /api/reportes: {e}')
+        return jsonify({'error': 'Error al crear el reporte'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/usuarios/buscar', methods=['GET'])
+def buscar_usuarios():
+    texto = request.args.get("q", "")
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT idUsuario, nombres, paterno, materno
+            FROM Usuario
+            WHERE CONCAT(nombres, ' ', paterno, ' ', materno) LIKE ?
+        """, f'%{texto}%')
+        rows = cursor.fetchall()
+
+        usuarios = [
+            {
+                "idUsuario": row[0],
+                "nombreCompleto": f"{row[1]} {row[2]} {row[3]}"
+            }
+            for row in rows
+        ]
+
+        return jsonify(usuarios)
+
+    except Exception as e:
+        print(f"Error buscando usuarios: {e}")
+        return jsonify([]), 500
+
+
+
+
 
 @app.route('/<path:filename>')
 def serve_file(filename):
