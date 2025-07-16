@@ -42,10 +42,10 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
 
         const formData = new FormData(form);
-        const baseURL = `http://${window.location.hostname}:5000`;
 
         try {
-            const response = await fetch(`${baseURL}/login`, {
+            // Usamos ruta relativa para que funcione con Ngrok o local
+            const response = await fetch('/login', {
                 method: 'POST',
                 body: formData
             });
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.success) {
                 // Guardar el ID del usuario en localStorage
                 localStorage.setItem('idUsuario', data.idUsuario);
-                
+
                 // Redirigir a la página correspondiente
                 window.location.href = data.redirect;
             } else {
@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
 
 </body>
 </html>
