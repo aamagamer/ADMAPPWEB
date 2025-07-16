@@ -1174,6 +1174,81 @@ def crear_reporte():
         if conn:
             conn.close()
 
+@app.route('/solicitudes-aprobadas-rechazadas', methods=['GET'])
+def obtener_solicitudes_aprobadas_rechazadas():
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Consulta de vacaciones con nombre de usuario
+        query_vacaciones = '''
+            SELECT 
+                v.idVacaciones, v.Usuario_idUsuario,
+                v.EstadoSolicitud_idSolicitud, v.DiasSolicitados,
+                v.FechaSalida, v.FechaRegreso,
+                u.Nombres, u.Paterno, u.Materno
+            FROM Vacaciones v
+            JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+            WHERE v.EstadoSolicitud_idSolicitud IN (1, 2)
+        '''
+        cursor.execute(query_vacaciones)
+        vacaciones = [
+            {
+                'tipo': 'Vacaciones',
+                'id': row.idVacaciones,
+                'usuario_id': row.Usuario_idUsuario,
+                'nombre': f"{row.Nombres} {row.Paterno} {row.Materno}",
+                'estado_id': row.EstadoSolicitud_idSolicitud,
+                'dias_solicitados': row.DiasSolicitados,
+                'fecha_salida': str(row.FechaSalida),
+                'fecha_regreso': str(row.FechaRegreso)
+            }
+            for row in cursor.fetchall()
+        ]
+
+        # Consulta de permisos con nombre de usuario
+        query_permisos = '''
+            SELECT 
+                p.idPermiso, p.Usuario_idUsuario,
+                p.EstadoSolicitud_idSolicitud,
+                p.DiaSolicitado, p.HoraInicio, p.HoraFin,
+                p.Razon, c.TipoCompensacion,
+                u.Nombres, u.Paterno, u.Materno
+            FROM Permiso p
+            JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+            JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+            WHERE p.Compensacion_idCompensacion IN (1, 2)
+        '''
+        cursor.execute(query_permisos)
+        permisos = [
+            {
+                'tipo': 'Permiso',
+                'id': row.idPermiso,
+                'usuario_id': row.Usuario_idUsuario,
+                'nombre': f"{row.Nombres} {row.Paterno} {row.Materno}",
+                'estado_id': row.EstadoSolicitud_idSolicitud,
+                'dia_solicitado': str(row.DiaSolicitado),
+                'hora_inicio': str(row.HoraInicio),
+                'hora_fin': str(row.HoraFin),
+                'razon': row.Razon,
+                'tipo_compensacion': row.TipoCompensacion
+            }
+            for row in cursor.fetchall()
+        ]
+
+        solicitudes = vacaciones + permisos
+        return jsonify(solicitudes)
+
+    except Exception as e:
+        print("❌ Error en /solicitudes-aprobadas-rechazadas:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+
 @app.route('/api/usuarios/buscar', methods=['GET'])
 def buscar_usuarios():
     texto = request.args.get("q", "")
@@ -1201,7 +1276,7 @@ def buscar_usuarios():
     except Exception as e:
         print(f"Error buscando usuarios: {e}")
         return jsonify([]), 500
-
+    
 
 
 
