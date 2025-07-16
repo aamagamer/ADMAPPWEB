@@ -570,6 +570,17 @@
     </style>
 
     <script>
+      function formatearFechaHumana(fechaStr) {
+  const opciones = {
+    weekday: "long",  // martes
+    year: "numeric",
+    month: "long",    // julio
+    day: "numeric"
+  };
+
+  const fecha = new Date(fechaStr + "T00:00:00");
+  return fecha.toLocaleDateString("es-MX", opciones);
+}
   document.addEventListener("DOMContentLoaded", async function () {
     const idUsuario = localStorage.getItem("idUsuario");
     let diasFestivos = [];
@@ -706,34 +717,18 @@
           return;
         }
 
-        const confirmar = confirm(
-          `¿Deseas solicitar ${diasSolicitados} días de vacaciones?`
-        );
-        if (!confirmar) return;
+        // Mostrar modal personalizado
+const resumen = `
+  Solicitas <strong>${diasSolicitados}</strong> días hábiles de vacaciones<br>
+  desde el <strong>${formatearFechaHumana(fechaInicio)}</strong> hasta el <strong>${formatearFechaHumana(fechaFin)}</strong>.
+`;
 
-        try {
-          const res = await fetch("/api/solicitarVacaciones", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              idUsuario,
-              fechaInicio,
-              fechaFin,
-              diasSolicitados,
-            }),
-          });
+document.getElementById("modal-text").innerHTML = resumen;
+document.getElementById("confirm-modal").style.display = "flex";
 
-          const result = await res.json();
-          if (res.ok) {
-            alert("Solicitud enviada correctamente.");
-            location.reload();
-          } else {
-            alert(result.error || "Ocurrió un error al enviar la solicitud.");
-          }
-        } catch (err) {
-          console.error("Error al enviar solicitud:", err);
-          alert("Error de red o del servidor.");
-        }
+// Guardar los datos temporalmente para usarlos al confirmar
+window.datosSolicitud = { idUsuario, fechaInicio, fechaFin, diasSolicitados };
+
       });
 
     // Carga contadores y actualiza variable global
@@ -753,6 +748,34 @@
         console.error("Error al cargar contadores de vacaciones:", error);
       }
     }
+
+    document.getElementById("confirm-btn").addEventListener("click", async () => {
+  const { idUsuario, fechaInicio, fechaFin, diasSolicitados } = window.datosSolicitud;
+
+  try {
+    const res = await fetch("/api/solicitarVacaciones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idUsuario, fechaInicio, fechaFin, diasSolicitados }),
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      //alert("Solicitud enviada correctamente.");
+      location.reload();
+    } else {
+      alert(result.error || "Ocurrió un error al enviar la solicitud.");
+    }
+  } catch (err) {
+    console.error("Error al enviar solicitud:", err);
+    alert("Error de red o del servidor.");
+  }
+});
+
+document.getElementById("cancel-btn").addEventListener("click", () => {
+  document.getElementById("confirm-modal").style.display = "none";
+});
+
   });
 </script>
 
