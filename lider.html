@@ -100,7 +100,7 @@
         padding: 35px 20px;
         width: 100%;
         max-width: 300px;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); 
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -168,7 +168,11 @@
       </div>
 
       <div class="options-container">
-        <a href="permiso.html" class="option-button">
+        <a
+          href="permiso.html"
+          class="option-button"
+          onclick="localStorage.setItem('paginaAnterior', 'lider.html')"
+        >
           <i class="bi bi-clipboard-check"></i>
           <h2>Solicitar Permiso</h2>
           <p>Solicita un permiso por horas o días específicos</p>
@@ -200,67 +204,67 @@
       </div>
     </div>
 
-   <script>
-  // Función para obtener los datos del usuario
-  async function cargarDatosUsuario() {
-    try {
-      const idUsuario = localStorage.getItem("idUsuario");
+    <script>
+      // Función para obtener los datos del usuario
+      async function cargarDatosUsuario() {
+        try {
+          const idUsuario = localStorage.getItem("idUsuario");
 
-      if (!idUsuario) {
-        console.error('No se encontró idUsuario en localStorage');
-        return;
+          if (!idUsuario) {
+            console.error("No se encontró idUsuario en localStorage");
+            return;
+          }
+
+          const response = await fetch(`/api/empleado/${idUsuario}`);
+          if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+          const data = await response.json();
+          console.log("Datos recibidos:", data);
+
+          // Mostrar nombre del empleado en el saludo
+          if (data.Nombres && data.Paterno && data.Materno) {
+            const nombreCompleto = `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+            document.getElementById("employee-name").textContent =
+              nombreCompleto;
+          } else {
+            document.getElementById("employee-name").textContent =
+              data.Nombres || "Empleado";
+          }
+
+          // Si es líder, cargar su área
+          if (data.TipoRol && data.TipoRol.toLowerCase().includes("lider")) {
+            cargarAreaLider(idUsuario);
+          } else {
+            // Si no es líder, establecer título por defecto
+            document.getElementById("header-title").textContent =
+              "Portal del Empleado";
+          }
+        } catch (error) {
+          console.error("Error al cargar datos del usuario:", error);
+        }
       }
 
-      const response = await fetch(`/api/empleado/${idUsuario}`);
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+      // Función para obtener el área del usuario si es líder
+      async function cargarAreaLider(idUsuario) {
+        try {
+          const res = await fetch(`/api/usuario/${idUsuario}/area`);
+          if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
 
-      const data = await response.json();
-      console.log("Datos recibidos:", data);
+          const data = await res.json();
+          console.log("Área recibida:", data);
 
-      // Mostrar nombre del empleado en el saludo
-      if (data.Nombres && data.Paterno && data.Materno) {
-  const nombreCompleto = `${data.Nombres} ${data.Paterno} ${data.Materno}`;
-  document.getElementById('employee-name').textContent = nombreCompleto;
-} else {
-  document.getElementById('employee-name').textContent = data.Nombres || "Empleado";
-}
-
-
-      // Si es líder, cargar su área
-      if (data.TipoRol && data.TipoRol.toLowerCase().includes("lider")) {
-        cargarAreaLider(idUsuario);
-      } else {
-        // Si no es líder, establecer título por defecto
-        document.getElementById('header-title').textContent = "Portal del Empleado";
+          if (data.NombreArea) {
+            document.getElementById(
+              "header-title"
+            ).textContent = `Portal de Líder de ${data.NombreArea}`;
+          }
+        } catch (err) {
+          console.error("Error al obtener el área del líder:", err);
+        }
       }
 
-    } catch (error) {
-      console.error('Error al cargar datos del usuario:', error);
-    }
-  }
-
-  // Función para obtener el área del usuario si es líder
-  async function cargarAreaLider(idUsuario) {
-    try {
-      const res = await fetch(`/api/usuario/${idUsuario}/area`);
-      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-
-      const data = await res.json();
-      console.log("Área recibida:", data);
-
-      if (data.NombreArea) {
-        document.getElementById('header-title').textContent =
-          `Portal de Líder de ${data.NombreArea}`;
-      }
-    } catch (err) {
-      console.error("Error al obtener el área del líder:", err);
-    }
-  }
-
-  // Ejecutar al cargar la página
-  window.addEventListener('DOMContentLoaded', cargarDatosUsuario);
-</script>
-
-
+      // Ejecutar al cargar la página
+      window.addEventListener("DOMContentLoaded", cargarDatosUsuario);
+    </script>
   </body>
 </html>
