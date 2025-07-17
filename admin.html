@@ -659,7 +659,7 @@
 
         
 
-        <a href="pendiente.html" class="option-button">
+        <a href="#" class="option-button" onclick="abrirModalAgregarArea()">
           <i class="bi bi-building" style="font-size: 24px"></i>
           <h2>Área</h2>
           <p>Agregar</p>
@@ -680,6 +680,12 @@
           <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
           <h2>Reportes</h2>
           <p>Genera un reporte</p>
+        </a>
+
+         <a href="verReportes.html" class="option-button">
+          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
+          <h2>Ver reportes</h2>
+          <p>Visualiza los reportes generados</p>
         </a>
 
         <a href="vacante.html" class="option-button">
@@ -1220,6 +1226,40 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal para agregar área -->
+<div id="add-area-modal" class="modal hidden">
+  <div class="modal-content add-employee-modal">
+    <span class="close" onclick="cerrarModalAgregarArea()">&times;</span>
+    <h2>Agregar Área</h2>
+    <form id="area-form" class="add-employee-form">
+      <!-- Campo Nombre del Área -->
+      <div class="form-group">
+        <label for="nombreArea">Nombre del Área:</label>
+        <input
+          type="text"
+          id="nombreArea"
+          name="nombreArea"
+          required
+          placeholder="Ej. Recursos Humanos"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalAgregarArea()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Agregar Área
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
     <!-- Modal para exportar a Excel (actualizado) -->
     <div id="export-excel-modal" class="modal hidden">
@@ -2282,37 +2322,41 @@ wrapper.appendChild(checkbox);
           modal.classList.add("hidden");
         };
       }
+
+
       function calcularDiasVacaciones(fechaIngreso) {
-        const hoy = new Date();
-        const ingreso = new Date(fechaIngreso);
+  const hoy = new Date();
+  const ingreso = new Date(fechaIngreso);
+  
+  // Ajustar horas para evitar problemas de zona horaria
+  hoy.setHours(0, 0, 0, 0);
+  ingreso.setHours(0, 0, 0, 0);
 
-        let años = hoy.getFullYear() - ingreso.getFullYear();
-        let meses = hoy.getMonth() - ingreso.getMonth();
-        let dias = hoy.getDate() - ingreso.getDate();
+  // Calcular diferencia exacta en años
+  let años = hoy.getFullYear() - ingreso.getFullYear();
+  const mesActual = hoy.getMonth();
+  const diaActual = hoy.getDate();
+  const mesIngreso = ingreso.getMonth();
+  const diaIngreso = ingreso.getDate();
+  
+  // Ajustar si aún no cumple años en el año actual
+  if (mesActual < mesIngreso || (mesActual === mesIngreso && diaActual < diaIngreso)) {
+    años--;
+  }
 
-        // Ajuste si aún no ha cumplido el año, mes y día exacto
-        if (meses < 0 || (meses === 0 && dias < 0)) {
-          años--;
-        }
-
-        console.log("Antigüedad exacta:", años, "años");
-
-        // Tabla oficial LFT 2023
-        let diasVacaciones = 0;
-        if (años < 1) diasVacaciones = 0;
-        else if (años === 1) diasVacaciones = 12;
-        else if (años === 2) diasVacaciones = 14;
-        else if (años === 3) diasVacaciones = 16;
-        else if (años === 4) diasVacaciones = 18;
-        else if (años === 5) diasVacaciones = 20;
-        else if (años >= 6 && años <= 10) diasVacaciones = 22;
-        else if (años >= 11 && años <= 15) diasVacaciones = 24;
-        else if (años >= 16 && años <= 20) diasVacaciones = 26;
-        else if (años >= 21 && años <= 25) diasVacaciones = 28;
-        else if (años >= 26) diasVacaciones = 30;
-
-        return diasVacaciones;
-      }
+  // Tabla LFT 
+  if (años < 1) return 0;       // Menos de 1 año: 0 días
+  if (años === 1) return 12;    // 1 año: 12 días
+  if (años === 2) return 14;    // 2 años: 14 días
+  if (años === 3) return 16;    // 3 años: 16 días
+  if (años === 4) return 18;    // ... y así sucesivamente
+  if (años === 5) return 20;
+  if (años >= 6 && años <= 10) return 22;
+  if (años >= 11 && años <= 15) return 24;
+  if (años >= 16 && años <= 20) return 26;
+  if (años >= 21 && años <= 25) return 28;
+  return 30; // 26+ años: 30 días
+}
 
       // Función para abrir el modal de días festivos
       function abrirModalAgregarFestivo() {
@@ -2415,6 +2459,46 @@ wrapper.appendChild(checkbox);
             });
         });
 
+        document
+  .getElementById("area-form")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const nombreArea = document.getElementById("nombreArea").value;
+
+    fetch("/api/agregarArea", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ Area: nombreArea }),
+    })
+      .then((response) => {
+        if (!response.ok)
+          throw new Error("Error al guardar el área");
+        return response.json();
+      })
+      .then((data) => {
+        //alert("Área agregada correctamente");
+        cerrarModalAgregarArea();
+        document.getElementById("area-form").reset();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Error al guardar el área: " + error.message);
+      });
+  });
+
+
+        function abrirModalAgregarArea() {
+  document.getElementById("add-area-modal").classList.remove("hidden");
+}
+
+function cerrarModalAgregarArea() {
+  document.getElementById("add-area-modal").classList.add("hidden");
+}
+
+
       // Enviar día festivo
       document
         .getElementById("holiday-form")
@@ -2443,7 +2527,7 @@ wrapper.appendChild(checkbox);
               return response.json();
             })
             .then((data) => {
-              alert("Día festivo agregado correctamente");
+              //alert("Día festivo agregado correctamente");
               cerrarModalAgregarFestivo();
             })
             .catch((error) => {

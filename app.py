@@ -3,6 +3,8 @@ import pyodbc
 from flask_cors import CORS
 from datetime import datetime
 
+
+
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
@@ -17,6 +19,37 @@ def get_connection():
         'Encrypt=no;'
         'Connection Timeout=10;'
     )
+
+def calcular_dias_vacaciones(fecha_ingreso_str):
+    hoy = datetime.now().date()
+    fecha_ingreso = datetime.strptime(fecha_ingreso_str, '%Y-%m-%d').date()
+
+    años = hoy.year - fecha_ingreso.year
+    if (hoy.month, hoy.day) < (fecha_ingreso.month, fecha_ingreso.day):
+        años -= 1
+
+    if años < 1:
+        return 0
+    elif años == 1:
+        return 12
+    elif años == 2:
+        return 14
+    elif años == 3:
+        return 16
+    elif años == 4:
+        return 18
+    elif años == 5:
+        return 20
+    elif 6 <= años <= 10:
+        return 22
+    elif 11 <= años <= 15:
+        return 24
+    elif 16 <= años <= 20:
+        return 26
+    elif 21 <= años <= 25:
+        return 28
+    else:
+        return 30
 
 @app.route('/api/usuario/<int:id>/area', methods=['GET'])
 def obtener_areas_usuario(id):
@@ -196,7 +229,29 @@ def insertar_dia_festivo():
         cursor.close()
         conn.close()
 
-        
+@app.route('/api/agregarArea', methods=['POST'])
+def insertar_area():
+    data = request.get_json()
+
+    nombreArea = data.get('Area')
+
+    if not nombreArea:
+        return jsonify({'error': 'Faltan datos'}), 400
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Area (NombreArea) VALUES (?)", (nombreArea,))
+        conn.commit()
+        return jsonify({'mensaje': 'Área ingresada correctamente'}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+       
 
 
 @app.route('/')
@@ -1277,7 +1332,37 @@ def buscar_usuarios():
         print(f"Error buscando usuarios: {e}")
         return jsonify([]), 500
     
+@app.route('/api/reportes-usuarios', methods=['GET'])
+def obtener_reportes_usuarios():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT Nombres, Paterno, Materno, Asunto, Observaciones
+            FROM Usuario
+            INNER JOIN Reporte ON Usuario.idUsuario = Reporte.Usuario_idUsuario
+        """)
+        resultados = cursor.fetchall()
 
+        # Construir lista de diccionarios para JSON
+        lista_reportes = []
+        for fila in resultados:
+            lista_reportes.append({
+                "Nombres": fila[0],
+                "Paterno": fila[1],
+                "Materno": fila[2],
+                "Asunto": fila[3],
+                "Observaciones": fila[4]
+            })
+
+        return jsonify(lista_reportes), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
