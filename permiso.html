@@ -307,7 +307,8 @@
   <body>
     <header>
       <div class="header-container">
-        <a href="empleado.html" class="menu-button">Regresar</a>
+        <a href="#" class="menu-button" onclick="volver()">Regresar</a>
+
 
         <div class="header-center">
           <img src="Media/logo.png" alt="Logo" class="logo" />
@@ -618,15 +619,17 @@
       });
 
       function volver() {
-        const pagina =
-          localStorage.getItem("paginaAnterior") || "empleado.html";
-        window.location.href = pagina;
-      }
-      function volver() {
-        const pagina =
-          localStorage.getItem("paginaAnterior") || "lider.html";
-        window.location.href = pagina;
-      }
+  const rol = localStorage.getItem("rolUsuario");
+
+  let destino = "empleado.html"; // valor por defecto
+
+  if (rol === "lider") destino = "lider.html";
+  else if (rol === "rh") destino = "rh.html";
+
+  localStorage.removeItem("rolUsuario"); // opcional: para no guardar el rol para siempre
+  window.location.href = destino;
+}
+
 
       fetch("/api/compensaciones")
         .then((response) => response.json())
