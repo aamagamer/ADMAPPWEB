@@ -739,8 +739,8 @@ def crear_vacante():
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO Vacante (area_idarea, Usuario_idUsuario, Puesto, Perfil, Habilidades)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO Vacante (area_idarea, Usuario_idUsuario, Puesto, Perfil, Habilidades, Estado)
+            VALUES (?, ?, ?, ?, ?, 'Activo')
         """
         cursor.execute(query, (
             data['area_idarea'],
@@ -1169,10 +1169,12 @@ def obtener_vacantes():
                 Area.NombreArea, 
                 Vacante.Puesto, 
                 Vacante.Perfil, 
-                Vacante.Habilidades
+                Vacante.Habilidades,
+                Vacante.idVacante
             FROM 
                 Area 
-            INNER JOIN Vacante ON Area.idArea = Vacante.Area_idArea
+            INNER JOIN Vacante ON Area.idArea = Vacante.Area_idArea where 
+            Estado = 'Activo'
         '''
         cursor.execute(query)
         rows = cursor.fetchall()
@@ -1191,6 +1193,41 @@ def obtener_vacantes():
             cursor.close()
         if conn:
             conn.close()
+        
+    
+@app.route('/api/vacantes/<int:idVacante>', methods=['PUT'])
+def actualizar_estado_vacante(idVacante):
+    data = request.get_json()
+    nuevo_estado = data.get('Estado')
+
+    if not nuevo_estado:
+        return jsonify({'error': 'Estado no proporcionado'}), 400
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Vacante 
+            SET Estado = ? 
+            WHERE idVacante = ?
+        """, (nuevo_estado, idVacante))
+        conn.commit()
+
+        return jsonify({'mensaje': 'Estado de la vacante actualizado correctamente'}), 200
+
+    except Exception as e:
+        print(f'❌ ERROR EN /api/vacantes/{idVacante}: {e}')
+        return jsonify({'error': 'Error al actualizar la vacante'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 @app.route('/api/reportes', methods=['POST'])
 def crear_reporte():

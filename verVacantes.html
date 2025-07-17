@@ -32,65 +32,81 @@
       background-color: #f9f9f9;
     }
 
-     .main-container {
-    padding: 2rem;
-    font-family: "Segoe UI", sans-serif;
-    background-color: #f7f9fc;
-  }
+    .main-container {
+      padding: 2rem;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f7f9fc;
+    }
 
-  .page-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-    color: #333;
-  }
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
 
-  .info-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
+    .info-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
 
-  .vacante-card {
-    background-color: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    border: 2px solid #3498db33; /* Borde azul claro con transparencia */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
+    .vacante-card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      border: 2px solid #3498db33; /* Borde azul claro con transparencia */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease,
+        border-color 0.2s ease;
+    }
 
-  .vacante-card:hover {
-    transform: translateY(-4px);
-    border-color: #2980b9; /* Azul más fuerte al pasar el mouse */
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  }
+    .vacante-card:hover {
+      transform: translateY(-4px);
+      border-color: #2980b9; /* Azul más fuerte al pasar el mouse */
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
 
-  .vacante-titulo {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
-  }
+    .vacante-titulo {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
 
-  .vacante-area {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #5a5a5a;
-    margin-bottom: 0.8rem;
-  }
+    .vacante-area {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #5a5a5a;
+      margin-bottom: 0.8rem;
+    }
 
-  .vacante-detalle {
-    font-size: 0.95rem;
-    color: #333;
-    margin-bottom: 0.4rem;
-  }
+    .vacante-detalle {
+      font-size: 0.95rem;
+      color: #333;
+      margin-bottom: 0.4rem;
+    }
 
-  .vacante-etiqueta {
-    font-weight: bold;
-    color: #666;
-  }
-  
+    .vacante-etiqueta {
+      font-weight: bold;
+      color: #666;
+    }
+
+    .btn-conseguir {
+      margin-top: 12px;
+      background-color: #0b1c68;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-conseguir:hover {
+      background-color: #01001b;
+    }
   </style>
   <body>
     <header>
@@ -129,7 +145,33 @@
             <div class="vacante-area">${vacante.NombreArea}</div>
             <div class="vacante-detalle"><span class="vacante-etiqueta">Perfil:</span> ${vacante.Perfil}</div>
             <div class="vacante-detalle"><span class="vacante-etiqueta">Habilidades:</span> ${vacante.Habilidades}</div>
+            <button class="btn-conseguir" data-id="${vacante.idVacante}">Vacante conseguida</button>
           `;
+
+              // ✅ Evento del botón debe estar dentro del forEach
+              const boton = card.querySelector(".btn-conseguir");
+              boton.addEventListener("click", async function () {
+                const id = this.getAttribute("data-id");
+
+                try {
+                  const res = await fetch(`/api/vacantes/${id}`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ Estado: "Inactivo" }), // ✅ Estado correcto
+                  });
+
+                  if (!res.ok)
+                    throw new Error("Error al actualizar la vacante");
+
+                  alert("✅ Vacante marcada como conseguida.");
+                  card.remove(); // ✅ desaparece de la vista
+                } catch (error) {
+                  console.error("Error al actualizar la vacante:", error);
+                  alert("❌ No se pudo actualizar la vacante.");
+                }
+              });
 
               contenedor.appendChild(card);
             });
