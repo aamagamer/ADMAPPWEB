@@ -207,20 +207,26 @@
 
       /* Agrega esto al estilo CSS */
       .checkbox-areas-container {
-        border: 1px solid #ddd;
-        padding: 10px;
-        border-radius: 4px;
-        margin-top: 5px;
-        max-height: 200px;
-        overflow-y: auto;
-      }
+  display: grid;
+  grid-template-columns: 1fr; /* Una columna */
+  gap: 8px; /* Espacio entre filas */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
 
       .area-item {
   display: flex;
-  align-items: center;
+  flex-direction: row; /* Cambiado de column a row */
+  align-items: center; /* Centra verticalmente los elementos */
   padding: 6px 12px;
   border-bottom: 1px solid #eee;
+  gap: 8px; /* Espacio entre el checkbox y el label */
 }
+
 
 .area-item:last-child {
   border-bottom: none;
@@ -234,6 +240,8 @@
 }
 
 .area-label {
+  flex: 1; /* Ocupa todo el espacio disponible */
+  min-width: 150px; /* Ancho mínimo para evitar desbordamiento */
   font-size: 14px;
 }
 
@@ -919,273 +927,259 @@
       </div>
     </div>
 
-    <!-- Modal para editar empleado -->
-    <div id="edit-employee-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalEditarEmpleado()">&times;</span>
-        <h2>Editar Empleado</h2>
-        <form id="edit-employee-form" class="add-employee-form">
-          <!-- ID -->
-          <div class="form-group">
-            <label for="edit-idUsuario">ID Usuario:</label>
-            <input
-              type="number"
-              id="edit-idUsuario"
-              name="idUsuario"
-              readonly
-            />
-          </div>
+<!-- Modal para editar empleado -->
+<div id="edit-employee-modal" class="modal hidden">
+  <div class="modal-content add-employee-modal">
+    <span class="close" onclick="cerrarModalEditarEmpleado()">&times;</span>
+    <h2>Editar Empleado</h2>
+    <form id="edit-employee-form" class="add-employee-form">
+      <!-- ID -->
+      <div class="form-group">
+        <label for="edit-idUsuario">ID Usuario:</label>
+        <input type="number" id="edit-idUsuario" name="idUsuario" readonly />
+      </div>
 
-          <!-- Rol -->
-          <div class="form-group">
-            <label for="edit-tipoRol">Tipo de Rol:</label>
-            <select id="edit-tipoRol" name="tipoRol" required>
-              <option value="">Cargando roles...</option>
-            </select>
-          </div>
+      <!-- Rol -->
+      <div class="form-group">
+        <label for="edit-tipoRol">Tipo de Rol:</label>
+        <select id="edit-tipoRol" name="tipoRol" required>
+          <option value="">Cargando roles...</option>
+        </select>
+      </div>
 
-          <!-- Botón de toggle (igual al de alta) -->
-<button type="button" class="toggle-desplegable" id="edit-toggle-areas" onclick="toggleAreas('edit')">
-  Mostrar Áreas ▼
-</button>
+      <!-- Áreas con toggle -->
+      <div class="form-group">
+        <label>Áreas:</label>
+        <button
+          type="button"
+          class="toggle-desplegable"
+          id="edit-toggle-areas"
+          onclick="toggleAreas('edit')"
+        >
+          Mostrar Áreas ▼
+        </button>
+        <div id="edit-checkbox-areas" class="desplegable-container">
+          <!-- checkboxes se insertan dinámicamente -->
+        </div>
+        <small>Puedes seleccionar una o más áreas.</small>
+      </div>
 
-<!-- Contenedor con misma clase de animación -->
-<div id="edit-checkbox-areas" class="desplegable-container">
-  <!-- checkboxes se insertan dinámicamente -->
+      <!-- Nombres -->
+      <div class="form-group">
+        <label for="edit-nombres">Nombres:</label>
+        <input type="text" id="edit-nombres" name="nombres" required />
+      </div>
+
+      <!-- Paterno -->
+      <div class="form-group">
+        <label for="edit-paterno">Apellido Paterno:</label>
+        <input type="text" id="edit-paterno" name="paterno" required />
+      </div>
+
+      <!-- Materno -->
+      <div class="form-group">
+        <label for="edit-materno">Apellido Materno:</label>
+        <input type="text" id="edit-materno" name="materno" />
+      </div>
+
+      <!-- Fecha de Nacimiento -->
+      <div class="form-group">
+        <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
+        <input
+          type="date"
+          id="edit-fechaNacimiento"
+          name="fechaNacimiento"
+          required
+        />
+      </div>
+
+      <!-- Dirección -->
+      <div class="form-group">
+        <label for="edit-direccion">Dirección:</label>
+        <input type="text" id="edit-direccion" name="direccion" required />
+      </div>
+
+      <!-- Código Postal -->
+      <div class="form-group">
+        <label for="edit-codigoPostal">Código Postal:</label>
+        <input type="text" id="edit-codigoPostal" name="codigoPostal" required />
+      </div>
+
+      <!-- Correo -->
+      <div class="form-group">
+        <label for="edit-correo">Correo Electrónico:</label>
+        <input type="email" id="edit-correo" name="correo" required />
+      </div>
+
+      <!-- NSS -->
+      <div class="form-group">
+        <label for="edit-nss">Número de Seguro Social (NSS):</label>
+        <input type="text" id="edit-nss" name="nss" required />
+      </div>
+
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label for="edit-telefono">Teléfono:</label>
+        <input type="tel" id="edit-telefono" name="telefono" required />
+      </div>
+
+      <!-- Fecha de Ingreso -->
+      <div class="form-group">
+        <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
+        <input
+          type="date"
+          id="edit-fechaIngreso"
+          name="fechaIngreso"
+          required
+        />
+      </div>
+
+      <!-- RFC -->
+      <div class="form-group">
+        <label for="edit-rfc">RFC:</label>
+        <input type="text" id="edit-rfc" name="rfc" required />
+      </div>
+
+      <!-- CURP -->
+      <div class="form-group">
+        <label for="edit-curp">CURP:</label>
+        <input type="text" id="edit-curp" name="curp" required />
+      </div>
+
+      <!-- Puesto -->
+      <div class="form-group">
+        <label for="edit-puesto">Puesto:</label>
+        <input type="text" id="edit-puesto" name="puesto" required />
+      </div>
+
+      <!-- Contacto de Emergencia -->
+      <div class="form-group">
+        <label for="edit-nombreContactoEmergencia">Nombre Contacto Emergencia:</label>
+        <input
+          type="text"
+          id="edit-nombreContactoEmergencia"
+          name="nombreContactoEmergencia"
+          required
+        />
+      </div>
+
+      <!-- Teléfono Emergencia -->
+      <div class="form-group">
+        <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
+        <input
+          type="tel"
+          id="edit-telefonoEmergencia"
+          name="telefonoEmergencia"
+          required
+        />
+      </div>
+
+      <!-- Parentesco -->
+      <div class="form-group">
+        <label for="edit-parentesco">Parentesco:</label>
+        <input type="text" id="edit-parentesco" name="parentesco" required />
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="edit-contraseña">Contraseña:</label>
+        <input
+          type="password"
+          id="edit-contraseña"
+          name="contraseña"
+          required
+        />
+      </div>
+
+      <!-- Confirmar Contraseña -->
+      <div class="form-group">
+        <label for="edit-confirmarContraseña">Confirmar Contraseña:</label>
+        <input
+          type="password"
+          id="edit-confirmarContraseña"
+          name="confirmarContraseña"
+          required
+        />
+      </div>
+
+      <!-- Sueldo Diario -->
+      <div class="form-group">
+        <label for="edit-sueldoDiario">Sueldo Diario:</label>
+        <input
+          type="number"
+          id="edit-sueldoDiario"
+          name="SueldoDiario"
+          required
+        />
+      </div>
+
+      <!-- Sueldo Semanal -->
+      <div class="form-group">
+        <label for="edit-sueldoSemanal">Sueldo Semanal:</label>
+        <input
+          type="number"
+          id="edit-sueldoSemanal"
+          name="SueldoSemanal"
+          required
+        />
+      </div>
+
+      <!-- Bono Semanal -->
+      <div class="form-group">
+        <label for="edit-bonoSemanal">Bono Semanal:</label>
+        <input
+          type="number"
+          id="edit-bonoSemanal"
+          name="BonoSemanal"
+          required
+        />
+      </div>
+
+      <!-- Fecha de Baja -->
+      <div class="form-group">
+        <label for="edit-fechaBaja">Fecha de Baja:</label>
+        <input type="date" id="edit-fechaBaja" name="fechaBaja" />
+      </div>
+
+      <!-- Comentario de Salida -->
+      <div class="form-group">
+        <label for="edit-comentarioSalida">Comentario de Salida:</label>
+        <input type="text" id="edit-comentarioSalida" name="comentarioSalida" />
+      </div>
+
+      <!-- Vacaciones -->
+      <div class="form-group">
+        <label for="edit-vacaciones">Vacaciones:</label>
+        <input type="number" id="edit-vacaciones" name="Vacaciones" />
+      </div>
+
+      <!-- Vacaciones Disponibles -->
+      <div class="form-group">
+        <label for="edit-diasDisponibles">Vacaciones disponibles:</label>
+        <input
+          type="text"
+          id="edit-diasDisponibles"
+          name="diasDisponibles"
+        />
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalEditarEmpleado()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Actualizar Empleado
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
-
-          <!-- Nombres -->
-          <div class="form-group">
-            <label for="edit-nombres">Nombres:</label>
-            <input type="text" id="edit-nombres" name="nombres" required />
-          </div>
-
-          <!-- Paterno -->
-          <div class="form-group">
-            <label for="edit-paterno">Apellido Paterno:</label>
-            <input type="text" id="edit-paterno" name="paterno" required />
-          </div>
-
-          <!-- Materno -->
-          <div class="form-group">
-            <label for="edit-materno">Apellido Materno:</label>
-            <input type="text" id="edit-materno" name="materno" />
-          </div>
-
-          <!-- Fecha de Nacimiento -->
-          <div class="form-group">
-            <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
-            <input
-              type="date"
-              id="edit-fechaNacimiento"
-              name="fechaNacimiento"
-              required
-            />
-          </div>
-
-          <!-- Dirección -->
-          <div class="form-group">
-            <label for="edit-direccion">Dirección:</label>
-            <input type="text" id="edit-direccion" name="direccion" required />
-          </div>
-
-          <!-- Código Postal -->
-          <div class="form-group">
-            <label for="edit-codigoPostal">Código Postal:</label>
-            <input
-              type="text"
-              id="edit-codigoPostal"
-              name="codigoPostal"
-              required
-            />
-          </div>
-
-          <!-- Correo -->
-          <div class="form-group">
-            <label for="edit-correo">Correo Electrónico:</label>
-            <input type="email" id="edit-correo" name="correo" required />
-          </div>
-
-          <!-- NSS -->
-          <div class="form-group">
-            <label for="edit-nss">Número de Seguro Social (NSS):</label>
-            <input type="text" id="edit-nss" name="nss" required />
-          </div>
-
-          <!-- Teléfono -->
-          <div class="form-group">
-            <label for="edit-telefono">Teléfono:</label>
-            <input type="tel" id="edit-telefono" name="telefono" required />
-          </div>
-
-          <!-- Fecha de Ingreso -->
-          <div class="form-group">
-            <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
-            <input
-              type="date"
-              id="edit-fechaIngreso"
-              name="fechaIngreso"
-              required
-            />
-          </div>
-
-          <!-- RFC -->
-          <div class="form-group">
-            <label for="edit-rfc">RFC:</label>
-            <input type="text" id="edit-rfc" name="rfc" required />
-          </div>
-
-          <!-- CURP -->
-          <div class="form-group">
-            <label for="edit-curp">CURP:</label>
-            <input type="text" id="edit-curp" name="curp" required />
-          </div>
-
-          <!-- Puesto -->
-          <div class="form-group">
-            <label for="edit-puesto">Puesto:</label>
-            <input type="text" id="edit-puesto" name="puesto" required />
-          </div>
-
-          <!-- Contacto de Emergencia -->
-          <div class="form-group">
-            <label for="edit-nombreContactoEmergencia"
-              >Nombre Contacto Emergencia:</label
-            >
-            <input
-              type="text"
-              id="edit-nombreContactoEmergencia"
-              name="nombreContactoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Teléfono Emergencia -->
-          <div class="form-group">
-            <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
-            <input
-              type="tel"
-              id="edit-telefonoEmergencia"
-              name="telefonoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Parentesco -->
-          <div class="form-group">
-            <label for="edit-parentesco">Parentesco:</label>
-            <input
-              type="text"
-              id="edit-parentesco"
-              name="parentesco"
-              required
-            />
-          </div>
-
-          <!-- Contraseña -->
-          <div class="form-group">
-            <label for="edit-contraseña">Contraseña:</label>
-            <input
-              type="password"
-              id="edit-contraseña"
-              name="contraseña"
-              required
-            />
-          </div>
-
-          <!-- Confirmar Contraseña -->
-          <div class="form-group">
-            <label for="edit-confirmarContraseña">Confirmar Contraseña:</label>
-            <input
-              type="password"
-              id="edit-confirmarContraseña"
-              name="confirmarContraseña"
-              required
-            />
-          </div>
-
-          <!-- Sueldo Diario -->
-          <div class="form-group">
-            <label for="edit-sueldoDiario">Sueldo Diario:</label>
-            <input
-              type="number"
-              id="edit-sueldoDiario"
-              name="SueldoDiario"
-              required
-            />
-          </div>
-
-          <!-- Sueldo Semanal -->
-          <div class="form-group">
-            <label for="edit-sueldoSemanal">Sueldo Semanal:</label>
-            <input
-              type="number"
-              id="edit-sueldoSemanal"
-              name="SueldoSemanal"
-              required
-            />
-          </div>
-
-          <!-- Bono Semanal -->
-          <div class="form-group">
-            <label for="edit-bonoSemanal">Bono Semanal:</label>
-            <input
-              type="number"
-              id="edit-bonoSemanal"
-              name="BonoSemanal"
-              required
-            />
-          </div>
-
-          <!-- Fecha de Baja -->
-          <div class="form-group">
-            <label for="edit-fechaBaja">Fecha de Baja:</label>
-            <input type="date" id="edit-fechaBaja" name="fechaBaja" />
-          </div>
-
-          <!-- Comentario de Salida -->
-          <div class="form-group">
-            <label for="edit-comentarioSalida">Comentario de Salida:</label>
-            <input
-              type="text"
-              id="edit-comentarioSalida"
-              name="comentarioSalida"
-            />
-          </div>
-
-          <!-- Vacaciones -->
-          <div class="form-group">
-            <label for="edit-vacaciones">Vacaciones:</label>
-            <input type="number" id="edit-vacaciones" name="Vacaciones" />
-          </div>
-
-          <!-- Vacaciones Disponibles -->
-          <div class="form-group">
-            <label for="edit-diasDisponibles">Vacaciones disponibles:</label>
-            <input
-              type="text"
-              id="edit-diasDisponibles"
-              name="diasDisponibles"
-            />
-          </div>
-
-          <!-- Botones -->
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalEditarEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Actualizar Empleado
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
 
     <!-- Modal para agregar día festivo -->
     <div id="add-holiday-modal" class="modal hidden">
@@ -1601,7 +1595,8 @@
               checkbox.className = "area-checkbox";
 
               item.appendChild(label);
-              item.appendChild(checkbox);
+item.appendChild(checkbox);
+
               container.appendChild(item);
             });
 
@@ -1633,8 +1628,9 @@
   label.className = "area-label";
   label.textContent = area.NombreArea;
 
-  wrapper.appendChild(checkbox);
   wrapper.appendChild(label);
+wrapper.appendChild(checkbox);
+
   container.appendChild(wrapper);
 });
 

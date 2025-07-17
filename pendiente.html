@@ -329,20 +329,28 @@ textarea {
 
     
     <script>
-        function formatearFechaHumana(fechaStr) {
-  const opciones = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
+function formatearFechaHumana(fechaStr) {
+    if (!fechaStr) return "Fecha no disponible";
 
-  const fecha = new Date(fechaStr + "T00:00:00"); // asegura que lo trate como fecha válida
-  return fecha.toLocaleDateString("es-MX", opciones);
+    const opciones = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    };
+
+    const fecha = new Date(fechaStr + "T00:00:00");
+    return fecha.toLocaleDateString("es-MX", opciones);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const idUsuario = 481;
+    const idUsuario = localStorage.getItem("idUsuario");
+    if (!idUsuario) {
+        alert("No se ha iniciado sesión.");
+        window.location.href = "login.html";
+        return;
+    }
+
     const contPendientes = document.getElementById("pendientes");
     const contAceptadas = document.getElementById("aceptadas");
     const contRechazadas = document.getElementById("rechazadas");
@@ -366,20 +374,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (tipo === "Vacaciones") {
                 html += `
-  <p><strong>Días solicitados:</strong> ${datos.diasSolicitados}</p>
-  <p><strong>Fecha de salida:</strong> ${formatearFechaHumana(datos.fechaSalida)}</p>
-  <p><strong>Fecha de regreso:</strong> ${formatearFechaHumana(datos.fechaRegreso)}</p>
-`;
-
+                    <p><strong>Días solicitados:</strong> ${datos.diasSolicitados}</p>
+                    <p><strong>Fecha de salida:</strong> ${formatearFechaHumana(datos.fechaSalida)}</p>
+                    <p><strong>Fecha de regreso:</strong> ${formatearFechaHumana(datos.fechaRegreso)}</p>
+                `;
             } else {
                 html += `
-  <p><strong>Día solicitado:</strong> ${formatearFechaHumana(datos.diaSolicitado)}</p>
-  <p><strong>Hora inicio:</strong> ${datos.horaInicio}</p>
-  <p><strong>Hora fin:</strong> ${datos.horaFin}</p>
-  <p><strong>Razón:</strong> ${datos.razon}</p>
-  <p><strong>Compensación:</strong> ${datos.tipoCompensacion}</p>
-`;
-
+                    <p><strong>Día solicitado:</strong> ${formatearFechaHumana(datos.diaSolicitado)}</p>
+                    <p><strong>Hora inicio:</strong> ${datos.horaInicio}</p>
+                    <p><strong>Hora fin:</strong> ${datos.horaFin}</p>
+                    <p><strong>Razón:</strong> ${datos.razon}</p>
+                    <p><strong>Compensación:</strong> ${datos.tipoCompensacion}</p>
+                `;
             }
 
             card.innerHTML = html;
@@ -411,6 +417,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 </script>
+
+
 
 
 
