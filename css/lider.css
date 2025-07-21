@@ -1,0 +1,157 @@
+:root {
+  --primary: #2c3e50;
+  --secondary: #666;
+}
+
+/* Reset y estilos generales */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+  text-decoration: none;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Header grande */
+header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 40px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  height: 180px;
+  display: flex;
+  align-items: center;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.logo {
+  width: 50%;
+  height: 25%;
+  margin-bottom: 15px;
+  max-height: 25%;
+  max-width: 25%;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Contenedor principal */
+.main-container {
+  max-width: 1200px;
+  margin: 20px auto 50px;
+  padding: 0 20px;
+}
+
+/* Sección de saludo */
+.welcome-section {
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.welcome-message {
+  font-size: 30px;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+/* Contenedor de opciones */
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+}
+
+/* Botones grandes */
+.option-button {
+  background-color: rgb(255, 255, 255);
+  color: inherit;
+  border-radius: 16px;
+  padding: 35px 20px;
+  width: 100%;
+  max-width: 300px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+}
+
+.option-button:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+.option-button i {
+  font-size: 60px;
+  margin-bottom: 20px;
+  color: var(--primary);
+}
+
+.option-button h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: var(--primary);
+}
+
+.option-button p {
+  font-size: 15px;
+  color: var(--secondary);
+}
+
+.badge-notificacion {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 6px 9px;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.option-button {
+  position: relative; /* necesario para que el badge se posicione respecto al botón */
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .option-button {
+    padding: 25px 15px;
+  }
+
+  .option-button i {
+    font-size: 50px;
+  }
+
+  .option-button h2 {
+    font-size: 20px;
+  }
+
+  .welcome-message {
+    font-size: 26px;
+  }
+}

@@ -1,0 +1,283 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Header grande */
+header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 40px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  position: relative; /* Para posicion absoluto del centro */
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 50%;
+  height: 25%;
+  margin-bottom: 15px;
+  max-height: 25%;
+  max-width: 25%;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.menu-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  position: absolute;
+  left: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* Contenedor principal */
+.main-container {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+/* Sección de saludo */
+.welcome-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.welcome-message {
+  font-size: 24px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Formulario */
+.form-container {
+  background-color: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  font-size: 22px;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+input[type="date"],
+input[type="time"],
+textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus {
+  border-color: #2c3e50;
+  outline: none;
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.time-fields {
+  display: flex;
+  gap: 20px;
+}
+
+.time-fields .form-group {
+  flex: 1;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #1a252f;
+}
+
+.section-title {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card p {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+/* Contenedor para columnas */
+.solicitudes-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+/* Cada columna */
+.solicitud-col {
+  flex: 1;
+  min-width: 300px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow: visible; /* para que la barra color no se corte */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header de cada columna con barra arriba de color */
+.solicitud-header {
+  position: relative;
+  padding: 20px 12px 12px 12px; /* más padding top para espacio de barra */
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+  border-bottom: 2px solid #ccc;
+  background-color: white; /* fondo blanco */
+  color: black;
+  overflow: visible;
+}
+
+.solicitud-header.pendiente::before,
+.solicitud-header.aceptado::before,
+.solicitud-header.rechazado::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px; /* altura barra */
+  z-index: 0;
+  display: block;
+}
+
+.solicitud-header.pendiente::before {
+  background-color: #fde3b1;
+}
+
+.solicitud-header.aceptado::before {
+  background-color: #c8f3dd;
+}
+
+.solicitud-header.rechazado::before {
+  background-color: #f7c6c6;
+}
+
+/* Título dentro del header */
+.solicitud-header h2 {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 22px;
+  color: black;
+  padding-bottom: 8px;
+}
+
+/* Contenido debajo del header */
+#pendientes,
+#aceptadas,
+#rechazadas {
+  padding: 20px;
+  /* Puedes agregar más estilos aquí */
+}
