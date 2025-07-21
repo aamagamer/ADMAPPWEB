@@ -865,15 +865,15 @@ def obtener_vacaciones_por_areas(ids):
             params = [estado]
 
         elif tipo_rol == 2:  # Admin → ve RH (estado 20)
-            estado = 20
+            estados = (18,19,20)
             query = f"""
                 SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
                 FROM Vacaciones v
                 JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
                 
-                WHERE v.EstadoSolicitud_idSolicitud = ?
+                WHERE v.EstadoSolicitud_idSolicitud in (?,?,?)
             """
-            params = [estado]
+            params = estados
 
         else:
             return jsonify({"error": "Rol no autorizado para esta operación"}), 403
@@ -973,7 +973,7 @@ def obtener_permisos_por_areas(ids):
             params = [estado]
 
         elif tipo_rol == 2:  # Admin → ve solicitudes de RH, estado 20
-            estado = 20
+            estados = (18,19,20)
             query = """
                 SELECT 
                     p.idPermiso, 
@@ -986,10 +986,10 @@ def obtener_permisos_por_areas(ids):
                 FROM Permiso p
                 JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
                 LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
-                WHERE p.EstadoSolicitud_idSolicitud = ?
+                WHERE p.EstadoSolicitud_idSolicitud in (?,?,?)
                 
             """
-            params = [estado]
+            params = estados
 
         else:
             return jsonify({"error": "Rol no autorizado para esta operación"}), 403
@@ -1400,6 +1400,79 @@ def obtener_reportes_usuarios():
     finally:
         cursor.close()
         conn.close()
+
+
+@app.route('/api/totalSolicitudes/<int:idUsuario>')
+def total_solicitudes_por_rol(idUsuario):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener el rol del usuario
+        cursor.execute("""
+            SELECT r.TipoRol 
+            FROM Usuario u 
+            JOIN Rol r ON u.Rol_idRol = r.idRol 
+            WHERE u.idUsuario = ?
+        """, (idUsuario,))
+        resultado = cursor.fetchone()
+
+        if not resultado:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = resultado[0].lower()
+
+        if tipo_rol == 'administrador':
+            # El admin ve solicitudes en estados 18, 19 y 20
+            cursor.execute("""
+                SELECT 
+                    (SELECT COUNT(*) FROM Permiso WHERE EstadoSolicitud_idSolicitud IN (18,19,20)) +
+                    (SELECT COUNT(*) FROM Vacaciones WHERE EstadoSolicitud_idSolicitud IN (18,19,20))
+            """)
+            total = cursor.fetchone()[0]
+            return jsonify({"total": total})
+
+        # Para RH o Líder, usamos lógica basada en nombre del estado
+        elif tipo_rol == 'rh':
+            estado = 'Pendiente de aprobar por Recursos Humanos'
+        elif tipo_rol == 'lider area':
+            estado = 'Pendiente de aprobar por tu líder'
+        else:
+            # Otros roles no tienen notificaciones
+            return jsonify({"total": 0})
+
+        # Obtener el ID del estado correspondiente
+        cursor.execute("""
+            SELECT idSolicitud FROM EstadoSolicitud WHERE Estado = ?
+        """, (estado,))
+        estado_result = cursor.fetchone()
+
+        if not estado_result:
+            return jsonify({"total": 0})
+
+        id_estado = estado_result[0]
+
+        # Contar permisos y vacaciones con ese estado
+        cursor.execute("""
+            SELECT 
+                (SELECT COUNT(*) FROM Permiso WHERE EstadoSolicitud_idSolicitud = ?) +
+                (SELECT COUNT(*) FROM Vacaciones WHERE EstadoSolicitud_idSolicitud = ?)
+        """, (id_estado, id_estado))
+        total = cursor.fetchone()[0]
+
+        return jsonify({"total": total})
+
+    except Exception as e:
+        print(f"Error en total_solicitudes_por_rol: {str(e)}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 
 

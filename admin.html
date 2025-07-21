@@ -517,6 +517,23 @@
   text-align: left;
 }
 
+.badge-notificacion {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background-color: red;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 6px 9px;
+        border-radius: 50%;
+        z-index: 10;
+      }
+
+      .option-button {
+        position: relative; /* necesario para que el badge se posicione respecto al botón */
+      }
+
 
 
   
@@ -640,6 +657,9 @@
       </div>
       <div class="options-container">
         <a href="evaluarSoli.html" class="option-button">
+          <span id="notificacion-solicitudes" class="badge-notificacion"
+            >0</span
+          >
           <i class="bi bi-search" style="font-size: 24px"></i>
           <h2>Solicitudes</h2>
           <p>Evalúa las solicitudes de tus empleados</p>
@@ -1413,10 +1433,51 @@
         return idUsuario;
       }
 
+      // Función para cargar notificaciones
+async function cargarNotificaciones() {
+    try {
+        const idUsuario = localStorage.getItem("idUsuario");
+        
+        if (!idUsuario) {
+            console.error("No se encontró idUsuario en localStorage");
+            return;
+        }
+
+        const response = await fetch(`/api/totalSolicitudes/${idUsuario}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Datos de notificaciones:", data); // Debug visible
+
+        const badge = document.getElementById("notificacion-solicitudes");
+        if (!badge) {
+            console.warn("Elemento badge no encontrado");
+            return;
+        }
+
+        if (data.total > 0) {
+            badge.textContent = data.total;
+            badge.style.display = "inline-block";
+        } else {
+            badge.style.display = "none";
+        }
+    } catch (error) {
+        console.error("Error al cargar notificaciones:", error);
+        // Opcional: mostrar mensaje al usuario
+    }
+}
+
       // Uso en tu página:
       document.addEventListener("DOMContentLoaded", function () {
         // Verificar sesión y obtener ID de usuario
         const idUsuario = verificarSesion();
+
+        cargarNotificaciones();
+        setInterval(cargarNotificaciones, 1200000)
+
 
         // Cargar datos del usuario
         if (idUsuario) {
