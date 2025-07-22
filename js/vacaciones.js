@@ -143,9 +143,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       );
 
       if (diasSolicitados > diasDisponibles) {
-        alert(
-          `Estás solicitando ${diasSolicitados} días hábiles, pero solo tienes ${diasDisponibles} disponibles.`
-        );
+        mostrarAdvertenciaDias(diasSolicitados, diasDisponibles);
         return;
       }
 
@@ -168,6 +166,34 @@ document.addEventListener("DOMContentLoaded", async function () {
         diasSolicitados,
       };
     });
+
+    function mostrarAdvertenciaDias(diasSolicitados, diasDisponibles) {
+  const modal = document.getElementById('diasDisponiblesModal');
+  const mensajeElement = document.getElementById('diasDisponiblesModalMensaje');
+  const cerrarBtn = document.getElementById('diasDisponiblesModalCerrarBtn');
+  
+  mensajeElement.innerHTML = `
+    <strong>Advertencia de días</strong><br><br>
+    Estás solicitando <span style="color: #e74c3c; font-weight: bold;">${diasSolicitados} días hábiles</span>, 
+    pero solo tienes <span style="color: #27ae60; font-weight: bold;">${diasDisponibles} disponibles</span>.
+  `;
+  
+  modal.style.display = 'block';
+  
+  // Evento para cerrar el modal
+  cerrarBtn.onclick = function() {
+    modal.style.display = 'none';
+  }
+  
+  // Cerrar al hacer clic fuera del modal
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  }
+  
+  return false; 
+}
 
   // Carga contadores y actualiza variable global
   async function cargarContadoresVacaciones(idUsuario) {

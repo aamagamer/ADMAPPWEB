@@ -73,7 +73,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const horaFinObj = new Date(`2000-01-01T${horaFin.value}`);
 
     if (horaFinObj <= horaInicioObj) {
-      alert("La hora de fin debe ser mayor a la hora de inicio.");
+      function mostrarAlarma(mensaje) {
+  const modal = document.getElementById('alarmaModal');
+  const mensajeElement = document.getElementById('alarmaModalMensaje');
+  const cerrarBtn = document.getElementById('alarmaModalCerrarBtn');
+  
+  mensajeElement.textContent = mensaje;
+  modal.style.display = 'block';
+  
+  cerrarBtn.onclick = function() {
+    modal.style.display = 'none';
+  }
+  
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  }
+}
+
+// Uso:
+mostrarAlarma("La hora de fin debe ser mayor a la hora de inicio.");
       return;
     }
 
@@ -147,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.display = "none";
         if (data.mensaje) {
           //alert("Permiso registrado correctamente.");
-          window.location.href = "empleado.html";
+          //window.location.href = "empleado.html";
         } else {
           alert(
             "Error al registrar el permiso: " + (data.error || "desconocido")

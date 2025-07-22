@@ -400,3 +400,50 @@ input[type="date"] {
     opacity: 1;
   }
 }
+
+/* Estilos específicos para el modal de días disponibles */
+.modal-dias-disponibles {
+  display: none;
+  position: fixed;
+  z-index: 1050; /* Mayor que otros modales */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-dias-disponibles-contenido {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 25px;
+  border: none;
+  width: 85%;
+  max-width: 450px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#diasDisponiblesModalCerrarBtn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s;
+}
+
+#diasDisponiblesModalCerrarBtn:hover {
+  background-color: #2980b9;
+}
+
+#diasDisponiblesModalMensaje {
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-size: 17px;
+  line-height: 1.5;
+}
