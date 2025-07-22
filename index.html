@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ADM</title>
     <link rel="stylesheet" href="css/index.css" />
-    <script src = "js/index.js"></script>
+    <script src="js/index.js"></script>
     <link rel="icon" href="Media/favicon.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
   </head>
   <body>
     <header>
@@ -42,9 +46,47 @@
           </div>
           <button type="submit" class="login-button">Ingresar</button>
           <div class="forgot-password">
-            <a href="#">¿Olvidaste tu contraseña?</a>
+            <a href="#" onclick="mostrarModalRecuperacion();">¿Olvidaste tu contraseña?</a>
           </div>
         </form>
+      </div>
+    </div>
+    <!-- Modal para credenciales incorrectas -->
+    <div id="credencialesModal" class="modal-credenciales">
+      <div class="modal-credenciales-contenido">
+        <div class="modal-credenciales-icono">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="modal-credenciales-titulo">Error de Autenticación</h3>
+        <p id="credencialesModalMensaje" class="modal-credenciales-texto"></p>
+        <button
+          id="credencialesModalCerrarBtn"
+          class="modal-credenciales-boton"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+    <!-- Modal para recuperación de contraseña -->
+    <div id="recuperarContrasenaModal" class="modal-recuperacion">
+      <div class="modal-recuperacion-contenido">
+        <div class="modal-recuperacion-icono">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <h3 class="modal-recuperacion-titulo">Recuperación de Contraseña</h3>
+        <p
+          id="recuperarContrasenaModalMensaje"
+          class="modal-recuperacion-texto"
+        >
+          Dirígete al departamento de Recursos Humanos para recuperar tu
+          contraseña.
+        </p>
+        <button
+          id="recuperarContrasenaModalCerrarBtn"
+          class="modal-recuperacion-boton"
+        >
+          Entendido
+        </button>
       </div>
     </div>
   </body>

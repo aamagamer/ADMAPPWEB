@@ -26,6 +26,7 @@ header {
   height: 180px;
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .header-container {
@@ -155,3 +156,4 @@ h1 {
     font-size: 26px;
   }
 }
+

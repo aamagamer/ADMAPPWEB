@@ -1,3 +1,42 @@
+function mostrarErrorCredenciales() {
+  const modal = document.getElementById("credencialesModal");
+  const mensajeElement = document.getElementById("credencialesModalMensaje");
+  const cerrarBtn = document.getElementById("credencialesModalCerrarBtn");
+
+  mensajeElement.textContent = "Contraseña o Número de Usuario incorrecto.";
+  modal.style.display = "block";
+
+  // Evento para cerrar el modal
+  cerrarBtn.onclick = function () {
+    modal.style.display = "none";
+  };
+
+  // Cerrar al hacer clic fuera del modal
+  window.onclick = function (event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+}
+
+function mostrarModalRecuperacion() {
+  const modal = document.getElementById('recuperarContrasenaModal');
+  const cerrarBtn = document.getElementById('recuperarContrasenaModalCerrarBtn');
+  
+  modal.style.display = 'block';
+  
+  // Cerrar al hacer clic en el botón
+  cerrarBtn.onclick = function() {
+    modal.style.display = 'none';
+  }
+  
+  // Cerrar al hacer clic fuera del modal
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  }
+}
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("login-form");
 
@@ -16,13 +55,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = await response.json();
 
       if (data.success) {
-        // Guardar el ID del usuario en localStorage
         localStorage.setItem("idUsuario", data.idUsuario);
-
-        // Redirigir a la página correspondiente
         window.location.href = data.redirect;
       } else {
-        alert(data.message);
+        mostrarErrorCredenciales();
       }
     } catch (error) {
       console.error("Error:", error);

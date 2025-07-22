@@ -143,6 +143,142 @@
             text-decoration: underline;
         }
 
-        
+      /* Estilos específicos para el modal de credenciales */
+.modal-credenciales {
+  display: none;
+  position: fixed;
+  z-index: 1200; /* Mayor que otros modales */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-credenciales-contenido {
+  background-color: #ffffff; /* Color solicitado */
+  margin: 15% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.4);
+  color: rgb(33, 74, 157);
+  animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-credenciales-icono {
+  font-size: 60px;
+  color: #ff0000;
+  margin-bottom: 15px;
+}
+
+.modal-credenciales-titulo {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.modal-credenciales-texto {
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.modal-credenciales-boton {
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.modal-credenciales-boton:hover {
+  background-color: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}  
+
+/* Estilos para el modal de recuperación */
+.modal-recuperacion {
+  display: none;
+  position: fixed;
+  z-index: 1300;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-recuperacion-contenido {
+  background-color: #ffffff;
+  margin: 15% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.4s ease-out;
+  border-top: 5px solid #161f7b;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-recuperacion-icono {
+  font-size: 60px;
+  color: #1724b5;
+  margin-bottom: 15px;
+}
+
+.modal-recuperacion-titulo {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #1927bf;
+}
+
+.modal-recuperacion-texto {
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.modal-recuperacion-boton {
+  background-color: #17239e;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.modal-recuperacion-boton:hover {
+  background-color: #0f199b;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
 
         
