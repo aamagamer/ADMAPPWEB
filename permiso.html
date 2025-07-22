@@ -15,6 +15,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
     <link rel="stylesheet" href="css/permiso.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="js/permiso.js"></script>
     <script src="js/utils.js"></script>
     <title>Solicitud de Permiso</title>
@@ -162,12 +163,25 @@
       </div>
     </div>
 
-    <!-- Modal de alarma -->
-<div id="alarmaModal" class="modal-alarma">
+  <!-- Modal de alarma -->
+<div id="alarmaModal" class="modal-alarma" style="display:none">
   <div class="modal-alarma-contenido">
-    <p id="alarmaModalMensaje"></p>
-    <button id="alarmaModalCerrarBtn">Aceptar</button>
+    <p class="modal-mensaje" id="alarmaModalMensaje"></p>
+    <button class="modal-cerrar-btn">Aceptar</button>
   </div>
 </div>
+
+<!-- Modal para anticipación requerida -->
+<div id="anticipacionModal" class="modal-anticipacion" style="display:none">
+  <div class="modal-anticipacion-contenido">
+    <div class="modal-anticipacion-icono">
+      <i class="fas fa-clock"></i>
+    </div>
+    <h3 class="modal-anticipacion-titulo">Los permisos se piden con 28 horas de anticipación</h3>
+    <p class="modal-mensaje" id="anticipacionModalMensaje"></p>
+    <button class="modal-cerrar-btn modal-anticipacion-boton">Entendido</button>
+  </div>
+</div>
+
   </body>
 </html>

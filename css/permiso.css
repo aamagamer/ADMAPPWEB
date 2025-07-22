@@ -329,3 +329,121 @@ input.flatpickr-input:focus {
   color: #333;
   font-size: 16px;
 }
+
+/* Estilos específicos para el modal de anticipación */
+.modal-anticipacion {
+  display: none;
+  position: fixed;
+  z-index: 1100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-anticipacion-contenido {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-anticipacion-icono {
+  font-size: 50px;
+  color: #f39c12;
+  margin-bottom: 15px;
+}
+
+.modal-anticipacion-titulo {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.modal-anticipacion-texto {
+  color: #7f8c8d;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.modal-anticipacion-boton {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.modal-anticipacion-boton:hover {
+  background-color: #1f137b;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para los modales */
+.modal-alarma, .modal-anticipacion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-alarma-contenido, .modal-anticipacion-contenido {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-anticipacion-icono {
+  font-size: 50px;
+  color: #2a39c5;
+  margin-bottom: 15px;
+}
+
+.modal-anticipacion-titulo {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.modal-cerrar-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.modal-anticipacion-boton {
+  background: #161f7b !important;
+}
+
+.modal-cerrar-btn:hover {
+  opacity: 0.9;
+}
