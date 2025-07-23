@@ -38,25 +38,43 @@ function mostrarModalRecuperacion() {
   }
 }
 document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById("login-form");
+  // --- Medidas de seguridad extra ---
+  // 1. Limpiar localStorage al cargar login (por si quedó data)
+  localStorage.removeItem("idUsuario");
+  
+  // 2. Forzar recarga sin caché si se llega aquí al retroceder
+  if (performance.navigation.type === 2) { // Si se navegó con "back/forward"
+    window.location.replace('index.html?noCache=' + Date.now());
+  }
 
+  // 3. Resetear formulario y desactivar autocompletado
+  const form = document.getElementById("login-form");
+  form.reset(); // Limpia campos
+  form.setAttribute('autocomplete', 'off'); // Bloquea autocompletado
+
+  // --- Manejo del envío del formulario (original) ---
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const formData = new FormData(form);
 
     try {
-      // Usamos ruta relativa para que funcione con Ngrok o local
       const response = await fetch("/login", {
         method: "POST",
         body: formData,
+        headers: {
+          'Cache-Control': 'no-store' // Evita caché en la petición
+        }
       });
 
       const data = await response.json();
 
       if (data.success) {
+        // 4. Almacenamiento seguro (solo lo necesario)
         localStorage.setItem("idUsuario", data.idUsuario);
-        window.location.href = data.redirect;
+        
+        // 5. Redirección que no deja historial
+        window.location.replace(data.redirect); 
       } else {
         mostrarErrorCredenciales();
       }
@@ -66,3 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+
+

@@ -10,6 +10,9 @@ from flask import Flask, session, redirect, url_for, render_template
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
+app.secret_key = 'clave_secreta_segura'
+
+
 def get_connection():
     return pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
@@ -269,7 +272,7 @@ def login():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Verificar usuario
+        # Verificar usuario y obtener su rol
         cursor.execute("""
             SELECT u.idUsuario, u.clave, r.TipoRol
             FROM Usuario u
@@ -279,7 +282,7 @@ def login():
         row = cursor.fetchone()
 
         if row and row[1] == password:
-            # Obtener FechaIngreso y Vacaciones actuales
+            # Obtener FechaIngreso y vacaciones actuales
             cursor.execute("SELECT FechaIngreso, Vacaciones FROM Usuario WHERE idUsuario = ?", (username,))
             ingreso_row = cursor.fetchone()
 
@@ -296,17 +299,21 @@ def login():
                     )
                     conn.commit()
 
-            rol = row[2].strip()
+            # Guardar en sesión
+            session['id_usuario'] = row[0]
+            session['rol'] = row[2].strip()
+
+            # Determinar redirección según rol
             rutas = {
-                'Empleado': 'empleado.html',
-                'RH': 'rh.html',
-                'Administrador': 'admin.html',
-                'Lider Area': 'lider.html'
+                'Empleado': '/empleado',
+                'RH': '/rh',
+                'Administrador': '/admin',
+                'Lider Area': '/lider'
             }
 
             return jsonify({
                 "success": True,
-                "redirect": rutas.get(rol, "index.html"),
+                "redirect": rutas.get(session['rol'], "/"),
                 "idUsuario": row[0]
             })
 
@@ -317,6 +324,33 @@ def login():
 
     finally:
         conn.close()
+
+
+# Rutas protegidas según el rol del usuario
+
+@app.route('/admin')
+def admin():
+    if 'id_usuario' not in session or session.get('rol') != 'Administrador':
+        return redirect(url_for('index'))
+    return send_from_directory('.', 'admin.html')
+
+@app.route('/empleado')
+def empleado():
+    if 'id_usuario' not in session or session.get('rol') != 'Empleado':
+        return redirect(url_for('index'))
+    return send_from_directory('.', 'empleado.html')
+
+@app.route('/rh')
+def rh():
+    if 'id_usuario' not in session or session.get('rol') != 'RH':
+        return redirect(url_for('index'))
+    return send_from_directory('.', 'rh.html')
+
+@app.route('/lider')
+def lider():
+    if 'id_usuario' not in session or session.get('rol') != 'Lider Area':
+        return redirect(url_for('index'))
+    return send_from_directory('.', 'lider.html')
 
 
 @app.route('/api/empleados', methods=['GET'])
@@ -1532,10 +1566,7 @@ def vacaciones_por_ley():
     })
 
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+
 
 
 

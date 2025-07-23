@@ -33,6 +33,10 @@ function cargarNombreUsuario(idUsuario) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Verificar si el usuario NO está logueado
+if (!localStorage.getItem('idUsuario')) {
+    window.location.href = 'index.html';
+}
     const idUsuario = localStorage.getItem("idUsuario");
     if (idUsuario) {
       cargarNombreUsuario(parseInt(idUsuario));

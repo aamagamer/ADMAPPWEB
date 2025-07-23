@@ -94,6 +94,10 @@ async function cargarNotificaciones() {
 
 // Ejecutar al cargar la página
 window.addEventListener("DOMContentLoaded", cargarDatosUsuario);
+// Verificar si el usuario NO está logueado
+if (!localStorage.getItem('idUsuario')) {
+    window.location.href = 'index.html';
+}
 cargarNotificaciones();
 // Actualizar cada 30 segundos (ajusta este valor según necesites)
 setInterval(cargarNotificaciones, 1200000);

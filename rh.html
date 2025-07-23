@@ -19,6 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src = "js/utils.js"></script>
   </head>
 
   <style>
@@ -611,7 +612,7 @@ a{
   <body>
     <header>
       <div class="header-container">
-        <a href="index.html" class="back-button">
+        <a href="#" class="back-button" onclick="logout()">
         <i class="bi bi-arrow-left"></i>
         Cerrar Sesión
       </a>
@@ -1481,6 +1482,10 @@ async function cargarNotificaciones() {
 // Uso en tu página:
 document.addEventListener("DOMContentLoaded", function () {
   // Verificar sesión y obtener ID de usuario
+  // Verificar si el usuario NO está logueado
+if (!localStorage.getItem('idUsuario')) {
+    window.location.href = 'index.html';
+}
   const idUsuario = verificarSesion();
 
   cargarNotificaciones();
