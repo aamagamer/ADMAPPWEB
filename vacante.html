@@ -11,10 +11,15 @@
     <link rel="icon" href="Media/favicon.ico" />
     <link rel="stylesheet" href="css/vacante.css">
     <script src = "js/vacante.js"></script>
+    <script src = "js/utils.js"></script>
   </head>
   <body>
     <header>
       <div class="header-container">
+        <a href="#" class="menu-button" onclick="goBack(); return false;">
+          <i class="bi bi-arrow-left"></i>
+          Regresar
+        </a>
         <img src="Media/logo.png" alt="Logo" class="logo" />
         <h1>Asesoría y Diseño Mecánico</h1>
       </div>
@@ -22,10 +27,7 @@
 
     <div class="main-container">
       <div class="form-container">
-        <a href="index.html" class="back-button">
-          <i class="bi bi-arrow-left"></i>
-          Regresar
-        </a>
+        
 
         <h2 class="form-title">Solicitar Vacantes</h2>
         <form id="vacancy-form">
