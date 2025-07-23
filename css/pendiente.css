@@ -253,15 +253,15 @@ textarea {
 }
 
 .solicitud-header.pendiente::before {
-  background-color: #fde3b1;
+  background-color: #b67218;
 }
 
 .solicitud-header.aceptado::before {
-  background-color: #c8f3dd;
+  background-color: #04793c;
 }
 
 .solicitud-header.rechazado::before {
-  background-color: #f7c6c6;
+  background-color: #b92727;
 }
 
 /* Título dentro del header */
