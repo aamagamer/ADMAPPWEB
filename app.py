@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, send_from_directory
 import pyodbc
 from flask_cors import CORS
 from datetime import datetime
+from flask import Flask, session, redirect, url_for, render_template
+
 
 
 
@@ -266,38 +268,56 @@ def login():
     try:
         conn = get_connection()
         cursor = conn.cursor()
+
+        # Verificar usuario
         cursor.execute("""
             SELECT u.idUsuario, u.clave, r.TipoRol
             FROM Usuario u
             JOIN Rol r ON u.Rol_idRol = r.idRol
             WHERE u.idUsuario = ?
-        """, username)
+        """, (username,))
         row = cursor.fetchone()
 
-        if row and row.clave == password:
-            cursor.execute("SELECT FechaIngreso, Vacaciones FROM Usuario WHERE idUsuario = ?", username)
+        if row and row[1] == password:
+            # Obtener FechaIngreso y Vacaciones actuales
+            cursor.execute("SELECT FechaIngreso, Vacaciones FROM Usuario WHERE idUsuario = ?", (username,))
             ingreso_row = cursor.fetchone()
+
             if ingreso_row:
-                fecha_ingreso_str = ingreso_row.FechaIngreso.strftime('%Y-%m-%d')
-                vacaciones_actuales = ingreso_row.Vacaciones or 0
+                fecha_ingreso = ingreso_row[0]
+                vacaciones_actuales = ingreso_row[1] or 0
+                fecha_ingreso_str = fecha_ingreso.strftime('%Y-%m-%d')
                 vacaciones_calculadas = calcular_dias_vacaciones(fecha_ingreso_str)
+
                 if vacaciones_actuales != vacaciones_calculadas:
-                    cursor.execute("UPDATE Usuario SET Vacaciones = ? WHERE idUsuario = ?",
-                                   vacaciones_calculadas, username)
+                    cursor.execute(
+                        "UPDATE Usuario SET Vacaciones = ? WHERE idUsuario = ?",
+                        (vacaciones_calculadas, username)
+                    )
                     conn.commit()
 
-            rol = row.TipoRol.strip()
-            rutas = {'Empleado': 'empleado.html', 'RH': 'rh.html', 'Administrador': 'admin.html', 'Lider Area' : 'lider.html'}
+            rol = row[2].strip()
+            rutas = {
+                'Empleado': 'empleado.html',
+                'RH': 'rh.html',
+                'Administrador': 'admin.html',
+                'Lider Area': 'lider.html'
+            }
+
             return jsonify({
                 "success": True,
                 "redirect": rutas.get(rol, "index.html"),
-                "idUsuario": row.idUsuario
+                "idUsuario": row[0]
             })
+
         return jsonify({"success": False, "message": "Usuario o contraseña incorrectos"})
+
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al conectar: {e}"})
+
     finally:
         conn.close()
+
 
 @app.route('/api/empleados', methods=['GET'])
 def obtener_empleados():
@@ -1472,6 +1492,52 @@ def total_solicitudes_por_rol(idUsuario):
             cursor.close()
         if conn:
             conn.close()
+
+@app.route('/vacaciones_por_ley', methods=['POST'])
+def vacaciones_por_ley():
+    hoy = datetime.now().date()
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Obtener todos los usuarios con fecha de ingreso y vacaciones actuales
+    cursor.execute("SELECT idUsuario, FechaIngreso, Vacaciones FROM Usuario")
+    usuarios = cursor.fetchall()
+
+    actualizados = []
+
+    for idUsuario, fechaIngreso, vacacionesActuales in usuarios:
+        if not fechaIngreso:
+            continue
+
+        # Calcular los días que deberían tener por ley
+        vacacionesCalculadas = calcular_dias_vacaciones(fechaIngreso.strftime('%Y-%m-%d'))
+
+        # Actualizar solo si hay diferencia
+        if vacacionesActuales != vacacionesCalculadas:
+            cursor.execute(
+                "UPDATE Usuario SET Vacaciones = ? WHERE idUsuario = ?",
+                (vacacionesCalculadas, idUsuario)
+            )
+            actualizados.append({
+                'idUsuario': idUsuario,
+                'nuevas_vacaciones': vacacionesCalculadas
+            })
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        'mensaje': f'{len(actualizados)} usuario(s) actualizado(s)',
+        'usuarios_actualizados': actualizados
+    })
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
 
 
 

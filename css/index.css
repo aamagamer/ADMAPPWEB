@@ -236,7 +236,7 @@
   text-align: center;
   box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
   animation: modalFadeIn 0.4s ease-out;
-  border-top: 5px solid #161f7b;
+  border-top: 5px solid #040538;
 }
 
 @keyframes modalFadeIn {
@@ -246,14 +246,14 @@
 
 .modal-recuperacion-icono {
   font-size: 60px;
-  color: #1724b5;
+  color: #050c58;
   margin-bottom: 15px;
 }
 
 .modal-recuperacion-titulo {
   margin-bottom: 20px;
   font-size: 24px;
-  color: #1927bf;
+  color: #050c58;
 }
 
 .modal-recuperacion-texto {
