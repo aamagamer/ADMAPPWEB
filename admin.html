@@ -1031,6 +1031,7 @@ fetch("/api/empleados")
   });
 
 function verEmpleado(id) {
+  document.body.classList.add("no-scroll");
   fetch(`/api/empleado/${id}`)
     .then((res) => {
       if (!res.ok) throw new Error("Error al cargar datos del empleado");
@@ -1098,12 +1099,13 @@ function verEmpleado(id) {
 
 function cerrarModal() {
   document.getElementById("modal").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
 }
 
 function abrirModalAltaEmpleado() {
   // Mostrar el modal
   document.getElementById("add-employee-modal").classList.remove("hidden");
-
+  document.body.classList.add("no-scroll");
   // Llenar roles
   fetch("/api/roles")
     .then((res) => res.json())
@@ -1181,6 +1183,7 @@ function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
 
 function cerrarModalAltaEmpleado() {
   document.getElementById("add-employee-modal").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
 }
 
 //Dar de alta a empleado
@@ -1299,7 +1302,7 @@ function formatoFechaParaInput(fecha) {
 
 function editarEmpleado(id) {
   document.getElementById("edit-employee-modal").classList.remove("hidden");
-
+  document.body.classList.add("no-scroll");
   fetch(`/api/empleado/${id}`)
     .then((res) => {
       if (!res.ok) throw new Error("Error al obtener datos del empleado");
@@ -1391,6 +1394,7 @@ function editarEmpleado(id) {
 
 function cerrarModalEditarEmpleado() {
   document.getElementById("edit-employee-modal").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
 }
 
 function buscarEmpleado() {
@@ -1556,6 +1560,7 @@ let empleadosSeleccionados = [];
 function abrirModalExportarExcel() {
   document.getElementById("export-excel-modal").classList.remove("hidden");
   mostrarPasoCampos();
+  document.body.classList.add("no-scroll");
 }
 
 function mostrarPasoCampos() {
@@ -1748,6 +1753,7 @@ function exportarExcel() {
 
 function cerrarModalExportarExcel() {
   document.getElementById("export-excel-modal").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
   camposSeleccionados = [];
   empleadosSeleccionados = [];
 }
@@ -1838,6 +1844,7 @@ function calcularDiasVacaciones(fechaIngreso) {
 // Función para abrir el modal de días festivos
 function abrirModalAgregarFestivo() {
   document.getElementById("add-holiday-modal").classList.remove("hidden");
+  document.body.classList.add("no-scroll");
   const today = new Date().toISOString().split("T")[0];
   document.getElementById("fechaFestivo").value = today;
 }
@@ -1845,10 +1852,12 @@ function abrirModalAgregarFestivo() {
 // Función para cerrar el modal de días festivos
 function cerrarModalAgregarFestivo() {
   document.getElementById("add-holiday-modal").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
 }
 
 // Función para abrir el modal de baja
 function abrirModalBajaEmpleado(idUsuario) {
+  document.body.classList.add("no-scroll");
   fetch(`/api/empleado/${idUsuario}`)
     .then((res) => {
       if (!res.ok) throw new Error("No se encontró el empleado");
@@ -1871,6 +1880,7 @@ function abrirModalBajaEmpleado(idUsuario) {
 
 function cerrarModalBajaEmpleado() {
   document.getElementById("modal-baja-empleado").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
 }
 
 // Enviar solicitud de baja
@@ -1960,10 +1970,12 @@ document.getElementById("area-form").addEventListener("submit", function (e) {
 
 function abrirModalAgregarArea() {
   document.getElementById("add-area-modal").classList.remove("hidden");
+  document.body.classList.add("no-scroll");
 }
 
 function cerrarModalAgregarArea() {
   document.getElementById("add-area-modal").classList.add("hidden");
+   document.body.classList.remove("no-scroll");
 }
 
 // Enviar día festivo

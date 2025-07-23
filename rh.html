@@ -558,6 +558,54 @@ a{
   text-decoration: none;
 }
 
+/* 🌟 Mejora visual para campos del modal de ver empleado */
+#modal-body p {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border-left: 5px solid #2980b9;
+  border-radius: 10px;
+  padding: 12px 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+#modal-body p:hover {
+  transform: scale(1.02);
+}
+
+#modal-body strong {
+  color: #34495e;
+  font-size: 14px;
+}
+
+.modal-content h2::after {
+  content: "👤";
+  margin-left: 8px;
+}
+
+/* Estilo exclusivo para el modal de ver empleado */
+#modal .modal-content {
+  max-width: 1000px; /* Aumenta el ancho */
+  max-height: 85vh;  /* Limita altura si es demasiado largo */
+  overflow-y: auto;  /* Agrega scroll interno si se excede */
+  padding: 30px 40px;
+  border-left: 8px solid #2c3e50;
+}
+
+/* Mejora visual para que el modal no sature la vista */
+#modal .modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#modal .modal-content::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
 
   </style>
   <body>
@@ -1540,6 +1588,7 @@ fetch("/api/empleados")
   });
 
 function verEmpleado(id) {
+  document.body.classList.add("no-scroll");
   fetch(`/api/empleado/${id}`)
     .then((res) => {
       if (!res.ok) throw new Error("Error al cargar datos del empleado");
@@ -1607,11 +1656,13 @@ function verEmpleado(id) {
 
 function cerrarModal() {
   document.getElementById("modal").classList.add("hidden");
+  document.body.classList.remove("no-scroll");
 }
 
 function abrirModalAltaEmpleado() {
   // Mostrar el modal
   document.getElementById("add-employee-modal").classList.remove("hidden");
+  document.body.classList.add("no-scroll");
 
   // Llenar roles
   fetch("/api/roles")
@@ -1689,6 +1740,7 @@ function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
 
 function cerrarModalAltaEmpleado() {
   document.getElementById("add-employee-modal").classList.add("hidden");
+  document.body.classList.remove("no-scroll");
 }
 
 //Dar de alta a empleado
@@ -1806,6 +1858,7 @@ function formatoFechaParaInput(fecha) {
 }
 
 function editarEmpleado(id) {
+  document.body.classList.add("no-scroll");
   document.getElementById("edit-employee-modal").classList.remove("hidden");
 
   fetch(`/api/empleado/${id}`)
@@ -1899,6 +1952,7 @@ function editarEmpleado(id) {
 
 function cerrarModalEditarEmpleado() {
   document.getElementById("edit-employee-modal").classList.add("hidden");
+  document.body.classList.remove("no-scroll");
 }
 
 function buscarEmpleado() {
@@ -2064,6 +2118,7 @@ let empleadosSeleccionados = [];
 function abrirModalExportarExcel() {
   document.getElementById("export-excel-modal").classList.remove("hidden");
   mostrarPasoCampos();
+  document.body.classList.add("no-scroll");
 }
 
 function mostrarPasoCampos() {
@@ -2258,6 +2313,7 @@ function cerrarModalExportarExcel() {
   document.getElementById("export-excel-modal").classList.add("hidden");
   camposSeleccionados = [];
   empleadosSeleccionados = [];
+  document.body.classList.remove("no-scroll");
 }
 
 function mostrarModalConfirmacion({
@@ -2342,15 +2398,18 @@ function abrirModalAgregarFestivo() {
   document.getElementById("add-holiday-modal").classList.remove("hidden");
   const today = new Date().toISOString().split("T")[0];
   document.getElementById("fechaFestivo").value = today;
+  document.body.classList.add("no-scroll");
 }
 
 // Función para cerrar el modal de días festivos
 function cerrarModalAgregarFestivo() {
   document.getElementById("add-holiday-modal").classList.add("hidden");
+  document.body.classList.remove("no-scroll");
 }
 
 // Función para abrir el modal de baja
 function abrirModalBajaEmpleado(idUsuario) {
+  document.body.classList.add("no-scroll");
   fetch(`/api/empleado/${idUsuario}`)
     .then((res) => {
       if (!res.ok) throw new Error("No se encontró el empleado");
@@ -2373,6 +2432,7 @@ function abrirModalBajaEmpleado(idUsuario) {
 
 function cerrarModalBajaEmpleado() {
   document.getElementById("modal-baja-empleado").classList.add("hidden");
+  document.body.classList.remove("no-scroll");
 }
 
 // Enviar solicitud de baja

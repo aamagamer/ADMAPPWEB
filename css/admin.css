@@ -574,3 +574,53 @@ textarea.estilo-textarea {
 .back-button i {
   font-size: 18px;
 }
+
+.no-scroll {
+  overflow: hidden;
+}
+
+/* 🌟 Mejora visual para campos del modal de ver empleado */
+#modal-body p {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border-left: 5px solid #2980b9;
+  border-radius: 10px;
+  padding: 12px 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+#modal-body p:hover {
+  transform: scale(1.02);
+}
+
+#modal-body strong {
+  color: #34495e;
+  font-size: 14px;
+}
+
+.modal-content h2::after {
+  content: "👤";
+  margin-left: 8px;
+}
+
+/* Estilo exclusivo para el modal de ver empleado */
+#modal .modal-content {
+  max-width: 1000px; /* Aumenta el ancho */
+  max-height: 85vh;  /* Limita altura si es demasiado largo */
+  overflow-y: auto;  /* Agrega scroll interno si se excede */
+  padding: 30px 40px;
+  border-left: 8px solid #2c3e50;
+}
+
+/* Mejora visual para que el modal no sature la vista */
+#modal .modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#modal .modal-content::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
+}
+
+
