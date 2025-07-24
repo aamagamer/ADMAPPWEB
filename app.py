@@ -1565,9 +1565,166 @@ def vacaciones_por_ley():
         'usuarios_actualizados': actualizados
     })
 
+@app.route('/api/tiposIncapacidad', methods=['GET'])
+def obtener_tipos_incapacidad():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT idTipoIncapacidad, TipoIncapacidad FROM TipoIncapacidad")
+        rows = cursor.fetchall()
+
+        # Cambia "id" por "idTipoIncapacidad" para coincidir con el frontend
+        tipos = [
+            {
+                "idTipoIncapacidad": row[0],  # Cambiado de "id"
+                "nombre": row[1]
+            }
+            for row in rows
+        ]
+
+        return jsonify(tipos)
+
+    except Exception as e:
+        print(f"Error al obtener tipos de incapacidad: {e}")
+        return jsonify([]), 500
 
 
+@app.route('/api/registrarIncapacidad', methods=['POST'])
+def registrar_incapacidad():
+    data = request.get_json()
+    print("Datos recibidos:", data)  # Para depuración
 
+    # Validación mejorada
+    required_fields = {
+        'idTipoIncapacidad': int,
+        'idUsuario': int,
+        'fechaInicio': str,
+        'fechaFinal': str,
+        'observaciones': str
+    }
+    
+    errors = []
+    cleaned_data = {}
+    
+    for field, field_type in required_fields.items():
+        value = data.get(field)
+        if value is None:
+            errors.append(f"Campo '{field}' es requerido")
+        else:
+            try:
+                cleaned_data[field] = field_type(value)
+            except (ValueError, TypeError):
+                errors.append(f"Campo '{field}' debe ser {field_type.__name__}")
+    
+    if errors:
+        return jsonify({"error": "Validación fallida", "details": errors}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Query principal de inserción
+        insert_query = """
+            INSERT INTO Incapacidad (
+                TipoIncapacidad_idTipoIncapacidad,
+                Usuario_idUsuario,
+                fechaInicio,
+                fechaFinal,
+                Observaciones
+            ) VALUES (?, ?, ?, ?, ?)
+        """
+        
+        # Parámetros para el INSERT
+        params = (
+            cleaned_data['idTipoIncapacidad'],
+            cleaned_data['idUsuario'],
+            cleaned_data['fechaInicio'],
+            cleaned_data['fechaFinal'],
+            cleaned_data['observaciones']
+        )
+        
+        # Ejecutar inserción
+        cursor.execute(insert_query, params)
+        
+        # Obtener el ID insertado (forma correcta para SQL Server)
+        cursor.execute("SELECT SCOPE_IDENTITY() AS new_id")
+        new_id = cursor.fetchone()[0]
+        
+        conn.commit()
+
+        return jsonify({
+            "message": "Incapacidad registrada correctamente",
+            "id": new_id  # Retorna el ID generado
+        }), 200
+
+    except Exception as e:
+        print("Error al registrar incapacidad:", str(e))
+        if conn:
+            conn.rollback()
+        return jsonify({
+            "error": "Error interno al registrar la incapacidad",
+            "details": str(e)
+        }), 500
+    finally:
+        # Cerrar cursor y conexión de forma segura
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/incapacidades', methods=['GET'])
+def obtener_incapacidades():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT 
+                ti.tipoIncapacidad AS TipoDeIncapacidad,
+                u.Nombres,
+                u.Paterno,
+                u.Materno,
+                i.fechaInicio,
+                i.fechaFinal,
+                i.Observaciones
+            FROM Incapacidad i
+            JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
+            JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+        """
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        incapacidades = []
+        for row in rows:
+            incapacidades.append({
+                "tipo": row.TipoDeIncapacidad,
+                "nombres": row.Nombres,
+                "paterno": row.Paterno,
+                "materno": row.Materno,
+                "fechaInicio": row.fechaInicio.strftime('%Y-%m-%d') if row.fechaInicio else None,
+                "fechaFinal": row.fechaFinal.strftime('%Y-%m-%d') if row.fechaFinal else None,
+                "observaciones": row.Observaciones
+            })
+
+        return jsonify(incapacidades), 200
+
+    except Exception as e:
+        print("Error al obtener incapacidades:", str(e))
+        return jsonify({
+            "error": "Error interno al obtener las incapacidades",
+            "details": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 

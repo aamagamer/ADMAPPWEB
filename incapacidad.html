@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css" />
+    <link rel="icon" href="Media/favicon.ico" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/incapacidad.css">
+    <title>Solicitud de Incapacidad</title>
+
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <a href="#" class="menu-button" onclick="history.back(); return false;">
+          <i class="bi bi-arrow-left"></i>
+          Regresar
+        </a>
+
+        <div class="header-center">
+          <img src="Media/logo.png" alt="Logo" class="logo" />
+          <h1>Solicitud de Incapacidad</h1>
+        </div>
+        <div style="width: 120px"></div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="welcome-section">
+        <p>Por favor completa el siguiente formulario</p>
+      </div>
+
+      <div class="form-container">
+        
+        <h2 class="form-title">Detalles de la incapacidad</h2>
+        <form id="incapacidad-form" action="#" method="post">
+            <div class="form-group autocomplete-container">
+            <label for="employee-input">Empleado</label>
+            <input
+              type="text"
+              id="employee-input"
+              class="form-control"
+              autocomplete="off"
+              placeholder="Buscar empleado..."
+              required
+            />
+            <div id="employee-dropdown" class="autocomplete-dropdown"></div>
+          </div>
+          <div class="form-group">
+            <label for="tipo-incapacidad">Tipo de Incapacidad</label>
+            <select id="tipo-incapacidad" name="tipo-incapacidad" required>
+              <option value="">Selecciona una opción</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="fecha-inicio">Fecha de Inicio</label>
+            <div class="input-icon">
+              <input
+                type="text"
+                id="fecha-inicio"
+                name="fecha-inicio"
+                class="flatpickr-input"
+                required
+              />
+              <span class="icon-calendar"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fecha-fin">Fecha de Fin</label>
+            <div class="input-icon">
+              <input
+                type="text"
+                id="fecha-fin"
+                name="fecha-fin"
+                class="flatpickr-input"
+                required
+              />
+              <span class="icon-calendar"></span>
+            </div>
+          </div>
+
+         
+
+          <div class="form-group">
+            <label for="observaciones">Observaciones</label>
+            <textarea
+              id="observaciones"
+              name="observaciones"
+              placeholder="Describa cualquier observación adicional..."
+              required
+            ></textarea>
+          </div>
+          
+          <button type="submit" class="submit-button">Enviar Solicitud</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Confirmación -->
+    <div id="confirm-modal" class="modal-confirmacion">
+      <div class="modal-contenido">
+        <div>
+          <h2 class="modal-titulo">Confirmar Solicitud</h2>
+          <p id="modal-text" class="modal-texto"></p>
+        </div>
+        <div>
+          <button id="confirm-btn" class="modal-boton-confirmar">
+            Confirmar
+          </button>
+          <button id="cancel-btn" class="modal-boton-cancelar">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+        <script src = "js/incapacidad.js"></script>
+  </body>
+</html>
