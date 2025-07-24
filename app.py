@@ -3,6 +3,9 @@ import pyodbc
 from flask_cors import CORS
 from datetime import datetime
 from flask import Flask, session, redirect, url_for, render_template
+from flask import send_file
+import pandas as pd
+from io import BytesIO
 
 
 
@@ -1717,6 +1720,67 @@ def obtener_incapacidades():
         print("Error al obtener incapacidades:", str(e))
         return jsonify({
             "error": "Error interno al obtener las incapacidades",
+            "details": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/incapacidadesExcel', methods=['GET'])
+def exportar_incapacidades_excel():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT 
+                ti.tipoIncapacidad AS TipoDeIncapacidad,
+                u.Nombres,
+                u.Paterno,
+                u.Materno,
+                i.fechaInicio,
+                i.fechaFinal,
+                i.Observaciones
+            FROM Incapacidad i
+            JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
+            JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+        """
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        data = [{
+            "Tipo de Incapacidad": row.TipoDeIncapacidad,
+            "Nombres": row.Nombres,
+            "Apellido Paterno": row.Paterno,
+            "Apellido Materno": row.Materno,
+            "Fecha de Inicio": row.fechaInicio.strftime('%Y-%m-%d') if row.fechaInicio else "",
+            "Fecha Final": row.fechaFinal.strftime('%Y-%m-%d') if row.fechaFinal else "",
+            "Observaciones": row.Observaciones or ""
+        } for row in rows]
+
+        df = pd.DataFrame(data)
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Incapacidades')
+
+        output.seek(0)
+        return send_file(
+            output,
+            download_name="Incapacidades.xlsx",
+            as_attachment=True,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+    except Exception as e:
+        print("Error al exportar Excel:", str(e))
+        return jsonify({
+            "error": "Error al exportar Excel",
             "details": str(e)
         }), 500
 
