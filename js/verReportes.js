@@ -4,6 +4,55 @@ document.addEventListener("DOMContentLoaded", function () {
   const contenedor = document.getElementById("report-content");
   const inputFiltro = document.getElementById("filtro-empleado");
 
+window.exportarExcelDesdeVista = function () {
+  const tarjetas = document.querySelectorAll(".reporte-card");
+  if (tarjetas.length === 0) {
+    alert("No hay reportes visibles para exportar.");
+    return;
+  }
+
+  const datosExportar = [];
+
+  tarjetas.forEach((card) => {
+    const asunto = card.querySelector(".reporte-titulo")?.innerText || "";
+    const empleado = card.querySelectorAll(".reporte-detalle")[0]?.innerText.replace("Empleado:", "").trim() || "";
+    const observaciones = card.querySelectorAll(".reporte-detalle")[1]?.innerText.replace("Observaciones:", "").trim() || "";
+
+    datosExportar.push({
+      "Asunto": asunto,
+      "Empleado": empleado,
+      "Observaciones": observaciones
+    });
+  });
+
+  fetch('/api/exportar-reportes-vista', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datosExportar)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Error al generar el archivo.");
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Reportes_Visibles.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      alert("Hubo un error al exportar los reportes.");
+    });
+};
+
+
+
   // Cargar datos desde el backend
   fetch("/api/reportes-usuarios")
     .then((res) => {

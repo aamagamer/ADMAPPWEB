@@ -12,6 +12,26 @@
     <link rel="stylesheet" href="css/verReportes.css" />
     <script src="js/verReportes.js"></script>
     <script src="js/utils.js"></script>
+    <style>
+      .exportar-button {
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .exportar-button:hover {
+        background-color: #219150;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -28,6 +48,7 @@
     <div class="main-container">
       <div class="content-container">
         <h1 class="page-title">Ver Reportes</h1>
+
         <input
           type="text"
           id="filtro-empleado"
@@ -41,6 +62,11 @@
             border: 1px solid #ccc;
           "
         />
+
+        <!-- Botón exportar Excel -->
+        <button onclick="exportarExcelDesdeVista()" class="exportar-button">
+          <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+        </button>
 
         <div class="info-container" id="report-content"></div>
       </div>

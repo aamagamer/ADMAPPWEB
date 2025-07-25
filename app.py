@@ -1791,6 +1791,32 @@ def exportar_incapacidades_excel():
             conn.close()
 
 
+@app.route('/api/exportar-reportes-vista', methods=['POST'])
+def exportar_reportes_visibles():
+    try:
+        datos = request.get_json()
+        if not datos or not isinstance(datos, list) or len(datos) == 0:
+            return jsonify({"error": "No se recibieron datos válidos"}), 400
+
+        df = pd.DataFrame(datos)
+
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Reportes')
+
+        output.seek(0)
+        return send_file(
+            output,
+            download_name="Reportes.xlsx",
+            as_attachment=True,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+    except Exception as e:
+        print("Error al exportar Excel:", str(e))
+        return jsonify({"error": "Error interno", "details": str(e)}), 500
+
+
 
 
 
