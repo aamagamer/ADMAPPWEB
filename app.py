@@ -1538,28 +1538,43 @@ def vacaciones_por_ley():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Obtener todos los usuarios con fecha de ingreso y vacaciones actuales
-    cursor.execute("SELECT idUsuario, FechaIngreso, Vacaciones FROM Usuario")
+    # Obtener todos los usuarios con fecha de ingreso, vacaciones actuales y días disponibles
+    cursor.execute("SELECT idUsuario, FechaIngreso, Vacaciones, DiasDisponibles FROM Usuario")
     usuarios = cursor.fetchall()
 
     actualizados = []
 
-    for idUsuario, fechaIngreso, vacacionesActuales in usuarios:
+    for idUsuario, fechaIngreso, vacacionesActuales, diasDisponibles in usuarios:
         if not fechaIngreso:
             continue
 
         # Calcular los días que deberían tener por ley
         vacacionesCalculadas = calcular_dias_vacaciones(fechaIngreso.strftime('%Y-%m-%d'))
 
-        # Actualizar solo si hay diferencia
+        # Verificar si hay cambio en las vacaciones por ley
         if vacacionesActuales != vacacionesCalculadas:
+            # Calcular nuevos días disponibles según las reglas
+            if diasDisponibles < 0:
+                # Si debe días, restamos los días negativos de las nuevas vacaciones
+                nuevos_dias_disponibles = vacacionesCalculadas + diasDisponibles
+            else:
+                # Si tenía días positivos, no se acumulan, se pierden
+                nuevos_dias_disponibles = vacacionesCalculadas
+            
+            # Asegurarse que no queden días negativos (por si debe más días de los nuevos disponibles)
+            nuevos_dias_disponibles = max(nuevos_dias_disponibles, 0)
+
+            # Actualizar ambos campos
             cursor.execute(
-                "UPDATE Usuario SET Vacaciones = ? WHERE idUsuario = ?",
-                (vacacionesCalculadas, idUsuario)
+                "UPDATE Usuario SET Vacaciones = ?, DiasDisponibles = ? WHERE idUsuario = ?",
+                (vacacionesCalculadas, nuevos_dias_disponibles, idUsuario)
             )
+            
             actualizados.append({
                 'idUsuario': idUsuario,
-                'nuevas_vacaciones': vacacionesCalculadas
+                'nuevas_vacaciones': vacacionesCalculadas,
+                'nuevos_dias_disponibles': nuevos_dias_disponibles,
+                'dias_disponibles_anteriores': diasDisponibles
             })
 
     conn.commit()
