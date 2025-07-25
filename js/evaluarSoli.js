@@ -1,4 +1,4 @@
-document.getElementById("employee-name").textContent = "Juan Pérez";
+
 const idUsuario = localStorage.getItem("idUsuario");
 
 let accionPendiente = null;

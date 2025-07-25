@@ -8,6 +8,7 @@ import pandas as pd
 from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 
@@ -173,43 +174,6 @@ def solicitar_vacaciones():
         if conn:
             conn.close()
 
-
-
-
-
-
-
-
-def calcular_dias_vacaciones(fecha_ingreso_str):
-    hoy = datetime.now().date()
-    fecha_ingreso = datetime.strptime(fecha_ingreso_str, '%Y-%m-%d').date()
-
-    años = hoy.year - fecha_ingreso.year
-    if (hoy.month, hoy.day) < (fecha_ingreso.month, fecha_ingreso.day):
-        años -= 1
-
-    if años < 1:
-        return 0
-    elif años == 1:
-        return 12
-    elif años == 2:
-        return 14
-    elif años == 3:
-        return 16
-    elif años == 4:
-        return 18
-    elif años == 5:
-        return 20
-    elif 6 <= años <= 10:
-        return 22
-    elif 11 <= años <= 15:
-        return 24
-    elif 16 <= años <= 20:
-        return 26
-    elif 21 <= años <= 25:
-        return 28
-    else:
-        return 30
     
 @app.route('/api/diafestivo', methods=['POST'])
 def insertar_dia_festivo():
@@ -1578,12 +1542,16 @@ def vacaciones_por_ley():
             })
 
     conn.commit()
+
+
     conn.close()
 
     return jsonify({
         'mensaje': f'{len(actualizados)} usuario(s) actualizado(s)',
         'usuarios_actualizados': actualizados
     })
+
+
 
 @app.route('/api/tiposIncapacidad', methods=['GET'])
 def obtener_tipos_incapacidad():
@@ -1861,7 +1829,31 @@ def exportar_reportes_visibles():
         print("Error al exportar Excel:", str(e))
         return jsonify({"error": "Error interno", "details": str(e)}), 500
 
+# Función que se ejecutará programadamente
+def actualizar_vacaciones_automaticamente():
+    with app.app_context():  # Necesario para acceder al contexto de Flask
+        print(f"[{datetime.now()}] Ejecutando actualización de vacaciones...")
+        try:
+            # Llamar al endpoint como si fuera una petición HTTP
+            client = app.test_client()
+            response = client.post('/vacaciones_por_ley')
+            print("Resultado:", response.get_json())
+        except Exception as e:
+            print(f"Error al actualizar vacaciones: {e}")
 
+# Configurar el scheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    actualizar_vacaciones_automaticamente,
+    trigger='cron',  # Ejecución programada
+    hour=8,          # A las 8:00 AM (ajusta la hora según necesites)
+    minute=0,
+)
+scheduler.start()
+
+# Detener el scheduler al cerrar la aplicación
+import atexit
+atexit.register(lambda: scheduler.shutdown())
 
 
 
