@@ -1,3 +1,59 @@
+function exportarExcelDesdeServidor() {
+  const dataParaExportar = [];
+
+  document.querySelectorAll(".request-item").forEach(div => {
+    const contenedor = div.parentElement.id;
+    const tipo = contenedor.includes("vacations") ? "Vacaciones" : "Permiso";
+    const estado =
+      contenedor.includes("approved") || contenedor.includes("accepted")
+        ? "Aceptado"
+        : "Rechazado";
+
+    const empleado = div.querySelector(".request-employee")?.textContent.trim();
+    const fecha = div.querySelector(".request-date")?.textContent.trim();
+    const detalles = div.querySelector(".request-details")?.textContent.trim();
+
+    dataParaExportar.push({
+      Tipo: tipo,
+      Estado: estado,
+      Empleado: empleado,
+      Fecha: fecha,
+      Detalles: detalles
+    });
+  });
+
+  if (dataParaExportar.length === 0) {
+    alert("No hay datos visibles para exportar.");
+    return;
+  }
+
+  fetch("/api/exportar-reportes-vista", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dataParaExportar)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Error al generar el archivo");
+
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Solicitudes_Visibles.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Hubo un error al exportar el archivo.");
+    });
+}
+
+
 function estaActiva(fechaInicio, fechaFin) {
   const hoy = new Date();
   const inicio = new Date(fechaInicio);

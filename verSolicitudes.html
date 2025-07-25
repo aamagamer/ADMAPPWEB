@@ -35,20 +35,27 @@
       <div class="evaluated-requests-container">
         <h2 class="page-title">Solicitudes Evaluadas</h2>
 
-        <div style="margin: 10px 0;">
-  <label for="filtro-solicitudes">Filtrar solicitudes:</label>
-  <select id="filtro-solicitudes" style="padding: 8px 12px; border-radius: 6px; font-size: 1rem; border: 1.5px solid #bbb;">
-    <option value="todas">Todas</option>
-    <option value="aceptadas">Aceptadas</option>
-    <option value="rechazadas">Rechazadas</option>
-    <option value="vacaciones-activas">Vacaciones activas ahora</option>
-    <option value="vacaciones-futuras">Vacaciones aceptadas futuras</option>
-    <option value="permisos-activos">Permisos activos ahora</option>
-    <option value="permisos-futuros">Permisos aceptados futuros</option>
-    <option value="ambos-activos">Permisos y vacaciones activos ahora</option>
-    <option value="ambos-futuros">Permisos y vacaciones aceptados futuro</option>
-  </select>
+        <div style="margin: 10px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between;">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <label for="filtro-solicitudes" style="font-weight: bold;">Filtrar solicitudes:</label>
+    <select id="filtro-solicitudes" style="padding: 8px 12px; border-radius: 6px; font-size: 1rem; border: 1.5px solid #bbb;">
+      <option value="todas">Todas</option>
+      <option value="aceptadas">Aceptadas</option>
+      <option value="rechazadas">Rechazadas</option>
+      <option value="vacaciones-activas">Vacaciones activas ahora</option>
+      <option value="vacaciones-futuras">Vacaciones aceptadas futuras</option>
+      <option value="permisos-activos">Permisos activos ahora</option>
+      <option value="permisos-futuros">Permisos aceptados futuros</option>
+      <option value="ambos-activos">Permisos y vacaciones activos ahora</option>
+      <option value="ambos-futuros">Permisos y vacaciones aceptados futuro</option>
+    </select>
+  </div>
+
+  <button onclick="exportarExcelDesdeServidor()" style="padding: 8px 16px; background-color: #32c555; color: white; border: none; border-radius: 6px;  cursor: pointer; transition: background-color 0.3s;">
+    <i class="bi bi-download" style="margin-right: 6px;"></i>Exportar a Excel
+  </button>
 </div>
+
 
 
 

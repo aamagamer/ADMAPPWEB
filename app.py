@@ -6,6 +6,8 @@ from flask import Flask, session, redirect, url_for, render_template
 from flask import send_file
 import pandas as pd
 from io import BytesIO
+from openpyxl.styles import Font, PatternFill
+from openpyxl.utils import get_column_letter
 
 
 
@@ -1754,20 +1756,32 @@ def exportar_incapacidades_excel():
         cursor.execute(query)
         rows = cursor.fetchall()
 
+        # Acceso por índices y concatenación de nombre completo
         data = [{
-            "Tipo de Incapacidad": row.TipoDeIncapacidad,
-            "Nombres": row.Nombres,
-            "Apellido Paterno": row.Paterno,
-            "Apellido Materno": row.Materno,
-            "Fecha de Inicio": row.fechaInicio.strftime('%Y-%m-%d') if row.fechaInicio else "",
-            "Fecha Final": row.fechaFinal.strftime('%Y-%m-%d') if row.fechaFinal else "",
-            "Observaciones": row.Observaciones or ""
+            "Tipo de Incapacidad": row[0],
+            "Empleado": f"{row[1]} {row[2]} {row[3]}".strip(),
+            "Fecha de Inicio": row[4].strftime('%Y-%m-%d') if row[4] else "",
+            "Fecha Final": row[5].strftime('%Y-%m-%d') if row[5] else "",
+            "Observaciones": row[6] or ""
         } for row in rows]
 
         df = pd.DataFrame(data)
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Incapacidades')
+
+            workbook = writer.book
+            hoja = writer.sheets['Incapacidades']
+
+            # Estilo visual igual que en /exportar-reportes-vista
+            font = Font(bold=True, size=12, color="000000")  # Letra negra
+            fill = PatternFill(start_color="f5fc19", end_color="f5fc19", fill_type="solid")  # Amarillo claro
+
+            for col_num, column_title in enumerate(df.columns, 1):
+                celda = hoja[f"{get_column_letter(col_num)}1"]
+                celda.font = font
+                celda.fill = fill
+                hoja.column_dimensions[get_column_letter(col_num)].width = max(15, len(column_title) + 5)
 
         output.seek(0)
         return send_file(
@@ -1791,6 +1805,8 @@ def exportar_incapacidades_excel():
             conn.close()
 
 
+
+
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
 def exportar_reportes_visibles():
     try:
@@ -1804,10 +1820,24 @@ def exportar_reportes_visibles():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Reportes')
 
+            # Aplicar estilos a la hoja
+            workbook = writer.book
+            hoja = writer.sheets['Reportes']
+
+            # Estilo para títulos
+            font = Font(bold=True, size=12, color="000000")  # Letra blanca
+            fill = PatternFill(start_color="f5fc19", end_color="f5fc19", fill_type="solid")  # Amarillo
+
+            for col_num, column_title in enumerate(df.columns, 1):
+                celda = hoja[f"{get_column_letter(col_num)}1"]
+                celda.font = font
+                celda.fill = fill
+                hoja.column_dimensions[get_column_letter(col_num)].width = max(15, len(column_title) + 5)
+
         output.seek(0)
         return send_file(
             output,
-            download_name="Reportes.xlsx",
+            download_name="Solicitudes_Visibles.xlsx",
             as_attachment=True,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )

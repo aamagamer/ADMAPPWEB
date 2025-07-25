@@ -68,28 +68,23 @@ async function cargarIncapacidades() {
   });
 }
 
-function exportarExcelDesdeVista() {
-  const tarjetas = document.querySelectorAll(".reporte-card");
-  if (tarjetas.length === 0) {
-    alert("No hay registros visibles para exportar.");
-    return;
+async function exportarExcelDesdeVista() {
+  try {
+    const response = await fetch('/api/incapacidadesExcel');
+    if (!response.ok) {
+      alert('Error al descargar el archivo Excel del servidor');
+      return;
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Incapacidades.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    alert('Error al descargar el archivo: ' + error.message);
   }
-
-  const data = [];
-
-  tarjetas.forEach((card) => {
-    const fila = {
-      "Tipo de Incapacidad": card.querySelector(".tipo-incapacidad")?.textContent.trim() || '',
-      "Empleado": card.querySelector(".nombre-empleado")?.textContent.replace("Empleado:", "").trim() || '',
-      "Fecha Inicio": card.querySelector(".fecha-inicio")?.textContent.replace("Inicio:", "").trim() || '',
-      "Fecha Final": card.querySelector(".fecha-final")?.textContent.replace("Fin:", "").trim() || '',
-      "Observaciones": card.querySelector(".observaciones")?.textContent.replace("Observaciones:", "").trim() || ''
-    };
-    data.push(fila);
-  });
-
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(data);
-  XLSX.utils.book_append_sheet(wb, ws, "Incapacidades");
-  XLSX.writeFile(wb, "incapacidades-filtradas.xlsx");
 }
