@@ -10,9 +10,6 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from apscheduler.schedulers.background import BackgroundScheduler
 
-
-
-
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
@@ -1722,6 +1719,29 @@ def obtener_incapacidades():
             cursor.close()
         if conn:
             conn.close()
+
+@app.route('/api/usuario/<int:idUsuario>/rol', methods=['GET'])
+def obtener_rol_usuario(idUsuario):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", idUsuario)
+        row = cursor.fetchone()
+
+        if row:
+            return jsonify({"idRol": row[0]})
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+    except Exception as e:
+        print("Error al obtener rol:", e)
+        return jsonify({"error": "Error del servidor"}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+
 
 @app.route('/api/incapacidadesExcel', methods=['GET'])
 def exportar_incapacidades_excel():
