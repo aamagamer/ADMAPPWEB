@@ -18,6 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body>
     <header>
@@ -803,13 +804,7 @@
           <h2>Exportar datos (2/2)</h2>
           <p>Selecciona los empleados a incluir en el reporte:</p>
           <div style="margin-bottom: 10px">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="toggleSeleccionarTodos()"
-            >
-              <i class="bi bi-check-all"></i> Seleccionar todos
-            </button>
+           
           </div>
           <div id="export-employees-container" class="fields-grid"></div>
           <div class="form-actions">
@@ -894,114 +889,131 @@
       </div>
     </div>
 
-    <script>
-      function toggleAreas(context = "") {
-        const prefix = context ? context + "-" : "";
 
-        const contenedor = document.getElementById(`${prefix}checkbox-areas`);
-        const boton = document.getElementById(`${prefix}toggle-areas`);
 
-        if (!contenedor || !boton) return;
+<script>
+  let empleadosVisibles = []; 
+  function toggleAreas(context = "") {
+    const prefix = context ? context + "-" : "";
+    const contenedor = document.getElementById(`${prefix}checkbox-areas`);
+    const boton = document.getElementById(`${prefix}toggle-areas`);
 
-        if (contenedor.classList.contains("abierto")) {
-          contenedor.classList.remove("abierto");
-          boton.textContent = "Mostrar Áreas ▼";
-        } else {
-          contenedor.classList.add("abierto");
-          boton.textContent = "Ocultar Áreas ▲";
-        }
+    if (!contenedor || !boton) return;
+
+    if (contenedor.classList.contains("abierto")) {
+      contenedor.classList.remove("abierto");
+      boton.textContent = "Mostrar Áreas ▼";
+    } else {
+      contenedor.classList.add("abierto");
+      boton.textContent = "Ocultar Áreas ▲";
+    }
+  }
+
+  function verificarSesion() {
+    const idUsuario = localStorage.getItem("idUsuario");
+    if (!idUsuario) {
+      window.location.href = "index.html";
+    }
+    return idUsuario;
+  }
+
+  async function cargarNotificaciones() {
+    try {
+      const idUsuario = localStorage.getItem("idUsuario");
+      if (!idUsuario) return;
+
+      const response = await fetch(`/api/totalSolicitudes/${idUsuario}`);
+      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+      const data = await response.json();
+      const badge = document.getElementById("notificacion-solicitudes");
+      if (!badge) return;
+
+      badge.textContent = data.total > 0 ? data.total : "";
+      badge.style.display = data.total > 0 ? "inline-block" : "none";
+    } catch (error) {
+      console.error("Error al cargar notificaciones:", error);
+    }
+  }
+
+  function cargarEmpleadosPorEstado() {
+  const estadoSeleccionado = document.getElementById("filtro-estado").value;
+  const termino = document.getElementById("busquedaEmpleado").value.toLowerCase();
+
+  fetch(`/api/empleados?estado=${estadoSeleccionado}`)
+    .then((response) => response.json())
+    .then((data) => {
+      const empleadosFiltrados = data.filter(
+        (emp) =>
+          emp.id.toString().includes(termino) ||
+          emp.nombre.toLowerCase().includes(termino)
+      );
+
+      empleadosVisibles = empleadosFiltrados;
+
+
+      const tbody = document.getElementById("empleados-body");
+      tbody.innerHTML = "";
+
+      if (empleadosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
+        return;
       }
 
-      // Verificar si el usuario está logueado
-      function verificarSesion() {
-        const idUsuario = localStorage.getItem("idUsuario");
-        if (!idUsuario) {
-          window.location.href = "index.html"; // Redirigir al login si no hay sesión
-        }
-        return idUsuario;
-      }
-
-      // Función para cargar notificaciones
-      async function cargarNotificaciones() {
-        try {
-          const idUsuario = localStorage.getItem("idUsuario");
-
-          if (!idUsuario) {
-            console.error("No se encontró idUsuario en localStorage");
-            return;
-          }
-
-          const response = await fetch(`/api/totalSolicitudes/${idUsuario}`);
-
-          if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log("Datos de notificaciones:", data); // Debug visible
-
-          const badge = document.getElementById("notificacion-solicitudes");
-          if (!badge) {
-            console.warn("Elemento badge no encontrado");
-            return;
-          }
-
-          if (data.total > 0) {
-            badge.textContent = data.total;
-            badge.style.display = "inline-block";
-          } else {
-            badge.style.display = "none";
-          }
-        } catch (error) {
-          console.error("Error al cargar notificaciones:", error);
-          // Opcional: mostrar mensaje al usuario
-        }
-      }
-
-      // Uso en tu página:
-      document.addEventListener("DOMContentLoaded", function () {
-        // Verificar sesión y obtener ID de usuario
-        const idUsuario = verificarSesion();
-
-        cargarNotificaciones();
-        setInterval(cargarNotificaciones, 1200000);
-
-        // Cargar datos del usuario
-        if (idUsuario) {
-          cargarNombreUsuario(idUsuario);
-
-          // Cargar lista de empleados
-          fetch("/api/empleados")
-            .then((response) => response.json())
-            .then((data) => {
-              const tbody = document.getElementById("empleados-body");
-              tbody.innerHTML = "";
-              data.forEach((emp) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                        <td>${emp.id}</td>
-                        <td>${emp.nombre}</td>
-                        <td>${emp.puesto}</td>
-                        <td>
-                            <button class="action-btn" onclick="verEmpleado(${emp.id})">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="action-btn" onclick="editarEmpleado(${emp.id})">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                tbody.appendChild(row);
-              });
-            })
-            .catch((error) => {
-              console.error("Error al cargar empleados:", error);
-            });
-        }
+      empleadosFiltrados.forEach((emp) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${emp.id}</td>
+          <td>${emp.nombre}</td>
+          <td>${emp.puesto}</td>
+          <td>
+            <button class="action-btn" onclick="verEmpleado(${emp.id})">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="action-btn" onclick="editarEmpleado(${emp.id})">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
       });
+    })
+    .catch((error) => {
+      console.error("Error al cargar empleados:", error);
+    });
+}
+
+// ✅ Reemplaza buscarEmpleado por esta versión:
+function buscarEmpleado() {
+  cargarEmpleadosPorEstado(); // ahora la búsqueda se combina con el filtro actual
+}
+
+
+
+
+  // ✅ INICIALIZACIÓN
+  document.addEventListener("DOMContentLoaded", function () {
+    const idUsuario = verificarSesion();
+    cargarNotificaciones();
+    setInterval(cargarNotificaciones, 1200000);
+
+    // Cargar nombre del usuario
+    if (idUsuario) {
+      cargarNombreUsuario(idUsuario);
+    }
+
+// Eventos
+  document.getElementById("filtro-estado").addEventListener("change", cargarEmpleadosPorEstado);
+  document.getElementById("busquedaEmpleado").addEventListener("input", buscarEmpleado);
+
+  // Carga inicial
+  cargarEmpleadosPorEstado();
+});
+
+  
 
       function cargarNombreUsuario(idUsuario) {
         fetch("/api/usuario/nombre", {
@@ -1039,37 +1051,7 @@
           });
       }
 
-      // Cargar lista de empleados
-      fetch("/api/empleados")
-        .then((response) => response.json())
-        .then((data) => {
-          const tbody = document.getElementById("empleados-body");
-          tbody.innerHTML = "";
-          data.forEach((emp) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-          <td>${emp.id}</td>
-          <td>${emp.nombre}</td>
-          <td>${emp.puesto}</td>
-          <td>
-            <button class="action-btn" onclick="verEmpleado(${emp.id})">
-  <i class="bi bi-eye"></i>
-</button>
-<button class="action-btn" onclick="editarEmpleado(${emp.id})">
-  <i class="bi bi-pencil"></i>
-</button>
-<button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
-  <i class="bi bi-trash"></i>
-</button>
-
-          </td>
-        `;
-            tbody.appendChild(row);
-          });
-        })
-        .catch((error) => {
-          console.error("Error al cargar empleados:", error);
-        });
+      
 
       function verEmpleado(id) {
         document.body.classList.add("no-scroll");
@@ -1456,52 +1438,7 @@
         document.body.classList.remove("no-scroll");
       }
 
-      function buscarEmpleado() {
-        const termino = document
-          .getElementById("busquedaEmpleado")
-          .value.toLowerCase();
 
-        fetch("/api/empleados")
-          .then((res) => res.json())
-          .then((empleados) => {
-            const resultados = empleados.filter(
-              (emp) =>
-                emp.id.toString().includes(termino) ||
-                emp.nombre.toLowerCase().includes(termino)
-            );
-
-            const tbody = document.getElementById("empleados-body");
-            tbody.innerHTML = "";
-
-            if (resultados.length === 0) {
-              tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
-            } else {
-              resultados.forEach((emp) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-            <td>${emp.id}</td>
-            <td>${emp.nombre}</td>
-            <td>${emp.puesto}</td>
-            <td>
-              <button class="action-btn" onclick="verEmpleado(${emp.id})">
-                <i class="bi bi-eye"></i>
-              </button>
-              <button class="action-btn" onclick="editarEmpleado(${emp.id})">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          `;
-                tbody.appendChild(row);
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Error en búsqueda:", error);
-          });
-      }
 
       document
         .getElementById("edit-employee-form")
@@ -1633,85 +1570,211 @@
         document.body.classList.add("no-scroll");
       }
 
-      function mostrarPasoCampos() {
-        document.getElementById("paso-empleados").classList.remove("visible");
-        document.getElementById("paso-campos").classList.remove("oculto");
+function mostrarPasoEmpleados() {
+  // Guardar campos seleccionados
+  const checkboxes = document.querySelectorAll(
+    '#export-fields-container input[type="checkbox"]:checked'
+  );
+  camposSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
 
-        const container = document.getElementById("export-fields-container");
-        container.innerHTML = "";
+  if (camposSeleccionados.length === 0) {
+    // Mejoramos el alert con un modal más profesional
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campos requeridos',
+      text: 'Por favor selecciona al menos un campo para exportar',
+      confirmButtonColor: '#4dabf7'
+    });
+    return;
+  }
 
-        camposExportacion.forEach((campo) => {
-          const div = document.createElement("div");
-          div.style.display = "flex";
-          div.style.alignItems = "center";
-          div.style.gap = "8px";
+  document.getElementById("paso-campos").classList.add("oculto");
+  document.getElementById("paso-empleados").classList.add("visible");
 
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.id = `export-${campo.id}`;
-          checkbox.value = campo.id;
-          checkbox.checked = true;
+  // Mostrar solo los empleados visibles actualmente
+  const container = document.getElementById("export-employees-container");
+  container.innerHTML = "";
+  container.style.display = "grid";
+  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
+  container.style.gap = "12px";
+  container.style.padding = "16px";
+  container.style.maxHeight = "400px";
+  container.style.overflowY = "auto";
 
-          const label = document.createElement("label");
-          label.htmlFor = `export-${campo.id}`;
-          label.textContent = campo.nombre;
+  if (empleadosVisibles.length === 0) {
+    container.innerHTML = `
+      <div style="
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+        font-size: 16px;
+      ">
+        <i class="fas fa-users-slash" style="font-size: 24px; margin-bottom: 8px;"></i>
+        <p>No hay empleados para exportar</p>
+      </div>
+    `;
+    return;
+  }
 
-          div.appendChild(checkbox);
-          div.appendChild(label);
-          container.appendChild(div);
-        });
-      }
+  // Añadir select all/none
+  const selectAllDiv = document.createElement("div");
+  selectAllDiv.style.gridColumn = "1 / -1";
+  selectAllDiv.style.display = "flex";
+  selectAllDiv.style.gap = "12px";
+  selectAllDiv.style.marginBottom = "8px";
+  
+  const selectAllBtn = document.createElement("button");
+  selectAllBtn.textContent = "Seleccionar todos";
+  selectAllBtn.style.padding = "6px 12px";
+  selectAllBtn.style.background = "#174da3";
+  selectAllBtn.style.color = "white";
+  selectAllBtn.style.border = "none";
+  selectAllBtn.style.borderRadius = "4px";
+  selectAllBtn.style.cursor = "pointer";
+  
+  const deselectAllBtn = document.createElement("button");
+  deselectAllBtn.textContent = "Quitar todos";
+  deselectAllBtn.style.padding = "6px 12px";
+  deselectAllBtn.style.background = "#f1f3f5";
+  deselectAllBtn.style.color = "#495057";
+  deselectAllBtn.style.border = "1px solid #dee2e6";
+  deselectAllBtn.style.borderRadius = "4px";
+  deselectAllBtn.style.cursor = "pointer";
+  
+  selectAllBtn.onclick = () => {
+    document.querySelectorAll('.empleado-checkbox').forEach(cb => cb.checked = true);
+  };
+  
+  deselectAllBtn.onclick = () => {
+    document.querySelectorAll('.empleado-checkbox').forEach(cb => cb.checked = false);
+  };
+  
+  selectAllDiv.appendChild(selectAllBtn);
+  selectAllDiv.appendChild(deselectAllBtn);
+  container.appendChild(selectAllDiv);
 
-      function mostrarPasoEmpleados() {
-        // Guardar los campos seleccionados
-        const checkboxes = document.querySelectorAll(
-          '#export-fields-container input[type="checkbox"]:checked'
-        );
-        camposSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
+  empleadosVisibles.forEach((emp) => {
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+    div.style.gap = "12px";
+    div.style.padding = "10px";
+    div.style.borderRadius = "6px";
+    div.style.backgroundColor = "#f8f9fa";
+    div.style.transition = "all 0.2s ease";
 
-        if (camposSeleccionados.length === 0) {
-          alert("Por favor selecciona al menos un campo para exportar");
-          return;
-        }
+    // Efecto hover
+    div.onmouseenter = () => {
+      div.style.backgroundColor = "#e9ecef";
+    };
+    div.onmouseleave = () => {
+      div.style.backgroundColor = "#f8f9fa";
+    };
 
-        document.getElementById("paso-campos").classList.add("oculto");
-        document.getElementById("paso-empleados").classList.add("visible");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "empleado-checkbox";
+    checkbox.value = emp.id;
+    checkbox.checked = true;
+    checkbox.style.width = "18px";
+    checkbox.style.height = "18px";
+    checkbox.style.cursor = "pointer";
+    checkbox.style.accentColor = "#4dabf7";
 
-        // Cargar lista de empleados
-        fetch("/api/empleados")
-          .then((response) => response.json())
-          .then((empleados) => {
-            const container = document.getElementById(
-              "export-employees-container"
-            );
-            container.innerHTML = "";
+    const label = document.createElement("label");
+    label.textContent = `${emp.id} - ${emp.nombre}`;
+    label.style.cursor = "pointer";
+    label.style.fontSize = "14px";
+    label.style.userSelect = "none";
+    label.style.color = "#495057";
+    label.style.flex = "1";
+    label.style.overflow = "hidden";
+    label.style.textOverflow = "ellipsis";
+    label.style.whiteSpace = "nowrap";
 
-            empleados.forEach((emp) => {
-              const div = document.createElement("div");
-              div.style.display = "flex";
-              div.style.alignItems = "center";
-              div.style.gap = "8px";
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    container.appendChild(div);
+  });
 
-              const checkbox = document.createElement("input");
-              checkbox.type = "checkbox";
-              checkbox.id = `emp-${emp.id}`;
-              checkbox.value = emp.id;
-              checkbox.checked = false;
+  // Añadir contador de seleccionados
+  const counterDiv = document.createElement("div");
+  counterDiv.style.gridColumn = "1 / -1";
+  counterDiv.style.textAlign = "right";
+  counterDiv.style.fontSize = "14px";
+  counterDiv.style.color = "#6c757d";
+  counterDiv.id = "employee-counter";
+  container.appendChild(counterDiv);
+  updateEmployeeCounter();
 
-              const label = document.createElement("label");
-              label.htmlFor = `emp-${emp.id}`;
-              label.textContent = `${emp.id} - ${emp.nombre}`;
+  // Actualizar contador cuando cambien los checkboxes
+  container.addEventListener('change', updateEmployeeCounter);
+  
+  function updateEmployeeCounter() {
+    const total = empleadosVisibles.length;
+    const selected = document.querySelectorAll('.empleado-checkbox:checked').length;
+    document.getElementById('employee-counter').textContent = 
+      `${selected} de ${total} empleados seleccionados`;
+  }
+}
 
-              div.appendChild(checkbox);
-              div.appendChild(label);
-              container.appendChild(div);
-            });
-          })
-          .catch((error) => {
-            console.error("Error al cargar empleados:", error);
-            alert("Error al cargar la lista de empleados");
-          });
-      }
+function mostrarPasoCampos() {
+  document.getElementById("paso-empleados").classList.remove("visible");
+  document.getElementById("paso-campos").classList.remove("oculto");
+
+  const container = document.getElementById("export-fields-container");
+  container.innerHTML = "";
+  container.style.display = "grid";
+  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+  container.style.gap = "12px";
+  container.style.padding = "12px";
+
+  camposExportacion.forEach((campo) => {
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+    div.style.gap = "10px";
+    div.style.padding = "8px";
+    div.style.borderRadius = "6px";
+    div.style.backgroundColor = "#f8f9fa";
+    div.style.transition = "all 0.2s ease";
+
+    // Efecto hover
+    div.onmouseenter = () => {
+      div.style.backgroundColor = "#e9ecef";
+      div.style.transform = "translateY(-2px)";
+    };
+    div.onmouseleave = () => {
+      div.style.backgroundColor = "#f8f9fa";
+      div.style.transform = "none";
+    };
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `export-${campo.id}`;
+    checkbox.value = campo.id;
+    checkbox.checked = true;
+    checkbox.style.width = "18px";
+    checkbox.style.height = "18px";
+    checkbox.style.cursor = "pointer";
+    checkbox.style.accentColor = "#4dabf7"; // Color azul moderno
+
+    const label = document.createElement("label");
+    label.htmlFor = `export-${campo.id}`;
+    label.textContent = campo.nombre;
+    label.style.cursor = "pointer";
+    label.style.fontSize = "14px";
+    label.style.userSelect = "none";
+    label.style.color = "#495057";
+
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    container.appendChild(div);
+  });
+}
+
+
 
       function toggleSeleccionarTodos() {
         const checkboxes = document.querySelectorAll(

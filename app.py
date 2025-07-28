@@ -324,9 +324,18 @@ def lider():
 
 @app.route('/api/empleados', methods=['GET'])
 def obtener_empleados():
+    estado = request.args.get('estado')  # puede ser 'activos', 'inactivos' o 'todos'
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario where Estado = 'Activo' ")
+
+    if estado == 'activos':
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Activo'"
+    elif estado == 'inactivos':
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Inactivo'"
+    else:
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario"
+
+    cursor.execute(query)
     empleados = [
         {
             "id": row.idUsuario,
