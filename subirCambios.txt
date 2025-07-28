@@ -29,3 +29,6 @@ git reset --hard origin/main
 
 //Activar ngrok
 ngrok http 5000
+
+//Test sobre recalculo de dias
+curl -X POST http://localhost:5000/vacaciones_por_ley
