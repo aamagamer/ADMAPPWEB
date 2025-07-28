@@ -1,4 +1,3 @@
-
 const idUsuario = localStorage.getItem("idUsuario");
 
 let accionPendiente = null;
@@ -35,6 +34,7 @@ function mostrarModal(tipo, datos, tipoSolicitud) {
       tipoSolicitud === "vacacion"
         ? "/api/actualizarEstadoSolicitud"
         : "/api/actualizarEstadoPermiso";
+
     const payload =
       tipoSolicitud === "vacacion"
         ? {
@@ -54,9 +54,18 @@ function mostrarModal(tipo, datos, tipoSolicitud) {
       body: JSON.stringify(payload),
     })
       .then((res) => res.json())
-      .then((result) => {
+      .then(async (result) => {
         if (result && result.ok !== false) {
-          //alert(`${tipoSolicitud === 'vacacion' ? 'Vacación' : 'Permiso'} ${tipo === 'aceptar' ? 'aceptado' : 'rechazado'}.`);
+          const usuarioEsRH_O_Admin = idUsuario === "2" || idUsuario === "3";
+
+          if (
+            tipoSolicitud === "vacacion" &&
+            tipo === "aceptar" &&
+            usuarioEsRH_O_Admin
+          ) {
+            await generarPDFVacaciones(datos);
+          }
+
           location.reload();
         } else {
           alert(result.error || "Ocurrió un error.");
@@ -153,6 +162,50 @@ fetch(`/api/usuario/${idUsuario}/area`)
       "Error al cargar datos.";
     console.error("Error:", error);
   });
+
+//-----------------------Generar PDF------------------------------
+
+async function generarPDFVacaciones(datos) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const titulo = "Solicitud de Vacaciones";
+  const estado = "Aceptada";
+  const nombre = datos.nombre;
+  const inicio = new Date(datos.inicio).toLocaleDateString();
+  const fin = new Date(datos.fin).toLocaleDateString();
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text(`${titulo}: ${estado}`, 20, 20);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(`Empleado: ${nombre}`, 20, 35);
+  doc.text(`Días de salida y regreso:`, 20, 45);
+  doc.text(`Del ${inicio} al ${fin}`, 20, 55);
+
+  const pdfBlob = doc.output("blob");
+  const nombreArchivo = `Vacaciones_${nombre.replace(/\s+/g, "_")}.pdf`;
+
+  if (window.showSaveFilePicker) {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: nombreArchivo,
+      types: [
+        {
+          description: "Archivo PDF",
+          accept: { "application/pdf": [".pdf"] },
+        },
+      ],
+    });
+    const writable = await handle.createWritable();
+    await writable.write(pdfBlob);
+    await writable.close();
+  } else {
+    // fallback por si no es compatible
+    doc.save(nombreArchivo);
+  }
+}
 
 // ------------------------ Cargar PERMISOS ------------------------
 
