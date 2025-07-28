@@ -1404,7 +1404,7 @@ def obtener_reportes_usuarios():
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT Nombres, Paterno, Materno, Asunto, Observaciones
+            SELECT Nombres, Paterno, Materno, Asunto, Observaciones, idReporte
             FROM Usuario
             INNER JOIN Reporte ON Usuario.idUsuario = Reporte.Usuario_idUsuario
         """)
@@ -1418,7 +1418,8 @@ def obtener_reportes_usuarios():
                 "Paterno": fila[1],
                 "Materno": fila[2],
                 "Asunto": fila[3],
-                "Observaciones": fila[4]
+                "Observaciones": fila[4],
+                "idReporte": fila[5]
             })
 
         return jsonify(lista_reportes), 200

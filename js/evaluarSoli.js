@@ -184,11 +184,11 @@ async function generarPDFVacaciones(datos) {
 
   // Configuración de colores elegantes y formales
   const colores = {
-    azulPrincipal: [41, 98, 149], // Azul profesional
+    azulPrincipal: [44,30,135], // Azul profesional
     grisTexto: [52, 58, 64], // Gris oscuro para texto
     grisClaro: [248, 249, 250], // Gris muy claro
     verdeAprobado: [40, 167, 69], // Verde limpio
-    blancoCrema: [255, 255, 255], // Blanco puro
+    blancoCrema: [250,250,250], // Blanco puro
     grisLineas: [206, 212, 218], // Gris para líneas
   };
 
