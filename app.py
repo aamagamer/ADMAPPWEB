@@ -854,10 +854,7 @@ def obtener_vacaciones_por_areas(ids):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Obtener el rol del usuario
-        cursor.execute("""
-            SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?
-        """, (id_usuario,))
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
         rol_row = cursor.fetchone()
         if not rol_row:
             return jsonify({"error": "Usuario no encontrado"}), 404
@@ -867,61 +864,51 @@ def obtener_vacaciones_por_areas(ids):
         lista_ids = ids.split(",")
         placeholders = ",".join("?" for _ in lista_ids)
 
-        # Según el tipo de rol, definimos qué estado y qué tipo de usuarios mostrar
-        if tipo_rol == 4:  # Líder de área → ve empleados (estado 18)
+        if tipo_rol == 4:  # Líder
             estado = 18
             query = f"""
-                SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+                SELECT DISTINCT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
                 FROM Vacaciones v
                 JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
                 JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
                 WHERE ua.idArea IN ({placeholders}) 
                   AND v.EstadoSolicitud_idSolicitud = ?
-                  AND u.Rol_idRol = 1 -- Empleados
+                  AND u.Rol_idRol = 1
             """
             params = lista_ids + [estado]
 
-        elif tipo_rol == 3:  # RH → ve líderes (estado 19)
+        elif tipo_rol == 3:  # RH
             estado = 19
-            query = f"""
-                SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+            query = """
+                SELECT DISTINCT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
                 FROM Vacaciones v
                 JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
-                
                 WHERE v.EstadoSolicitud_idSolicitud = ?
-                 
             """
             params = [estado]
 
-        elif tipo_rol == 2:  # Admin → ve RH (estado 20)
-            estados = (18,19,20)
-            query = f"""
-                SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
+        elif tipo_rol == 2:  # Admin
+            estados = (18, 19, 20)
+            query = """
+                SELECT DISTINCT v.idVacaciones, v.FechaSalida, v.FechaRegreso, u.Nombres, u.Paterno, u.Materno
                 FROM Vacaciones v
                 JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
-                
-                WHERE v.EstadoSolicitud_idSolicitud in (?,?,?)
+                WHERE v.EstadoSolicitud_idSolicitud IN (?,?,?)
             """
             params = estados
 
         else:
             return jsonify({"error": "Rol no autorizado para esta operación"}), 403
 
-        # Ejecutar consulta
         cursor.execute(query, params)
         rows = cursor.fetchall()
 
-        vacaciones = []
-        for row in rows:
-            inicio = row[1].strftime('%Y-%m-%d') if row[1] else ""
-            fin = row[2].strftime('%Y-%m-%d') if row[2] else ""
-            nombre = f"{row[3]} {row[4]} {row[5]}"
-            vacaciones.append({
-                "id": row[0],
-                "inicio": inicio,
-                "fin": fin,
-                "nombre": nombre
-            })
+        vacaciones = [{
+            "id": row[0],
+            "inicio": row[1].strftime('%Y-%m-%d') if row[1] else "",
+            "fin": row[2].strftime('%Y-%m-%d') if row[2] else "",
+            "nombre": f"{row[3]} {row[4]} {row[5]}"
+        } for row in rows]
 
         return jsonify(vacaciones)
 
@@ -934,6 +921,7 @@ def obtener_vacaciones_por_areas(ids):
             cursor.close()
         if conn:
             conn.close()
+
 
 
 @app.route('/api/permisos/area/<ids>', methods=['GET'])
@@ -949,7 +937,6 @@ def obtener_permisos_por_areas(ids):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Obtener el rol del usuario
         cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
         rol_row = cursor.fetchone()
         if not rol_row:
@@ -960,11 +947,10 @@ def obtener_permisos_por_areas(ids):
         lista_ids = ids.split(",")
         placeholders = ",".join("?" for _ in lista_ids)
 
-        # Definir filtros según el rol
-        if tipo_rol == 4:  # Líder → ve solicitudes de empleados, estado 18
+        if tipo_rol == 4:  # Líder
             estado = 18
             query = f"""
-                SELECT 
+                SELECT DISTINCT
                     p.idPermiso, 
                     p.DiaSolicitado, 
                     p.HoraInicio, 
@@ -978,14 +964,14 @@ def obtener_permisos_por_areas(ids):
                 LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
                 WHERE ua.idArea IN ({placeholders})
                   AND p.EstadoSolicitud_idSolicitud = ?
-                  AND u.Rol_idRol = 1  -- Empleados
+                  AND u.Rol_idRol = 1
             """
             params = lista_ids + [estado]
 
-        elif tipo_rol == 3:  # RH → ve solicitudes de líderes, estado 19
+        elif tipo_rol == 3:  # RH
             estado = 19
             query = """
-                SELECT 
+                SELECT DISTINCT
                     p.idPermiso, 
                     p.DiaSolicitado, 
                     p.HoraInicio, 
@@ -997,14 +983,13 @@ def obtener_permisos_por_areas(ids):
                 JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
                 LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
                 WHERE p.EstadoSolicitud_idSolicitud = ?
-                  
             """
             params = [estado]
 
-        elif tipo_rol == 2:  # Admin → ve solicitudes de RH, estado 20
-            estados = (18,19,20)
+        elif tipo_rol == 2:  # Admin
+            estados = (18, 19, 20)
             query = """
-                SELECT 
+                SELECT DISTINCT
                     p.idPermiso, 
                     p.DiaSolicitado, 
                     p.HoraInicio, 
@@ -1015,29 +1000,25 @@ def obtener_permisos_por_areas(ids):
                 FROM Permiso p
                 JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
                 LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
-                WHERE p.EstadoSolicitud_idSolicitud in (?,?,?)
-                
+                WHERE p.EstadoSolicitud_idSolicitud IN (?,?,?)
             """
             params = estados
 
         else:
             return jsonify({"error": "Rol no autorizado para esta operación"}), 403
 
-        # Ejecutar consulta y formatear respuesta
         cursor.execute(query, params)
         rows = cursor.fetchall()
 
-        permisos = []
-        for row in rows:
-            permisos.append({
-                "id": row[0],
-                "fecha": row[1].strftime('%Y-%m-%d') if row[1] else "",
-                "inicio": row[2].strftime('%H:%M') if row[2] else "",
-                "fin": row[3].strftime('%H:%M') if row[3] else "",
-                "razon": row[4],
-                "compensacion": row[5],
-                "nombre": f"{row[6]} {row[7]} {row[8]}"
-            })
+        permisos = [{
+            "id": row[0],
+            "fecha": row[1].strftime('%Y-%m-%d') if row[1] else "",
+            "inicio": row[2].strftime('%H:%M') if row[2] else "",
+            "fin": row[3].strftime('%H:%M') if row[3] else "",
+            "razon": row[4],
+            "compensacion": row[5],
+            "nombre": f"{row[6]} {row[7]} {row[8]}"
+        } for row in rows]
 
         return jsonify(permisos)
 
@@ -1050,6 +1031,7 @@ def obtener_permisos_por_areas(ids):
             cursor.close()
         if conn:
             conn.close()
+
 
 
 @app.route('/api/solicitarPermiso', methods=['POST'])
@@ -1337,26 +1319,27 @@ def obtener_solicitudes_aprobadas_rechazadas():
                 p.Razon, c.TipoCompensacion,
                 u.Nombres, u.Paterno, u.Materno
             FROM Permiso p
-            JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+            LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
             JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
-            WHERE p.Compensacion_idCompensacion IN (1, 2)
+            WHERE p.EstadoSolicitud_idSolicitud IN (1, 2)
         '''
         cursor.execute(query_permisos)
         permisos = [
-            {
-                'tipo': 'Permiso',
-                'id': row.idPermiso,
-                'usuario_id': row.Usuario_idUsuario,
-                'nombre': f"{row.Nombres} {row.Paterno} {row.Materno}",
-                'estado_id': row.EstadoSolicitud_idSolicitud,
-                'dia_solicitado': str(row.DiaSolicitado),
-                'hora_inicio': str(row.HoraInicio),
-                'hora_fin': str(row.HoraFin),
-                'razon': row.Razon,
-                'tipo_compensacion': row.TipoCompensacion
-            }
-            for row in cursor.fetchall()
-        ]
+    {
+        'tipo': 'Permiso',
+        'id': row.idPermiso,
+        'usuario_id': row.Usuario_idUsuario,
+        'estado_id': row.EstadoSolicitud_idSolicitud,
+        'dia_solicitado': str(row.DiaSolicitado),
+        'hora_inicio': str(row.HoraInicio),
+        'hora_fin': str(row.HoraFin),
+        'razon': row.Razon,
+        'tipo_compensacion': row.TipoCompensacion,
+        'nombre': f"{row.Nombres} {row.Paterno} {row.Materno}"
+    }
+    for row in cursor.fetchall()
+]
+
 
         solicitudes = vacaciones + permisos
         return jsonify(solicitudes)
@@ -1531,13 +1514,11 @@ def total_solicitudes_por_rol(idUsuario):
             total = cursor.fetchone()[0]
             return jsonify({"total": total})
 
-        # Para RH o Líder, usamos lógica basada en nombre del estado
         elif tipo_rol == 'rh':
             estado = 'Pendiente de aprobar por Recursos Humanos'
         elif tipo_rol == 'lider area':
             estado = 'Pendiente de aprobar por tu líder'
         else:
-            # Otros roles no tienen notificaciones
             return jsonify({"total": 0})
 
         # Obtener el ID del estado correspondiente
@@ -1551,15 +1532,49 @@ def total_solicitudes_por_rol(idUsuario):
 
         id_estado = estado_result[0]
 
-        # Contar permisos y vacaciones con ese estado
-        cursor.execute("""
-            SELECT 
-                (SELECT COUNT(*) FROM Permiso WHERE EstadoSolicitud_idSolicitud = ?) +
-                (SELECT COUNT(*) FROM Vacaciones WHERE EstadoSolicitud_idSolicitud = ?)
-        """, (id_estado, id_estado))
-        total = cursor.fetchone()[0]
+        if tipo_rol == 'rh':
+            # RH ve todas las solicitudes con ese estado
+            cursor.execute("""
+                SELECT 
+                    (SELECT COUNT(*) FROM Permiso WHERE EstadoSolicitud_idSolicitud = ?) +
+                    (SELECT COUNT(*) FROM Vacaciones WHERE EstadoSolicitud_idSolicitud = ?)
+            """, (id_estado, id_estado))
+            total = cursor.fetchone()[0]
+            return jsonify({"total": total})
 
-        return jsonify({"total": total})
+        elif tipo_rol == 'lider area':
+            # Obtener áreas del líder
+            cursor.execute("""
+                SELECT idArea 
+                FROM Usuario_Area 
+                WHERE idUsuario = ?
+            """, (idUsuario,))
+            areas = [row[0] for row in cursor.fetchall()]
+
+            if not areas:
+                return jsonify({"total": 0})
+
+            placeholders = ','.join(['?'] * len(areas))
+
+            # Contar permisos y vacaciones solo de usuarios en sus áreas y con estado correspondiente
+            query = f"""
+                 SELECT 
+    (SELECT COUNT(DISTINCT p.idPermiso) FROM Permiso p
+     JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+     JOIN Usuario_Area ua ON u.idUsuario = ua.idUsuario
+     WHERE ua.idArea IN ({placeholders}) AND p.EstadoSolicitud_idSolicitud = ?) +
+    (SELECT COUNT(DISTINCT v.idVacaciones) FROM Vacaciones v
+     JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+     JOIN Usuario_Area ua ON u.idUsuario = ua.idUsuario
+     WHERE ua.idArea IN ({placeholders}) AND v.EstadoSolicitud_idSolicitud = ?)
+
+
+            """
+            params = areas + [id_estado] + areas + [id_estado]
+            cursor.execute(query, params)
+            total = cursor.fetchone()[0]
+
+            return jsonify({"total": total})
 
     except Exception as e:
         print(f"Error en total_solicitudes_por_rol: {str(e)}")
@@ -1569,6 +1584,8 @@ def total_solicitudes_por_rol(idUsuario):
             cursor.close()
         if conn:
             conn.close()
+
+
 
 @app.route('/vacaciones_por_ley', methods=['POST'])
 def vacaciones_por_ley():
