@@ -1453,7 +1453,7 @@ def obtener_reportes_usuarios():
         cursor.execute("""
             SELECT Nombres, Paterno, Materno, Asunto, Observaciones, idReporte
             FROM Usuario
-            INNER JOIN Reporte ON Usuario.idUsuario = Reporte.Usuario_idUsuario
+            INNER JOIN Reporte ON Usuario.idUsuario = Reporte.Usuario_idUsuario where Reporte.Estado is null;
         """)
         resultados = cursor.fetchall()
 
@@ -1470,6 +1470,26 @@ def obtener_reportes_usuarios():
             })
 
         return jsonify(lista_reportes), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/reportes/<int:id_reporte>/enterado', methods=['PUT'])
+def marcar_reporte_enterado(id_reporte):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Reporte
+            SET Estado = 'Enterado'
+            WHERE idReporte = ?
+        """, id_reporte)
+        conn.commit()
+        return jsonify({'mensaje': 'Reporte marcado como enterado'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
