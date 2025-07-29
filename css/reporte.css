@@ -6,6 +6,7 @@
   width: 80%;
   max-width: 800px;
   margin: 20px auto;
+  position: relative;
 }
 
 .page-title {
@@ -255,3 +256,5 @@ header{
 a{
   text-decoration: none;
 }
+
+

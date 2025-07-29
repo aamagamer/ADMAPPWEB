@@ -134,3 +134,44 @@ header h1 {
 .back-button i {
   font-size: 18px;
 }
+
+.reporte-card {
+  position: relative;
+  padding-bottom: 40px; /* espacio para el botón abajo */
+}
+
+.reporte-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.delete-reporte-btn {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  color: #e74c3c; /* Rojo fuerte */
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  border-radius: 50%;
+}
+
+.delete-reporte-btn:hover {
+  background-color: rgba(231, 76, 60, 0.15);
+  transform: translateX(-50%) scale(1.2);
+}
+
+.reporte-detalle {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word; /* agrega esto si lo anterior no basta */
+}
+

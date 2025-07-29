@@ -68,36 +68,68 @@ window.exportarExcelDesdeVista = function () {
       contenedor.innerHTML = "<p>Error al cargar los reportes.</p>";
     });
 
-  // Función para renderizar reportes
-  function mostrarReportes(reportes) {
-    contenedor.innerHTML = "";
+function mostrarReportes(reportes) {
+  contenedor.innerHTML = "";
 
-    if (reportes.length === 0) {
-      contenedor.innerHTML = "<p>No hay reportes registrados.</p>";
-      return;
-    }
-
-    reportes.forEach((reporte) => {
-      const card = document.createElement("div");
-      card.classList.add("reporte-card");
-
-      const nombreCompleto = `${reporte.Nombres} ${reporte.Paterno} ${reporte.Materno}`;
-
-      card.innerHTML = `
-          <div class="reporte-titulo">${reporte.Asunto}</div>
-          <div class="reporte-detalle">
-            <span class="reporte-etiqueta">Empleado:</span><br>
-            ${nombreCompleto}
-          </div>
-          <div class="reporte-detalle">
-            <span class="reporte-etiqueta">Observaciones:</span><br>
-            ${reporte.Observaciones}
-          </div>
-        `;
-
-      contenedor.appendChild(card);
-    });
+  if (reportes.length === 0) {
+    contenedor.innerHTML = "<p>No hay reportes registrados.</p>";
+    return;
   }
+
+  reportes.forEach((reporte) => {
+    const card = document.createElement("div");
+    card.classList.add("reporte-card");
+    card.setAttribute("data-id", reporte.idReporte);
+
+    const nombreCompleto = `${reporte.Nombres} ${reporte.Paterno} ${reporte.Materno}`;
+
+    card.innerHTML = `
+      <div class="reporte-header">
+        <div class="reporte-titulo">${reporte.Asunto}</div>
+        <button class="delete-reporte-btn" title="Eliminar reporte">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="reporte-detalle">
+        <span class="reporte-etiqueta">Empleado:</span><br>
+        ${nombreCompleto}
+      </div>
+      <div class="reporte-detalle">
+        <span class="reporte-etiqueta">Observaciones:</span><br>
+        ${reporte.Observaciones}
+      </div>
+    `;
+
+    contenedor.appendChild(card);
+  });
+
+  // Agregar eventos de eliminación
+  document.querySelectorAll(".delete-reporte-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tarjeta = btn.closest(".reporte-card");
+      const id = tarjeta.getAttribute("data-id");
+
+      if (!confirm("¿Estás seguro de eliminar este reporte?")) return;
+
+      fetch(`/api/reportes/eliminar/${id}`, {
+        method: "DELETE"
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.mensaje) {
+            tarjeta.remove();
+          } else {
+            alert("Error al eliminar: " + (data.error || "desconocido"));
+          }
+        })
+        .catch(err => {
+          console.error("Error al eliminar:", err);
+          alert("No se pudo eliminar el reporte.");
+        });
+    });
+  });
+}
+
 
   // Filtro en tiempo real
   inputFiltro.addEventListener("input", function () {
