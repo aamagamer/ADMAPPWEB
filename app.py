@@ -1369,6 +1369,53 @@ def obtener_solicitudes_aprobadas_rechazadas():
         if conn:
             conn.close()
 
+@app.route('/api/dar-baja-solicitud', methods=['POST'])
+def dar_de_baja_solicitud():
+    data = request.get_json()
+    tipo = data.get("tipo")
+    id_solicitud = data.get("id")
+
+    if tipo not in ("Vacaciones", "Permiso") or not id_solicitud:
+        return jsonify({"error": "Datos inválidos"}), 400
+
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener ID del estado 'Enterado'
+        cursor.execute("SELECT idSolicitud FROM EstadoSolicitud WHERE Estado = 'Enterado'")
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({"error": "No se encontró el estado 'Enterado'"}), 500
+        estado_enterado_id = row.idSolicitud
+
+        # Ejecutar update según tipo
+        if tipo == "Permiso":
+            cursor.execute("""
+                UPDATE Permiso
+                SET EstadoSolicitud_idSolicitud = ?
+                WHERE idPermiso = ?
+            """, (estado_enterado_id, id_solicitud))
+
+        elif tipo == "Vacaciones":
+            cursor.execute("""
+                UPDATE Vacaciones
+                SET EstadoSolicitud_idSolicitud = ?
+                WHERE idVacaciones = ?
+            """, (estado_enterado_id, id_solicitud))
+
+        conn.commit()
+        return jsonify({"mensaje": "Solicitud dada de baja correctamente"})
+
+    except Exception as e:
+        print("❌ Error al dar de baja solicitud:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
 
 @app.route('/api/usuarios/buscar', methods=['GET'])
 def buscar_usuarios():

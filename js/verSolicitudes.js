@@ -53,7 +53,6 @@ function exportarExcelDesdeServidor() {
     });
 }
 
-
 function estaActiva(fechaInicio, fechaFin) {
   const hoy = new Date();
   const inicio = new Date(fechaInicio);
@@ -69,7 +68,6 @@ function esFutura(fechaInicio) {
 
 function permisoEstaActivoAhora(dia, horaInicio, horaFin) {
   const ahora = new Date();
-
   const [anio, mes, diaNum] = dia.split("-").map(Number);
   const [hInicio, mInicio] = horaInicio.split(":").map(Number);
   const [hFin, mFin] = horaFin.split(":").map(Number);
@@ -79,7 +77,6 @@ function permisoEstaActivoAhora(dia, horaInicio, horaFin) {
 
   return ahora >= inicio && ahora <= fin;
 }
- 
 
 let vacacionesData = [];
 let permisosData = [];
@@ -91,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
       vacacionesData = data.filter(item => item.tipo === "Vacaciones");
       permisosData = data.filter(item => item.tipo === "Permiso");
 
-      renderizarFiltradas(vacacionesData, permisosData); // todas al inicio
+      renderizarFiltradas(vacacionesData, permisosData);
 
       const filtro = document.getElementById("filtro-solicitudes");
       filtro.addEventListener("change", aplicarFiltroUnico);
@@ -123,22 +120,18 @@ function aplicarFiltroUnico() {
 
     case "vacaciones-activas":
       vac = vacacionesData.filter(i => i.estado_id === 2 && estaActiva(i.fecha_salida, i.fecha_regreso));
-      perm = [];
       break;
 
     case "vacaciones-futuras":
       vac = vacacionesData.filter(i => i.estado_id === 2 && esFutura(i.fecha_salida));
-      perm = [];
       break;
 
     case "permisos-activos":
       perm = permisosData.filter(i => i.estado_id === 2 && permisoEstaActivoAhora(i.dia_solicitado, i.hora_inicio, i.hora_fin));
-      vac = [];
       break;
 
     case "permisos-futuros":
       perm = permisosData.filter(i => i.estado_id === 2 && esFutura(i.dia_solicitado));
-      vac = [];
       break;
 
     case "ambos-activos":
@@ -170,10 +163,17 @@ function renderizarFiltradas(vacaciones, permisos) {
   vacaciones.forEach(item => {
     const div = document.createElement("div");
     div.className = "request-item";
+    div.setAttribute("data-id", item.id);
+    div.setAttribute("data-tipo", "Vacaciones");
     div.innerHTML = `
-      <div class="request-employee">${item.nombre}</div>
-      <div class="request-date">Del ${item.fecha_salida} al ${item.fecha_regreso}</div>
-      <div class="request-details">Días solicitados: ${item.dias_solicitados}</div>
+      <div style="flex: 1; margin-right: 10px;">
+        <div class="request-employee">${item.nombre}</div>
+        <div class="request-date">Del ${item.fecha_salida} al ${item.fecha_regreso}</div>
+        <div class="request-details">Días solicitados: ${item.dias_solicitados}</div>
+      </div>
+      <button class="delete-btn" title="Eliminar solicitud">
+        <i class="bi bi-x-lg"></i>
+      </button>
     `;
     if (item.estado_id === 2)
       containers.vacacionesAprobadas.appendChild(div);
@@ -184,10 +184,17 @@ function renderizarFiltradas(vacaciones, permisos) {
   permisos.forEach(item => {
     const div = document.createElement("div");
     div.className = "request-item";
+    div.setAttribute("data-id", item.id);
+    div.setAttribute("data-tipo", "Permiso");
     div.innerHTML = `
-      <div class="request-employee">${item.nombre}</div>
-      <div class="request-date">Día: ${item.dia_solicitado} (${item.hora_inicio} - ${item.hora_fin})</div>
-      <div class="request-details">Razón: ${item.razon} | Compensación: ${item.tipo_compensacion}</div>
+      <div style="flex: 1; margin-right: 10px;">
+        <div class="request-employee">${item.nombre}</div>
+        <div class="request-date">Día: ${item.dia_solicitado} (${item.hora_inicio} - ${item.hora_fin})</div>
+        <div class="request-details">Razón: ${item.razon} | Compensación: ${item.tipo_compensacion}</div>
+      </div>
+      <button class="delete-btn" title="Eliminar solicitud">
+        <i class="bi bi-x-lg"></i>
+      </button>
     `;
     if (item.estado_id === 2)
       containers.permisosAceptados.appendChild(div);
@@ -200,4 +207,33 @@ function renderizarFiltradas(vacaciones, permisos) {
       containers[key].innerHTML = `<div class="empty-message">No hay solicitudes recientes</div>`;
     }
   }
+
+  // Agregar eventos a los botones de eliminación
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tarjeta = btn.closest(".request-item");
+      const tipo = tarjeta.getAttribute("data-tipo");
+      const id = tarjeta.getAttribute("data-id");
+
+      if (!confirm("¿Estás seguro de dar de baja esta solicitud?")) return;
+
+      fetch("/api/dar-baja-solicitud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo, id })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.mensaje) {
+          tarjeta.remove();
+        } else {
+          alert("Error al dar de baja: " + (data.error || "desconocido"));
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("No se pudo dar de baja la solicitud.");
+      });
+    });
+  });
 }
