@@ -907,6 +907,7 @@ const camposExportacion = [
   { id: "Parentesco", nombre: "Parentesco" },
   { id: "FechaBaja", nombre: "Fecha Baja" },
   { id: "ComentarioSalida", nombre: "Comentario Salida" },
+  { id: "clave", nombre: "Clave" },
   { id: "Estado", nombre: "Estado" },
   { id: "SueldoDiario", nombre: "Sueldo Diario" },
   { id: "SueldoSemanal", nombre: "Sueldo Semanal" },
@@ -1015,7 +1016,9 @@ function cargarEmpleadosPorEstado() {
     .then((response) => response.json())
     .then((data) => {
       const empleadosFiltrados = data.filter(
-        (emp) => emp.id.toString().includes(termino) || emp.nombre.toLowerCase().includes(termino),
+        (emp) =>
+          emp.id.toString().includes(termino) ||
+          emp.nombre.toLowerCase().includes(termino)
       )
 
       empleadosVisibles = empleadosFiltrados
@@ -1029,6 +1032,9 @@ function cargarEmpleadosPorEstado() {
       }
 
       empleadosFiltrados.forEach((emp) => {
+        console.log("Empleado:", emp)
+        const esAdmin = emp.rolId === 2 || emp.Rol_idRol === 2
+
         const row = document.createElement("tr")
         row.innerHTML = `
           <td>${emp.id}</td>
@@ -1038,10 +1044,10 @@ function cargarEmpleadosPorEstado() {
             <button class="action-btn" onclick="verEmpleado(${emp.id})">
               <i class="bi bi-eye"></i>
             </button>
-            <button class="action-btn" onclick="editarEmpleado(${emp.id})">
+            <button class="action-btn" onclick="editarEmpleado(${emp.id})" ${esAdmin ? "disabled title='No permitido'" : ""}>
               <i class="bi bi-pencil"></i>
             </button>
-            <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
+            <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})" ${esAdmin ? "disabled title='No permitido'" : ""}>
               <i class="bi bi-trash"></i>
             </button>
           </td>
@@ -1053,6 +1059,8 @@ function cargarEmpleadosPorEstado() {
       console.error("Error al cargar empleados:", error)
     })
 }
+
+
 
 function buscarEmpleado() {
   cargarEmpleadosPorEstado()
@@ -1066,6 +1074,9 @@ function verEmpleado(id) {
       return res.json()
     })
     .then((data) => {
+      
+
+      
       const modalBody = document.getElementById("modal-body")
 
       const renderField = (label, value) => {
@@ -1097,7 +1108,7 @@ function verEmpleado(id) {
         ${renderField("Parentesco", data.Parentesco)}
         ${renderField("Fecha Baja", data.FechaBaja)}
         ${renderField("Comentario Salida", data.ComentarioSalida)}
-        ${renderField("Clave", data.clave)}
+        ${renderField("Clave", data.Rol_idRol === 2 ? "********" : data.clave)}
         ${renderField("Estado", data.Estado)}
         ${renderField("Sueldo Diario", data.SueldoDiario)}
         ${renderField("Sueldo Semanal", data.SueldoSemanal)}
@@ -1524,12 +1535,15 @@ function exportarExcel() {
         const fila = {}
 
         camposSeleccionados.forEach((campo) => {
-          if (campo === "Areas" && Array.isArray(empleado.Areas)) {
-            fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ")
-          } else {
-            fila[campo] = empleado[campo] !== undefined ? empleado[campo] : ""
-          }
-        })
+  if (campo === "Areas" && Array.isArray(empleado.Areas)) {
+    fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ")
+  } else if (campo === "clave" && empleado.Rol_idRol === 2) {
+    fila[campo] = "********"  // 🔐 censura clave de admins
+  } else {
+    fila[campo] = empleado[campo] !== undefined ? empleado[campo] : ""
+  }
+})
+
 
         return fila
       })

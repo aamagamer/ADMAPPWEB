@@ -326,22 +326,27 @@ def obtener_empleados():
     cursor = conn.cursor()
 
     if estado == 'activos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Activo'"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto, rol_idrol FROM Usuario WHERE Estado = 'Activo'"
     elif estado == 'inactivos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Inactivo'"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto, rol_idrol FROM Usuario WHERE Estado = 'Inactivo'"
     else:
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto, rol_idrol FROM Usuario"
 
     cursor.execute(query)
+
     empleados = [
         {
             "id": row.idUsuario,
             "nombre": f"{row.nombres} {row.paterno} {row.materno}",
-            "puesto": row.puesto
-        } for row in cursor.fetchall()
+            "puesto": row.puesto,
+            "rolId": row.rol_idrol  # 👈 ahora sí puedes identificar admins con rolId === 2
+        }
+        for row in cursor.fetchall()
     ]
+
     conn.close()
     return jsonify(empleados)
+
 
 @app.route('/api/actualizarEstadoSolicitud', methods=['POST'])
 def actualizar_estado_solicitud():
