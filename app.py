@@ -336,20 +336,22 @@ def obtener_empleados():
     cursor = conn.cursor()
 
     if estado == 'activos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Activo'"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto, Rol_idRol FROM Usuario WHERE Estado = 'Activo'"
     elif estado == 'inactivos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Inactivo'"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto, Rol_idRol FROM Usuario WHERE Estado = 'Inactivo'"
     else:
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto, Rol_idRol FROM Usuario"
 
     cursor.execute(query)
     empleados = [
-        {
-            "id": row.idUsuario,
-            "nombre": f"{row.nombres} {row.paterno} {row.materno}",
-            "puesto": row.puesto
-        } for row in cursor.fetchall()
-    ]
+    {
+        "id": row.idUsuario,
+        "nombre": f"{row.nombres} {row.paterno} {row.materno}",
+        "puesto": row.puesto,
+        "Rol_idRol": row.Rol_idRol  # ✅ Aquí está la clave para que JS lo detecte
+    } for row in cursor.fetchall()
+]
+
     conn.close()
     return jsonify(empleados)
 

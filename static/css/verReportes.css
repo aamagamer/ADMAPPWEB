@@ -1,0 +1,177 @@
+/* Estilos generales */
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f7f9fc;
+  color: #333;
+}
+
+/* Header */
+header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 15px 0;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.logo {
+  height: 50px;
+  margin-right: 15px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+/* Contenedor principal */
+.main-container {
+  padding: 2rem;
+  font-family: "Arial", sans-serif;
+}
+
+/* Contenedor de contenido */
+.content-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.info-container {
+  min-height: 300px;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Estilos para cards de reportes (puedes personalizar según necesites) */
+.reporte-card {
+  background-color: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 2px solid #3498db33;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.reporte-card:hover {
+  transform: translateY(-4px);
+  border-color: #2980b9;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.reporte-titulo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.reporte-detalle {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.4rem;
+}
+
+.reporte-etiqueta {
+  font-weight: bold;
+  color: #666;
+}
+
+/* Botón Regresar */
+.back-button {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.back-button i {
+  font-size: 18px;
+}
+
+.reporte-card {
+  position: relative;
+  padding-bottom: 40px; /* espacio para el botón abajo */
+}
+
+.reporte-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.delete-reporte-btn {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  color: #e74c3c; /* Rojo fuerte */
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  border-radius: 50%;
+}
+
+.delete-reporte-btn:hover {
+  background-color: rgba(231, 76, 60, 0.15);
+  transform: translateX(-50%) scale(1.2);
+}
+
+.reporte-detalle {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word; /* agrega esto si lo anterior no basta */
+}
+

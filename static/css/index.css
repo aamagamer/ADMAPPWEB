@@ -1,0 +1,284 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header grande */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 40px 0; /* Más padding para hacerlo más grande */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 180px; /* Altura fija para el header */
+            display: flex;
+            align-items: center; /* Centrado vertical */
+        }
+        
+        .header-container {
+            display: flex;
+            flex-direction: column; /* Cambio a columna */
+            align-items: center; /* Centrado horizontal */
+            justify-content: center; /* Centrado vertical */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        
+        .logo {
+            width: 50%; /* Logo más grande */
+            height: 25%;
+            margin-bottom: 15px; 
+            max-height: 25%;/* Espacio entre logo y texto */
+            max-width: 25%;
+        }
+        
+        h1 {
+            font-size: 28px; /* Texto más grande */
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+
+
+        
+        /* Contenedor principal */
+        .main-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* Formulario de login */
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-top: -30px; /* Levanta el formulario un poco */
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-size: 22px;
+        }
+
+        h3{
+            text-align: center;
+            margin-bottom: 30px;
+            color: #546373;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #2c3e50;
+            outline: none;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .login-button:hover {
+            background-color: #1a252f;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .forgot-password a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+      /* Estilos específicos para el modal de credenciales */
+.modal-credenciales {
+  display: none;
+  position: fixed;
+  z-index: 1200; /* Mayor que otros modales */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-credenciales-contenido {
+  background-color: #ffffff; /* Color solicitado */
+  margin: 15% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.4);
+  color: rgb(33, 74, 157);
+  animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-credenciales-icono {
+  font-size: 60px;
+  color: #ff0000;
+  margin-bottom: 15px;
+}
+
+.modal-credenciales-titulo {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.modal-credenciales-texto {
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.modal-credenciales-boton {
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.modal-credenciales-boton:hover {
+  background-color: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}  
+
+/* Estilos para el modal de recuperación */
+.modal-recuperacion {
+  display: none;
+  position: fixed;
+  z-index: 1300;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-recuperacion-contenido {
+  background-color: #ffffff;
+  margin: 15% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.4s ease-out;
+  border-top: 5px solid #040538;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-recuperacion-icono {
+  font-size: 60px;
+  color: #050c58;
+  margin-bottom: 15px;
+}
+
+.modal-recuperacion-titulo {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #050c58;
+}
+
+.modal-recuperacion-texto {
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.modal-recuperacion-boton {
+  background-color: #17239e;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.modal-recuperacion-boton:hover {
+  background-color: #0f199b;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+        

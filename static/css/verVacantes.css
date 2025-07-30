@@ -1,0 +1,134 @@
+/* Estilos para la nueva página */
+.content-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.page-title {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.info-container {
+  min-height: 300px;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.main-container {
+  padding: 2rem;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f7f9fc;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.info-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.vacante-card {
+  background-color: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 2px solid #3498db33; /* Borde azul claro con transparencia */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.vacante-card:hover {
+  transform: translateY(-4px);
+  border-color: #2980b9; /* Azul más fuerte al pasar el mouse */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.vacante-titulo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.vacante-area {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #5a5a5a;
+  margin-bottom: 0.8rem;
+}
+
+.vacante-detalle {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.4rem;
+}
+
+.vacante-etiqueta {
+  font-weight: bold;
+  color: #666;
+}
+
+.btn-conseguir {
+  margin-top: 12px;
+  background-color: #0b1c68;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-conseguir:hover {
+  background-color: #01001b;
+}
+
+.menu-button {
+  position: absolute;
+  left: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.menu-button i {
+  font-size: 18px;
+}
+
+a{
+  text-decoration: none;
+}
+
+header{
+  position: relative;
+}
