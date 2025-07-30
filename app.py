@@ -9,11 +9,24 @@ from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from apscheduler.schedulers.background import BackgroundScheduler
+from functools import wraps
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
 app.secret_key = 'clave_secreta_segura'
+
+
+def requiere_rol(rol_permitido):
+    def decorador(f):
+        @wraps(f)
+        def funcion_envuelta(*args, **kwargs):
+            if 'id_usuario' not in session or session.get('rol') != rol_permitido:
+                return redirect(url_for('index'))  # Puedes cambiar a 'login' o 'no_autorizado'
+            return f(*args, **kwargs)
+        return funcion_envuelta
+    return decorador
+
 
 
 def get_connection():
@@ -266,20 +279,20 @@ def login():
                     conn.commit()
 
             # Guardar en sesión
+            rol_normalizado = row[2].strip().lower()
             session['id_usuario'] = row[0]
-            session['rol'] = row[2].strip()
+            session['rol'] = rol_normalizado
 
-            # Determinar redirección según rol
             rutas = {
-                'Empleado': '/empleado',
-                'RH': '/rh',
-                'Administrador': '/admin',
-                'Lider Area': '/lider'
+                'empleado': '/empleado',
+                'rh': '/rh',
+                'administrador': '/admin',
+                'lider area': '/lider'
             }
 
             return jsonify({
                 "success": True,
-                "redirect": rutas.get(session['rol'], "/"),
+                "redirect": rutas.get(rol_normalizado, "/"),
                 "idUsuario": row[0]
             })
 
@@ -295,28 +308,25 @@ def login():
 # Rutas protegidas según el rol del usuario
 
 @app.route('/admin')
+@requiere_rol('administrador')
 def admin():
-    if 'id_usuario' not in session or session.get('rol') != 'Administrador':
-        return redirect(url_for('index'))
     return send_from_directory('.', 'admin.html')
 
 @app.route('/empleado')
+@requiere_rol('empleado')
 def empleado():
-    if 'id_usuario' not in session or session.get('rol') != 'Empleado':
-        return redirect(url_for('index'))
     return send_from_directory('.', 'empleado.html')
 
 @app.route('/rh')
+@requiere_rol('rh')
 def rh():
-    if 'id_usuario' not in session or session.get('rol') != 'RH':
-        return redirect(url_for('index'))
     return send_from_directory('.', 'rh.html')
 
 @app.route('/lider')
+@requiere_rol('lider area')
 def lider():
-    if 'id_usuario' not in session or session.get('rol') != 'Lider Area':
-        return redirect(url_for('index'))
     return send_from_directory('.', 'lider.html')
+
 
 
 @app.route('/api/empleados', methods=['GET'])
@@ -326,27 +336,22 @@ def obtener_empleados():
     cursor = conn.cursor()
 
     if estado == 'activos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto, rol_idrol FROM Usuario WHERE Estado = 'Activo'"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Activo'"
     elif estado == 'inactivos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto, rol_idrol FROM Usuario WHERE Estado = 'Inactivo'"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario WHERE Estado = 'Inactivo'"
     else:
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto, rol_idrol FROM Usuario"
+        query = "SELECT idUsuario, nombres, paterno, materno, puesto FROM Usuario"
 
     cursor.execute(query)
-
     empleados = [
         {
             "id": row.idUsuario,
             "nombre": f"{row.nombres} {row.paterno} {row.materno}",
-            "puesto": row.puesto,
-            "rolId": row.rol_idrol  # 👈 ahora sí puedes identificar admins con rolId === 2
-        }
-        for row in cursor.fetchall()
+            "puesto": row.puesto
+        } for row in cursor.fetchall()
     ]
-
     conn.close()
     return jsonify(empleados)
-
 
 @app.route('/api/actualizarEstadoSolicitud', methods=['POST'])
 def actualizar_estado_solicitud():
