@@ -37,7 +37,7 @@
 
     <div class="welcome-section">
       <div class="welcome-message">
-        ¡Hola <span id="employee-name"></span>!
+        ¡Hola <span id="employee-name">Juan Pérez</span>!
       </div>
       <p>¿Qué deseas hacer hoy?</p>
     </div>
@@ -878,78 +878,158 @@
     </div>
 
 
-
 <script>
-  let empleadosVisibles = []; 
-  function toggleAreas(context = "") {
-    const prefix = context ? context + "-" : "";
-    const contenedor = document.getElementById(`${prefix}checkbox-areas`);
-    const boton = document.getElementById(`${prefix}toggle-areas`);
+  // ===== VARIABLES GLOBALES =====
+let empleadosVisibles = []
+let camposSeleccionados = []
+let empleadosSeleccionados = []
 
-    if (!contenedor || !boton) return;
+// Campos disponibles para exportación
+const camposExportacion = [
+  { id: "idUsuario", nombre: "ID Usuario" },
+  { id: "TipoRol", nombre: "Tipo de Rol" },
+  { id: "Areas", nombre: "Área" },
+  { id: "Nombres", nombre: "Nombres" },
+  { id: "Paterno", nombre: "Apellido Paterno" },
+  { id: "Materno", nombre: "Apellido Materno" },
+  { id: "FechaNacimiento", nombre: "Fecha Nacimiento" },
+  { id: "Direccion", nombre: "Dirección" },
+  { id: "CodigoPostal", nombre: "Código Postal" },
+  { id: "Correo", nombre: "Correo Electrónico" },
+  { id: "NSS", nombre: "Número de Seguro Social" },
+  { id: "Telefono", nombre: "Teléfono" },
+  { id: "FechaIngreso", nombre: "Fecha Ingreso" },
+  { id: "RFC", nombre: "RFC" },
+  { id: "Curp", nombre: "CURP" },
+  { id: "Puesto", nombre: "Puesto" },
+  { id: "NombreContactoEmergencia", nombre: "Contacto Emergencia" },
+  { id: "TelefonoEmergencia", nombre: "Teléfono Emergencia" },
+  { id: "Parentesco", nombre: "Parentesco" },
+  { id: "FechaBaja", nombre: "Fecha Baja" },
+  { id: "ComentarioSalida", nombre: "Comentario Salida" },
+  { id: "Estado", nombre: "Estado" },
+  { id: "SueldoDiario", nombre: "Sueldo Diario" },
+  { id: "SueldoSemanal", nombre: "Sueldo Semanal" },
+  { id: "BonoSemanal", nombre: "Bono Semanal" },
+  { id: "Vacaciones", nombre: "Vacaciones" },
+  { id: "DiasDisponibles", nombre: "Dias Disponibles" },
+]
 
-    if (contenedor.classList.contains("abierto")) {
-      contenedor.classList.remove("abierto");
-      boton.textContent = "Mostrar Áreas ▼";
-    } else {
-      contenedor.classList.add("abierto");
-      boton.textContent = "Ocultar Áreas ▲";
-    }
+// ===== FUNCIONES DE UTILIDAD =====
+function toggleAreas(context = "") {
+  const prefix = context ? context + "-" : ""
+  const contenedor = document.getElementById(`${prefix}checkbox-areas`)
+  const boton = document.getElementById(`${prefix}toggle-areas`)
+
+  if (!contenedor || !boton) return
+
+  if (contenedor.classList.contains("abierto")) {
+    contenedor.classList.remove("abierto")
+    boton.textContent = "Mostrar Áreas ▼"
+  } else {
+    contenedor.classList.add("abierto")
+    boton.textContent = "Ocultar Áreas ▲"
   }
+}
 
-  function verificarSesion() {
-    const idUsuario = localStorage.getItem("idUsuario");
+// Verificar si el usuario está logueado
+function verificarSesion() {
+  const idUsuario = localStorage.getItem("idUsuario")
+  if (!idUsuario) {
+    window.location.href = "index.html"
+  }
+  return idUsuario
+}
+
+// Función para cargar notificaciones
+async function cargarNotificaciones() {
+  try {
+    const idUsuario = localStorage.getItem("idUsuario")
     if (!idUsuario) {
-      window.location.href = "index.html";
+      console.error("No se encontró idUsuario en localStorage")
+      return
     }
-    return idUsuario;
-  }
 
-  async function cargarNotificaciones() {
-    try {
-      const idUsuario = localStorage.getItem("idUsuario");
-      if (!idUsuario) return;
-
-      const response = await fetch(`/api/totalSolicitudes/${idUsuario}`);
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
-      const data = await response.json();
-      const badge = document.getElementById("notificacion-solicitudes");
-      if (!badge) return;
-
-      badge.textContent = data.total > 0 ? data.total : "";
-      badge.style.display = data.total > 0 ? "inline-block" : "none";
-    } catch (error) {
-      console.error("Error al cargar notificaciones:", error);
+    const response = await fetch(`/api/totalSolicitudes/${idUsuario}`)
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`)
     }
-  }
 
-  function cargarEmpleadosPorEstado() {
-  const estadoSeleccionado = document.getElementById("filtro-estado").value;
-  const termino = document.getElementById("busquedaEmpleado").value.toLowerCase();
+    const data = await response.json()
+    console.log("Datos de notificaciones:", data)
+
+    const badge = document.getElementById("notificacion-solicitudes")
+    if (!badge) {
+      console.warn("Elemento badge no encontrado")
+      return
+    }
+
+    if (data.total > 0) {
+      badge.textContent = data.total
+      badge.style.display = "inline-block"
+    } else {
+      badge.style.display = "none"
+    }
+  } catch (error) {
+    console.error("Error al cargar notificaciones:", error)
+  }
+}
+
+function cargarNombreUsuario(idUsuario) {
+  fetch("/api/usuario/nombre", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ idUsuario: idUsuario }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Error al obtener el nombre del usuario")
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.error) {
+        console.error(data.error)
+        document.getElementById("employee-name").textContent = "Administrador"
+      } else {
+        let nombreCompleto = data.nombres || ""
+        if (data.paterno) nombreCompleto += ` ${data.paterno}`
+        if (data.materno) nombreCompleto += ` ${data.materno}`
+
+        document.getElementById("employee-name").textContent = nombreCompleto.trim() || "Administrador"
+      }
+    })
+    .catch((error) => {
+      console.error("Error al cargar nombre:", error)
+      document.getElementById("employee-name").textContent = "Administrador"
+    })
+}
+
+function cargarEmpleadosPorEstado() {
+  const estadoSeleccionado = document.getElementById("filtro-estado").value
+  const termino = document.getElementById("busquedaEmpleado").value.toLowerCase()
 
   fetch(`/api/empleados?estado=${estadoSeleccionado}`)
     .then((response) => response.json())
     .then((data) => {
       const empleadosFiltrados = data.filter(
-        (emp) =>
-          emp.id.toString().includes(termino) ||
-          emp.nombre.toLowerCase().includes(termino)
-      );
+        (emp) => emp.id.toString().includes(termino) || emp.nombre.toLowerCase().includes(termino),
+      )
 
-      empleadosVisibles = empleadosFiltrados;
+      empleadosVisibles = empleadosFiltrados
 
-
-      const tbody = document.getElementById("empleados-body");
-      tbody.innerHTML = "";
+      const tbody = document.getElementById("empleados-body")
+      tbody.innerHTML = ""
 
       if (empleadosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
-        return;
+        tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`
+        return
       }
 
       empleadosFiltrados.forEach((emp) => {
-        const row = document.createElement("tr");
+        const row = document.createElement("tr")
         row.innerHTML = `
           <td>${emp.id}</td>
           <td>${emp.nombre}</td>
@@ -965,117 +1045,43 @@
               <i class="bi bi-trash"></i>
             </button>
           </td>
-        `;
-        tbody.appendChild(row);
-      });
+        `
+        tbody.appendChild(row)
+      })
     })
     .catch((error) => {
-      console.error("Error al cargar empleados:", error);
-    });
+      console.error("Error al cargar empleados:", error)
+    })
 }
 
-// ✅ Reemplaza buscarEmpleado por esta versión:
 function buscarEmpleado() {
-  cargarEmpleadosPorEstado(); // ahora la búsqueda se combina con el filtro actual
+  cargarEmpleadosPorEstado()
 }
 
+function verEmpleado(id) {
+  document.body.classList.add("no-scroll")
+  fetch(`/api/empleado/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Error al cargar datos del empleado")
+      return res.json()
+    })
+    .then((data) => {
+      const modalBody = document.getElementById("modal-body")
 
-
-
-  // ✅ INICIALIZACIÓN
-  document.addEventListener("DOMContentLoaded", function () {
-    const idUsuario = verificarSesion();
-    cargarNotificaciones();
-    setInterval(cargarNotificaciones, 1200000);
-
-    // Cargar nombre del usuario
-    if (idUsuario) {
-      cargarNombreUsuario(idUsuario);
-    }
-
-// Eventos
-  document.getElementById("filtro-estado").addEventListener("change", cargarEmpleadosPorEstado);
-  document.getElementById("busquedaEmpleado").addEventListener("input", buscarEmpleado);
-
-  // Carga inicial
-  cargarEmpleadosPorEstado();
-});
-
-  
-
-      function cargarNombreUsuario(idUsuario) {
-        fetch("/api/usuario/nombre", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idUsuario: idUsuario }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Error al obtener el nombre del usuario");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.error) {
-              console.error(data.error);
-              document.getElementById("employee-name").textContent =
-                "Administrador";
-            } else {
-              // Formatear el nombre completo manejando casos donde falte materno
-              let nombreCompleto = data.nombres || "";
-              if (data.paterno) nombreCompleto += ` ${data.paterno}`;
-              if (data.materno) nombreCompleto += ` ${data.materno}`;
-
-              document.getElementById("employee-name").textContent =
-                nombreCompleto.trim() || "Administrador";
-            }
-          })
-          .catch((error) => {
-            console.error("Error al cargar nombre:", error);
-            document.getElementById("employee-name").textContent =
-              "Administrador";
-          });
+      const renderField = (label, value) => {
+        const texto =
+          value === null || value === undefined || value === "" || value === "null" ? "Sin información" : value
+        return `<p><strong>${label}:</strong> ${texto}</p>`
       }
 
-      
+      const areasTexto =
+        data.Areas && data.Areas.length > 0 ? data.Areas.map((area) => area.NombreArea).join(", ") : "Sin información"
 
-      function verEmpleado(id) {
-        document.body.classList.add("no-scroll");
-        fetch(`/api/empleado/${id}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Error al cargar datos del empleado");
-            return res.json();
-          })
-          .then((data) => {
-            const modalBody = document.getElementById("modal-body");
-
-            const renderField = (label, value) => {
-              const texto =
-                value === null ||
-                value === undefined ||
-                value === "" ||
-                value === "null"
-                  ? "Sin información"
-                  : value;
-              return `<p><strong>${label}:</strong> ${texto}</p>`;
-            };
-
-            // Construir una cadena de texto con todas las áreas
-            const areasTexto =
-              data.Areas && data.Areas.length > 0
-                ? data.Areas.map((area) => area.NombreArea).join(", ")
-                : "Sin información";
-
-            modalBody.innerHTML = `
+      modalBody.innerHTML = `
         ${renderField("ID", data.idUsuario)}
         ${renderField("Rol", data.TipoRol)}
         ${renderField("Áreas", areasTexto)}
-        ${renderField(
-          "Nombre Completo",
-          `${data.Nombres} ${data.Paterno} ${data.Materno}`
-        )}
+        ${renderField("Nombre Completo", `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
         ${renderField("Fecha Nacimiento", data.FechaNacimiento)}
         ${renderField("Dirección", data.Direccion)}
         ${renderField("Código Postal", data.CodigoPostal)}
@@ -1098,496 +1104,278 @@ function buscarEmpleado() {
         ${renderField("Bono Semanal", data.BonoSemanal)}
         ${renderField("Vacaciones", data.Vacaciones)}
         ${renderField("Vacaciones disponibles", data.DiasDisponibles)}
-      `;
+      `
 
-            document.getElementById("modal").classList.remove("hidden");
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            alert("Error al cargar los datos del empleado");
-          });
-      }
+      document.getElementById("modal").classList.remove("hidden")
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+      alert("Error al cargar los datos del empleado")
+    })
+}
 
-      function cerrarModal() {
-        document.getElementById("modal").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
-      }
+function cerrarModal() {
+  document.getElementById("modal").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+}
 
-      function abrirModalAltaEmpleado() {
-        // Mostrar el modal
-        document
-          .getElementById("add-employee-modal")
-          .classList.remove("hidden");
-        document.body.classList.add("no-scroll");
-        // Llenar roles
-        fetch("/api/roles")
-          .then((res) => res.json())
-          .then((data) => {
-            const selectRol = document.getElementById("tipoRol");
-            selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-            data.forEach((rol) => {
-              const option = document.createElement("option");
-              option.value = rol.idRol;
-              option.textContent = rol.TipoRol;
-              selectRol.appendChild(option);
-            });
-          });
+function abrirModalAltaEmpleado() {
+  document.getElementById("add-employee-modal").classList.remove("hidden")
+  document.body.classList.add("no-scroll")
 
-        // Llenar áreas como checkboxes
-        fetch("/api/areas")
-          .then((res) => res.json())
-          .then((data) => {
-            const container = document.getElementById("checkbox-areas");
-            container.innerHTML = "";
+  // Llenar roles
+  fetch("/api/roles")
+    .then((res) => res.json())
+    .then((data) => {
+      const selectRol = document.getElementById("tipoRol")
+      selectRol.innerHTML = '<option value="">Seleccione un rol</option>'
+      data.forEach((rol) => {
+        const option = document.createElement("option")
+        option.value = rol.idRol
+        option.textContent = rol.TipoRol
+        selectRol.appendChild(option)
+      })
+    })
 
-            data.forEach((area) => {
-              const item = document.createElement("div");
-              item.className = "area-item";
+  // Llenar áreas como checkboxes
+  fetch("/api/areas")
+    .then((res) => res.json())
+    .then((data) => {
+      const container = document.getElementById("checkbox-areas")
+      container.innerHTML = ""
 
-              const label = document.createElement("label");
-              label.textContent = area.NombreArea;
-              label.className = "area-label";
+      data.forEach((area) => {
+        const item = document.createElement("div")
+        item.className = "area-item"
 
-              const checkbox = document.createElement("input");
-              checkbox.type = "checkbox";
-              checkbox.name = "areas";
-              checkbox.value = area.idArea;
-              checkbox.className = "area-checkbox";
+        const label = document.createElement("label")
+        label.textContent = area.NombreArea
+        label.className = "area-label"
 
-              item.appendChild(label);
-              item.appendChild(checkbox);
+        const checkbox = document.createElement("input")
+        checkbox.type = "checkbox"
+        checkbox.name = "areas"
+        checkbox.value = area.idArea
+        checkbox.className = "area-checkbox"
 
-              container.appendChild(item);
-            });
-          });
-      }
+        item.appendChild(label)
+        item.appendChild(checkbox)
 
-      function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
-        fetch("/api/areas")
-          .then((res) => res.json())
-          .then((areas) => {
-            const container = document.getElementById("edit-checkbox-areas");
-            container.innerHTML = "";
+        container.appendChild(item)
+      })
+    })
+}
 
-            areas.forEach((area) => {
-              const wrapper = document.createElement("div");
-              wrapper.className = "area-item";
+function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
+  fetch("/api/areas")
+    .then((res) => res.json())
+    .then((areas) => {
+      const container = document.getElementById("edit-checkbox-areas")
+      container.innerHTML = ""
 
-              const checkbox = document.createElement("input");
-              checkbox.type = "checkbox";
-              checkbox.name = "areas";
-              checkbox.value = area.idArea;
-              checkbox.id = `area-${area.idArea}`;
-              checkbox.checked = areasSeleccionadas.includes(area.idArea);
-              checkbox.className = "area-checkbox";
+      areas.forEach((area) => {
+        const wrapper = document.createElement("div")
+        wrapper.className = "area-item"
 
-              const label = document.createElement("label");
-              label.htmlFor = checkbox.id;
-              label.className = "area-label";
-              label.textContent = area.NombreArea;
+        const checkbox = document.createElement("input")
+        checkbox.type = "checkbox"
+        checkbox.name = "areas"
+        checkbox.value = area.idArea
+        checkbox.id = `area-${area.idArea}`
+        checkbox.checked = areasSeleccionadas.includes(area.idArea)
+        checkbox.className = "area-checkbox"
 
-              wrapper.appendChild(label);
-              wrapper.appendChild(checkbox);
+        const label = document.createElement("label")
+        label.htmlFor = checkbox.id
+        label.className = "area-label"
+        label.textContent = area.NombreArea
 
-              container.appendChild(wrapper);
-            });
-          });
-      }
+        wrapper.appendChild(label)
+        wrapper.appendChild(checkbox)
 
-      function cerrarModalAltaEmpleado() {
-        document.getElementById("add-employee-modal").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
-      }
+        container.appendChild(wrapper)
+      })
+    })
+}
 
-      //Dar de alta a empleado
-      document
-        .getElementById("employee-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
+function cerrarModalAltaEmpleado() {
+  document.getElementById("add-employee-modal").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+}
 
-          const fechaIngreso = document.getElementById("fechaIngreso").value;
-          const diasVacaciones = calcularDiasVacaciones(fechaIngreso);
+function formatoFechaParaInput(fecha) {
+  if (!fecha) return ""
 
-          const contraseña = document.getElementById("contraseña").value;
-          const confirmarContraseña = document.getElementById(
-            "confirmarContraseña"
-          ).value;
-
-          if (contraseña !== confirmarContraseña) {
-            alert("Las contraseñas no coinciden");
-            return;
-          }
-
-          const formData = new FormData(this);
-          const empleadoData = {};
-
-          formData.forEach((value, key) => {
-            empleadoData[key] = value;
-          });
-
-          // Obtener las áreas seleccionadas (checkboxes)
-          const areasSeleccionadas = Array.from(
-            document.querySelectorAll('input[name="areas"]:checked')
-          ).map((cb) => parseInt(cb.value));
-
-          if (areasSeleccionadas.length === 0) {
-            alert("Debes seleccionar al menos un área.");
-            return;
-          }
-
-          empleadoData.areas = areasSeleccionadas;
-
-          // Mapear y limpiar campos adicionales
-          empleadoData.rol_id = empleadoData.tipoRol;
-          delete empleadoData.tipoRol;
-          delete empleadoData.nombreArea; // ← ya no se usa
-
-          // Agregar días de vacaciones
-          empleadoData.Vacaciones = diasVacaciones;
-
-          // Convertir a número
-          empleadoData.idUsuario = Number(empleadoData.idUsuario);
-          empleadoData.nss = Number(empleadoData.nss);
-          empleadoData.telefono = Number(empleadoData.telefono);
-          empleadoData.telefonoEmergencia = Number(
-            empleadoData.telefonoEmergencia
-          );
-          empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
-          empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
-          empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
-          empleadoData.Vacaciones = Number(empleadoData.Vacaciones);
-          empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles);
-
-          // Validaciones finales
-          if (
-            isNaN(empleadoData.idUsuario) ||
-            isNaN(empleadoData.nss) ||
-            isNaN(empleadoData.telefono) ||
-            isNaN(empleadoData.telefonoEmergencia) ||
-            isNaN(empleadoData.SueldoDiario) ||
-            isNaN(empleadoData.SueldoSemanal) ||
-            isNaN(empleadoData.BonoSemanal)
-          ) {
-            alert(
-              "Por favor, ingresa valores numéricos válidos en los campos requeridos."
-            );
-            return;
-          }
-
-          // Enviar al backend
-          fetch("/api/empleado", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(empleadoData),
-          })
-            .then((res) => {
-              if (!res.ok)
-                return res.json().then((data) => {
-                  throw new Error(data.error || "Error al guardar el empleado");
-                });
-              return res.json();
-            })
-            .then((data) => {
-              alert(data.mensaje);
-              cerrarModalAltaEmpleado();
-              location.reload(); // o actualiza tabla sin recargar
-            })
-            .catch((error) => {
-              console.error("Error al insertar:", error);
-              alert("Hubo un error al guardar el empleado: " + error.message);
-            });
-        });
-
-      // Alternativa para manejar zona horaria
-      function formatoFechaParaInput(fecha) {
-        if (!fecha) return "";
-
-        // Si ya está en formato YYYY-MM-DD
-        if (typeof fecha === "string" && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          return fecha;
-        }
-
-        // Parsear fecha y ajustar por zona horaria
-        const date = new Date(fecha);
-        const offset = date.getTimezoneOffset();
-        date.setMinutes(date.getMinutes() + offset);
-
-        return date.toISOString().split("T")[0];
-      }
-
-      function editarEmpleado(id) {
-        document
-          .getElementById("edit-employee-modal")
-          .classList.remove("hidden");
-        document.body.classList.add("no-scroll");
-        fetch(`/api/empleado/${id}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Error al obtener datos del empleado");
-            return res.json();
-          })
-          .then((data) => {
-            Promise.all([
-              fetch("/api/roles").then((res) => res.json()),
-              fetch("/api/areas").then((res) => res.json()),
-            ]).then(([roles, areas]) => {
-              const selectRol = document.getElementById("edit-tipoRol");
-
-              // Llenar roles
-              selectRol.innerHTML =
-                '<option value="">Seleccione un rol</option>';
-              roles.forEach((rol) => {
-                const option = document.createElement("option");
-                option.value = rol.idRol;
-                option.textContent = rol.TipoRol;
-                selectRol.appendChild(option);
-              });
-
-              // Llenar campos del formulario
-              document.getElementById("edit-idUsuario").value =
-                data.idUsuario || "";
-              document.getElementById("edit-tipoRol").value =
-                data.Rol_idRol || "";
-              document.getElementById("edit-nombres").value =
-                data.Nombres || "";
-              document.getElementById("edit-paterno").value =
-                data.Paterno || "";
-              document.getElementById("edit-materno").value =
-                data.Materno || "";
-              document.getElementById("edit-fechaNacimiento").value =
-                formatoFechaParaInput(data.FechaNacimiento);
-              document.getElementById("edit-direccion").value =
-                data.Direccion || "";
-              document.getElementById("edit-codigoPostal").value =
-                data.CodigoPostal || "";
-              document.getElementById("edit-correo").value = data.Correo || "";
-              document.getElementById("edit-nss").value = data.NSS || "";
-              document.getElementById("edit-telefono").value =
-                data.Telefono || "";
-              document.getElementById("edit-rfc").value = data.RFC || "";
-              document.getElementById("edit-curp").value = data.Curp || "";
-              document.getElementById("edit-puesto").value = data.Puesto || "";
-              document.getElementById("edit-nombreContactoEmergencia").value =
-                data.NombreContactoEmergencia || "";
-              document.getElementById("edit-telefonoEmergencia").value =
-                data.TelefonoEmergencia || "";
-              document.getElementById("edit-parentesco").value =
-                data.Parentesco || "";
-              document.getElementById("edit-contraseña").value =
-                data.clave || "";
-              document.getElementById("edit-confirmarContraseña").value =
-                data.clave || "";
-              document.getElementById("edit-sueldoDiario").value =
-                data.SueldoDiario || "";
-              document.getElementById("edit-sueldoSemanal").value =
-                data.SueldoSemanal || "";
-              document.getElementById("edit-bonoSemanal").value =
-                data.BonoSemanal || "";
-              document.getElementById("edit-fechaBaja").value =
-                formatoFechaParaInput(data.FechaBaja);
-              document.getElementById("edit-comentarioSalida").value =
-                data.ComentarioSalida || "";
-
-              const fechaIngresoInput =
-                document.getElementById("edit-fechaIngreso");
-              fechaIngresoInput.value = formatoFechaParaInput(
-                data.FechaIngreso
-              );
-
-              const campoVacaciones =
-                document.getElementById("edit-vacaciones");
-              campoVacaciones.value =
-                data.Vacaciones != null
-                  ? data.Vacaciones
-                  : calcularDiasVacaciones(fechaIngresoInput.value);
-
-              document.getElementById("edit-diasDisponibles").value =
-                data.DiasDisponibles || 0;
-
-              // ✅ Cargar áreas como checkboxes
-              const idsDeAreas = (data.Areas || []).map((area) => area.idArea);
-              cargarAreasParaEditar(data.idUsuario, idsDeAreas);
-
-              // Recalcular vacaciones si cambia la fecha de ingreso
-              fechaIngresoInput.addEventListener("change", function () {
-                const nuevaFecha = this.value;
-                const dias = calcularDiasVacaciones(nuevaFecha);
-                document.getElementById("edit-vacaciones").value = dias;
-              });
-            });
-          })
-          .catch((error) => {
-            console.error("Error al cargar datos del empleado:", error);
-            alert("No se pudieron cargar los datos del empleado.");
-          });
-      }
-
-      function cerrarModalEditarEmpleado() {
-        document.getElementById("edit-employee-modal").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
-      }
-
-
-
-      document
-        .getElementById("edit-employee-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const contraseña = document.getElementById("edit-contraseña").value;
-          const confirmar = document.getElementById(
-            "edit-confirmarContraseña"
-          ).value;
-
-          if (contraseña !== confirmar) {
-            alert("Las contraseñas no coinciden");
-            return;
-          }
-
-          const empleadoData = {
-            idUsuario: Number(document.getElementById("edit-idUsuario").value),
-            rol_id: document.getElementById("edit-tipoRol").value,
-            nombres: document.getElementById("edit-nombres").value,
-            paterno: document.getElementById("edit-paterno").value,
-            materno: document.getElementById("edit-materno").value,
-            fechaNacimiento: document.getElementById("edit-fechaNacimiento")
-              .value,
-            direccion: document.getElementById("edit-direccion").value,
-            codigoPostal: document.getElementById("edit-codigoPostal").value,
-            correo: document.getElementById("edit-correo").value,
-            nss: Number(document.getElementById("edit-nss").value),
-            telefono: Number(document.getElementById("edit-telefono").value),
-            fechaIngreso: document.getElementById("edit-fechaIngreso").value,
-            rfc: document.getElementById("edit-rfc").value,
-            curp: document.getElementById("edit-curp").value,
-            puesto: document.getElementById("edit-puesto").value,
-            nombreContactoEmergencia: document.getElementById(
-              "edit-nombreContactoEmergencia"
-            ).value,
-            telefonoEmergencia: Number(
-              document.getElementById("edit-telefonoEmergencia").value
-            ),
-            parentesco: document.getElementById("edit-parentesco").value,
-            contraseña: contraseña,
-            SueldoDiario: Number(
-              document.getElementById("edit-sueldoDiario").value
-            ),
-            SueldoSemanal: Number(
-              document.getElementById("edit-sueldoSemanal").value
-            ),
-            BonoSemanal: Number(
-              document.getElementById("edit-bonoSemanal").value
-            ),
-            fechaBaja: document.getElementById("edit-fechaBaja").value || null,
-            comentarioSalida:
-              document.getElementById("edit-comentarioSalida").value || null,
-            Vacaciones:
-              Number(document.getElementById("edit-vacaciones").value) || 0,
-            diasDisponibles:
-              Number(document.getElementById("edit-diasDisponibles").value) ||
-              0,
-          };
-
-          // ✅ Agregar áreas seleccionadas
-          const checkboxes = document.querySelectorAll(
-            "#edit-checkbox-areas input[name='areas']:checked"
-          );
-          const areasSeleccionadas = Array.from(checkboxes).map((cb) =>
-            parseInt(cb.value)
-          );
-          empleadoData.areas = areasSeleccionadas;
-
-          fetch(`/api/empleado/${empleadoData.idUsuario}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(empleadoData),
-          })
-            .then((res) => {
-              if (!res.ok) throw new Error("Error al actualizar el empleado");
-              return res.json();
-            })
-            .then((data) => {
-              alert(data.mensaje);
-              cerrarModalEditarEmpleado();
-              location.reload();
-            })
-            .catch((err) => {
-              console.error("Error:", err);
-              alert("Hubo un error al actualizar: " + err.message);
-            });
-        });
-
-      // Campos disponibles para exportación
-      const camposExportacion = [
-        { id: "idUsuario", nombre: "ID Usuario" },
-        { id: "TipoRol", nombre: "Tipo de Rol" },
-        { id: "Areas", nombre: "Área" },
-        { id: "Nombres", nombre: "Nombres" },
-        { id: "Paterno", nombre: "Apellido Paterno" },
-        { id: "Materno", nombre: "Apellido Materno" },
-        { id: "FechaNacimiento", nombre: "Fecha Nacimiento" },
-        { id: "Direccion", nombre: "Dirección" },
-        { id: "CodigoPostal", nombre: "Código Postal" },
-        { id: "Correo", nombre: "Correo Electrónico" },
-        { id: "NSS", nombre: "Número de Seguro Social" },
-        { id: "Telefono", nombre: "Teléfono" },
-        { id: "FechaIngreso", nombre: "Fecha Ingreso" },
-        { id: "RFC", nombre: "RFC" },
-        { id: "Curp", nombre: "CURP" },
-        { id: "Puesto", nombre: "Puesto" },
-        { id: "NombreContactoEmergencia", nombre: "Contacto Emergencia" },
-        { id: "TelefonoEmergencia", nombre: "Teléfono Emergencia" },
-        { id: "Parentesco", nombre: "Parentesco" },
-        { id: "FechaBaja", nombre: "Fecha Baja" },
-        { id: "ComentarioSalida", nombre: "Comentario Salida" },
-        { id: "Estado", nombre: "Estado" },
-        { id: "SueldoDiario", nombre: "Sueldo Diario" },
-        { id: "SueldoSemanal", nombre: "Sueldo Semanal" },
-        { id: "BonoSemanal", nombre: "Bono Semanal" },
-        { id: "Vacaciones", nombre: "Vacaciones" },
-        { id: "DiasDisponibles", nombre: "Dias Disponibles" },
-      ];
-
-      let camposSeleccionados = [];
-      let empleadosSeleccionados = [];
-
-      function abrirModalExportarExcel() {
-        document
-          .getElementById("export-excel-modal")
-          .classList.remove("hidden");
-        mostrarPasoCampos();
-        document.body.classList.add("no-scroll");
-      }
-
-function mostrarPasoEmpleados() {
-  // Guardar campos seleccionados
-  const checkboxes = document.querySelectorAll(
-    '#export-fields-container input[type="checkbox"]:checked'
-  );
-  camposSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
-
-  if (camposSeleccionados.length === 0) {
-    // Mejoramos el alert con un modal más profesional
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campos requeridos',
-      text: 'Por favor selecciona al menos un campo para exportar',
-      confirmButtonColor: '#4dabf7'
-    });
-    return;
+  if (typeof fecha === "string" && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return fecha
   }
 
-  document.getElementById("paso-campos").classList.add("oculto");
-  document.getElementById("paso-empleados").classList.add("visible");
+  const date = new Date(fecha)
+  const offset = date.getTimezoneOffset()
+  date.setMinutes(date.getMinutes() + offset)
 
-  // Mostrar solo los empleados visibles actualmente
-  const container = document.getElementById("export-employees-container");
-  container.innerHTML = "";
-  container.style.display = "grid";
-  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
-  container.style.gap = "12px";
-  container.style.padding = "16px";
-  container.style.maxHeight = "400px";
-  container.style.overflowY = "auto";
+  return date.toISOString().split("T")[0]
+}
+
+function editarEmpleado(id) {
+  document.getElementById("edit-employee-modal").classList.remove("hidden")
+  document.body.classList.add("no-scroll")
+
+  fetch(`/api/empleado/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Error al obtener datos del empleado")
+      return res.json()
+    })
+    .then((data) => {
+      Promise.all([fetch("/api/roles").then((res) => res.json()), fetch("/api/areas").then((res) => res.json())]).then(
+        ([roles, areas]) => {
+          const selectRol = document.getElementById("edit-tipoRol")
+
+          selectRol.innerHTML = '<option value="">Seleccione un rol</option>'
+          roles.forEach((rol) => {
+            const option = document.createElement("option")
+            option.value = rol.idRol
+            option.textContent = rol.TipoRol
+            selectRol.appendChild(option)
+          })
+
+          // Llenar campos del formulario
+          document.getElementById("edit-idUsuario").value = data.idUsuario || ""
+          document.getElementById("edit-tipoRol").value = data.Rol_idRol || ""
+          document.getElementById("edit-nombres").value = data.Nombres || ""
+          document.getElementById("edit-paterno").value = data.Paterno || ""
+          document.getElementById("edit-materno").value = data.Materno || ""
+          document.getElementById("edit-fechaNacimiento").value = formatoFechaParaInput(data.FechaNacimiento)
+          document.getElementById("edit-direccion").value = data.Direccion || ""
+          document.getElementById("edit-codigoPostal").value = data.CodigoPostal || ""
+          document.getElementById("edit-correo").value = data.Correo || ""
+          document.getElementById("edit-nss").value = data.NSS || ""
+          document.getElementById("edit-telefono").value = data.Telefono || ""
+          document.getElementById("edit-rfc").value = data.RFC || ""
+          document.getElementById("edit-curp").value = data.Curp || ""
+          document.getElementById("edit-puesto").value = data.Puesto || ""
+          document.getElementById("edit-nombreContactoEmergencia").value = data.NombreContactoEmergencia || ""
+          document.getElementById("edit-telefonoEmergencia").value = data.TelefonoEmergencia || ""
+          document.getElementById("edit-parentesco").value = data.Parentesco || ""
+          document.getElementById("edit-contraseña").value = data.clave || ""
+          document.getElementById("edit-confirmarContraseña").value = data.clave || ""
+          document.getElementById("edit-sueldoDiario").value = data.SueldoDiario || ""
+          document.getElementById("edit-sueldoSemanal").value = data.SueldoSemanal || ""
+          document.getElementById("edit-bonoSemanal").value = data.BonoSemanal || ""
+          document.getElementById("edit-fechaBaja").value = formatoFechaParaInput(data.FechaBaja)
+          document.getElementById("edit-comentarioSalida").value = data.ComentarioSalida || ""
+
+          const fechaIngresoInput = document.getElementById("edit-fechaIngreso")
+          fechaIngresoInput.value = formatoFechaParaInput(data.FechaIngreso)
+
+          const campoVacaciones = document.getElementById("edit-vacaciones")
+          campoVacaciones.value =
+            data.Vacaciones != null ? data.Vacaciones : calcularDiasVacaciones(fechaIngresoInput.value)
+
+          document.getElementById("edit-diasDisponibles").value = data.DiasDisponibles || 0
+
+          const idsDeAreas = (data.Areas || []).map((area) => area.idArea)
+          cargarAreasParaEditar(data.idUsuario, idsDeAreas)
+
+          fechaIngresoInput.addEventListener("change", function () {
+            const nuevaFecha = this.value
+            const dias = calcularDiasVacaciones(nuevaFecha)
+            document.getElementById("edit-vacaciones").value = dias
+          })
+        },
+      )
+    })
+    .catch((error) => {
+      console.error("Error al cargar datos del empleado:", error)
+      alert("No se pudieron cargar los datos del empleado.")
+    })
+}
+
+function cerrarModalEditarEmpleado() {
+  document.getElementById("edit-employee-modal").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+}
+
+function abrirModalExportarExcel() {
+  document.getElementById("export-excel-modal").classList.remove("hidden")
+  mostrarPasoCampos()
+  document.body.classList.add("no-scroll")
+}
+
+function mostrarPasoCampos() {
+  document.getElementById("paso-empleados").classList.remove("visible")
+  document.getElementById("paso-campos").classList.remove("oculto")
+
+  const container = document.getElementById("export-fields-container")
+  container.innerHTML = ""
+  container.style.display = "grid"
+  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))"
+  container.style.gap = "12px"
+  container.style.padding = "12px"
+
+  camposExportacion.forEach((campo) => {
+    const div = document.createElement("div")
+    div.style.display = "flex"
+    div.style.alignItems = "center"
+    div.style.gap = "10px"
+    div.style.padding = "8px"
+    div.style.borderRadius = "6px"
+    div.style.backgroundColor = "#f8f9fa"
+    div.style.transition = "all 0.2s ease"
+
+    div.onmouseenter = () => {
+      div.style.backgroundColor = "#e9ecef"
+      div.style.transform = "translateY(-2px)"
+    }
+    div.onmouseleave = () => {
+      div.style.backgroundColor = "#f8f9fa"
+      div.style.transform = "none"
+    }
+
+    const checkbox = document.createElement("input")
+    checkbox.type = "checkbox"
+    checkbox.id = `export-${campo.id}`
+    checkbox.value = campo.id
+    checkbox.checked = true
+    checkbox.style.width = "18px"
+    checkbox.style.height = "18px"
+    checkbox.style.cursor = "pointer"
+    checkbox.style.accentColor = "#4dabf7"
+
+    const label = document.createElement("label")
+    label.htmlFor = `export-${campo.id}`
+    label.textContent = campo.nombre
+    label.style.cursor = "pointer"
+    label.style.fontSize = "14px"
+    label.style.userSelect = "none"
+    label.style.color = "#495057"
+
+    div.appendChild(checkbox)
+    div.appendChild(label)
+    container.appendChild(div)
+  })
+}
+
+function mostrarPasoEmpleados() {
+  const checkboxes = document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked')
+  camposSeleccionados = Array.from(checkboxes).map((cb) => cb.value)
+
+  if (camposSeleccionados.length === 0) {
+    alert("Por favor selecciona al menos un campo para exportar")
+    return
+  }
+
+  document.getElementById("paso-campos").classList.add("oculto")
+  document.getElementById("paso-empleados").classList.add("visible")
+
+  const container = document.getElementById("export-employees-container")
+  container.innerHTML = ""
+  container.style.display = "grid"
+  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))"
+  container.style.gap = "12px"
+  container.style.padding = "16px"
+  container.style.maxHeight = "400px"
+  container.style.overflowY = "auto"
 
   if (empleadosVisibles.length === 0) {
     container.innerHTML = `
@@ -1601,452 +1389,637 @@ function mostrarPasoEmpleados() {
         <i class="fas fa-users-slash" style="font-size: 24px; margin-bottom: 8px;"></i>
         <p>No hay empleados para exportar</p>
       </div>
-    `;
-    return;
+    `
+    return
   }
 
   // Añadir select all/none
-  const selectAllDiv = document.createElement("div");
-  selectAllDiv.style.gridColumn = "1 / -1";
-  selectAllDiv.style.display = "flex";
-  selectAllDiv.style.gap = "12px";
-  selectAllDiv.style.marginBottom = "8px";
-  
-  const selectAllBtn = document.createElement("button");
-  selectAllBtn.textContent = "Seleccionar todos";
-  selectAllBtn.style.padding = "6px 12px";
-  selectAllBtn.style.background = "#174da3";
-  selectAllBtn.style.color = "white";
-  selectAllBtn.style.border = "none";
-  selectAllBtn.style.borderRadius = "4px";
-  selectAllBtn.style.cursor = "pointer";
-  
-  const deselectAllBtn = document.createElement("button");
-  deselectAllBtn.textContent = "Quitar todos";
-  deselectAllBtn.style.padding = "6px 12px";
-  deselectAllBtn.style.background = "#f1f3f5";
-  deselectAllBtn.style.color = "#495057";
-  deselectAllBtn.style.border = "1px solid #dee2e6";
-  deselectAllBtn.style.borderRadius = "4px";
-  deselectAllBtn.style.cursor = "pointer";
-  
+  const selectAllDiv = document.createElement("div")
+  selectAllDiv.style.gridColumn = "1 / -1"
+  selectAllDiv.style.display = "flex"
+  selectAllDiv.style.gap = "12px"
+  selectAllDiv.style.marginBottom = "8px"
+
+  const selectAllBtn = document.createElement("button")
+  selectAllBtn.textContent = "Seleccionar todos"
+  selectAllBtn.style.padding = "6px 12px"
+  selectAllBtn.style.background = "#174da3"
+  selectAllBtn.style.color = "white"
+  selectAllBtn.style.border = "none"
+  selectAllBtn.style.borderRadius = "4px"
+  selectAllBtn.style.cursor = "pointer"
+
+  const deselectAllBtn = document.createElement("button")
+  deselectAllBtn.textContent = "Quitar todos"
+  deselectAllBtn.style.padding = "6px 12px"
+  deselectAllBtn.style.background = "#f1f3f5"
+  deselectAllBtn.style.color = "#495057"
+  deselectAllBtn.style.border = "1px solid #dee2e6"
+  deselectAllBtn.style.borderRadius = "4px"
+  deselectAllBtn.style.cursor = "pointer"
+
   selectAllBtn.onclick = () => {
-    document.querySelectorAll('.empleado-checkbox').forEach(cb => cb.checked = true);
-  };
-  
+    document.querySelectorAll(".empleado-checkbox").forEach((cb) => (cb.checked = true))
+    updateEmployeeCounter()
+  }
+
   deselectAllBtn.onclick = () => {
-    document.querySelectorAll('.empleado-checkbox').forEach(cb => cb.checked = false);
-  };
-  
-  selectAllDiv.appendChild(selectAllBtn);
-  selectAllDiv.appendChild(deselectAllBtn);
-  container.appendChild(selectAllDiv);
+    document.querySelectorAll(".empleado-checkbox").forEach((cb) => (cb.checked = false))
+    updateEmployeeCounter()
+  }
+
+  selectAllDiv.appendChild(selectAllBtn)
+  selectAllDiv.appendChild(deselectAllBtn)
+  container.appendChild(selectAllDiv)
 
   empleadosVisibles.forEach((emp) => {
-    const div = document.createElement("div");
-    div.style.display = "flex";
-    div.style.alignItems = "center";
-    div.style.gap = "12px";
-    div.style.padding = "10px";
-    div.style.borderRadius = "6px";
-    div.style.backgroundColor = "#f8f9fa";
-    div.style.transition = "all 0.2s ease";
+    const div = document.createElement("div")
+    div.style.display = "flex"
+    div.style.alignItems = "center"
+    div.style.gap = "12px"
+    div.style.padding = "10px"
+    div.style.borderRadius = "6px"
+    div.style.backgroundColor = "#f8f9fa"
+    div.style.transition = "all 0.2s ease"
 
-    // Efecto hover
     div.onmouseenter = () => {
-      div.style.backgroundColor = "#e9ecef";
-    };
+      div.style.backgroundColor = "#e9ecef"
+    }
     div.onmouseleave = () => {
-      div.style.backgroundColor = "#f8f9fa";
-    };
+      div.style.backgroundColor = "#f8f9fa"
+    }
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "empleado-checkbox";
-    checkbox.value = emp.id;
-    checkbox.checked = true;
-    checkbox.style.width = "18px";
-    checkbox.style.height = "18px";
-    checkbox.style.cursor = "pointer";
-    checkbox.style.accentColor = "#4dabf7";
+    const checkbox = document.createElement("input")
+    checkbox.type = "checkbox"
+    checkbox.className = "empleado-checkbox"
+    checkbox.value = emp.id
+    checkbox.checked = true
+    checkbox.style.width = "18px"
+    checkbox.style.height = "18px"
+    checkbox.style.cursor = "pointer"
+    checkbox.style.accentColor = "#4dabf7"
 
-    const label = document.createElement("label");
-    label.textContent = `${emp.id} - ${emp.nombre}`;
-    label.style.cursor = "pointer";
-    label.style.fontSize = "14px";
-    label.style.userSelect = "none";
-    label.style.color = "#495057";
-    label.style.flex = "1";
-    label.style.overflow = "hidden";
-    label.style.textOverflow = "ellipsis";
-    label.style.whiteSpace = "nowrap";
+    const label = document.createElement("label")
+    label.textContent = `${emp.id} - ${emp.nombre}`
+    label.style.cursor = "pointer"
+    label.style.fontSize = "14px"
+    label.style.userSelect = "none"
+    label.style.color = "#495057"
+    label.style.flex = "1"
+    label.style.overflow = "hidden"
+    label.style.textOverflow = "ellipsis"
+    label.style.whiteSpace = "nowrap"
 
-    div.appendChild(checkbox);
-    div.appendChild(label);
-    container.appendChild(div);
-  });
+    div.appendChild(checkbox)
+    div.appendChild(label)
+    container.appendChild(div)
+  })
 
   // Añadir contador de seleccionados
-  const counterDiv = document.createElement("div");
-  counterDiv.style.gridColumn = "1 / -1";
-  counterDiv.style.textAlign = "right";
-  counterDiv.style.fontSize = "14px";
-  counterDiv.style.color = "#6c757d";
-  counterDiv.id = "employee-counter";
-  container.appendChild(counterDiv);
-  updateEmployeeCounter();
+  const counterDiv = document.createElement("div")
+  counterDiv.style.gridColumn = "1 / -1"
+  counterDiv.style.textAlign = "right"
+  counterDiv.style.fontSize = "14px"
+  counterDiv.style.color = "#6c757d"
+  counterDiv.id = "employee-counter"
+  container.appendChild(counterDiv)
+  updateEmployeeCounter()
 
   // Actualizar contador cuando cambien los checkboxes
-  container.addEventListener('change', updateEmployeeCounter);
-  
+  container.addEventListener("change", updateEmployeeCounter)
+
   function updateEmployeeCounter() {
-    const total = empleadosVisibles.length;
-    const selected = document.querySelectorAll('.empleado-checkbox:checked').length;
-    document.getElementById('employee-counter').textContent = 
-      `${selected} de ${total} empleados seleccionados`;
+    const total = empleadosVisibles.length
+    const selected = document.querySelectorAll(".empleado-checkbox:checked").length
+    const counter = document.getElementById("employee-counter")
+    if (counter) {
+      counter.textContent = `${selected} de ${total} empleados seleccionados`
+    }
   }
 }
 
-function mostrarPasoCampos() {
-  document.getElementById("paso-empleados").classList.remove("visible");
-  document.getElementById("paso-campos").classList.remove("oculto");
+function exportarExcel() {
+  const camposSeleccionados = Array.from(
+    document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked'),
+  ).map((cb) => cb.value)
 
-  const container = document.getElementById("export-fields-container");
-  container.innerHTML = "";
-  container.style.display = "grid";
-  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
-  container.style.gap = "12px";
-  container.style.padding = "12px";
+  const checkboxes = document.querySelectorAll('#export-employees-container input[type="checkbox"]:checked')
+  const empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value)
 
-  camposExportacion.forEach((campo) => {
-    const div = document.createElement("div");
-    div.style.display = "flex";
-    div.style.alignItems = "center";
-    div.style.gap = "10px";
-    div.style.padding = "8px";
-    div.style.borderRadius = "6px";
-    div.style.backgroundColor = "#f8f9fa";
-    div.style.transition = "all 0.2s ease";
+  if (empleadosSeleccionados.length === 0 || camposSeleccionados.length === 0) {
+    alert("Por favor selecciona al menos un empleado y al menos un campo para exportar")
+    return
+  }
 
-    // Efecto hover
-    div.onmouseenter = () => {
-      div.style.backgroundColor = "#e9ecef";
-      div.style.transform = "translateY(-2px)";
-    };
-    div.onmouseleave = () => {
-      div.style.backgroundColor = "#f8f9fa";
-      div.style.transform = "none";
-    };
+  const exportBtn = document.querySelector("#paso-empleados .btn-primary")
+  const originalText = exportBtn.textContent
+  exportBtn.textContent = "Generando..."
+  exportBtn.disabled = true
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = `export-${campo.id}`;
-    checkbox.value = campo.id;
-    checkbox.checked = true;
-    checkbox.style.width = "18px";
-    checkbox.style.height = "18px";
-    checkbox.style.cursor = "pointer";
-    checkbox.style.accentColor = "#4dabf7"; // Color azul moderno
+  const promises = empleadosSeleccionados.map((id) => fetch(`/api/empleado/${id}`).then((res) => res.json()))
 
-    const label = document.createElement("label");
-    label.htmlFor = `export-${campo.id}`;
-    label.textContent = campo.nombre;
-    label.style.cursor = "pointer";
-    label.style.fontSize = "14px";
-    label.style.userSelect = "none";
-    label.style.color = "#495057";
+  Promise.all(promises)
+    .then((empleadosCompletos) => {
+      const datosExcel = empleadosCompletos.map((empleado) => {
+        const fila = {}
 
-    div.appendChild(checkbox);
-    div.appendChild(label);
-    container.appendChild(div);
-  });
+        camposSeleccionados.forEach((campo) => {
+          if (campo === "Areas" && Array.isArray(empleado.Areas)) {
+            fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ")
+          } else {
+            fila[campo] = empleado[campo] !== undefined ? empleado[campo] : ""
+          }
+        })
+
+        return fila
+      })
+
+      // Crear hoja Excel
+      const XLSX = window.XLSX // Declare XLSX variable
+      const worksheet = XLSX.utils.json_to_sheet(datosExcel, {
+        header: camposSeleccionados,
+      })
+
+      // Aplicar estilo al encabezado
+      const range = XLSX.utils.decode_range(worksheet["!ref"])
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell_address = XLSX.utils.encode_cell({ r: 0, c: C })
+        if (!worksheet[cell_address]) continue
+
+        worksheet[cell_address].s = {
+          fill: {
+            patternType: "solid",
+            fgColor: { rgb: "FFFF00" },
+          },
+          font: {
+            bold: true,
+          },
+          alignment: {
+            horizontal: "center",
+          },
+        }
+      }
+
+      // Ajustar ancho de columnas automáticamente
+      worksheet["!cols"] = camposSeleccionados.map((campo) => {
+        const maxLength = Math.max(
+          campo.length,
+          ...datosExcel.map((row) => (row[campo] ? row[campo].toString().length : 0)),
+        )
+        return { wch: maxLength + 2 }
+      })
+
+      // Crear libro y descargar
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Empleados")
+
+      XLSX.writeFile(workbook, "empleados_exportados.xlsx")
+    })
+    .catch((error) => {
+      console.error("Error al exportar a Excel:", error)
+      alert("Ocurrió un error al generar el archivo Excel: " + error.message)
+    })
+    .finally(() => {
+      exportBtn.textContent = originalText
+      exportBtn.disabled = false
+      cerrarModalExportarExcel()
+    })
 }
 
+function cerrarModalExportarExcel() {
+  document.getElementById("export-excel-modal").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+  camposSeleccionados = []
+  empleadosSeleccionados = []
+}
 
+function mostrarModalConfirmacion({
+  texto,
+  textoBotonConfirmar = "Confirmar",
+  claseBotonConfirmar = "btn-danger",
+  onConfirmar,
+  onCancelar,
+}) {
+  const modal = document.getElementById("modal-confirmacion")
+  const modalTexto = document.getElementById("modal-texto")
+  const btnConfirmar = document.getElementById("modal-confirmar")
+  const btnCancelar = document.getElementById("modal-cancelar")
 
-      function toggleSeleccionarTodos() {
-        const checkboxes = document.querySelectorAll(
-          '#export-employees-container input[type="checkbox"]'
-        );
-        const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+  modalTexto.textContent = texto
 
-        checkboxes.forEach((checkbox) => {
-          checkbox.checked = !allChecked;
-        });
+  btnConfirmar.textContent = textoBotonConfirmar
+  btnConfirmar.className = "btn " + claseBotonConfirmar
+
+  modal.classList.remove("hidden")
+
+  btnConfirmar.onclick = null
+  btnCancelar.onclick = null
+
+  btnConfirmar.onclick = () => {
+    if (typeof onConfirmar === "function") onConfirmar()
+    modal.classList.add("hidden")
+  }
+
+  btnCancelar.onclick = () => {
+    if (typeof onCancelar === "function") onCancelar()
+    modal.classList.add("hidden")
+  }
+}
+
+function mostrarModalExito() {
+  const modal = document.getElementById("modal-exito")
+  const btnCerrar = document.getElementById("btn-cerrar-exito")
+
+  modal.classList.remove("hidden")
+
+  btnCerrar.onclick = () => {
+    modal.classList.add("hidden")
+  }
+}
+
+function calcularDiasVacaciones(fechaIngreso) {
+  const hoy = new Date()
+  const ingreso = new Date(fechaIngreso)
+
+  hoy.setHours(0, 0, 0, 0)
+  ingreso.setHours(0, 0, 0, 0)
+
+  let años = hoy.getFullYear() - ingreso.getFullYear()
+  const mesActual = hoy.getMonth()
+  const diaActual = hoy.getDate()
+  const mesIngreso = ingreso.getMonth()
+  const diaIngreso = ingreso.getDate()
+
+  if (mesActual < mesIngreso || (mesActual === mesIngreso && diaActual < diaIngreso)) {
+    años--
+  }
+
+  // Tabla LFT
+  if (años < 1) return 0
+  if (años === 1) return 12
+  if (años === 2) return 14
+  if (años === 3) return 16
+  if (años === 4) return 18
+  if (años === 5) return 20
+  if (años >= 6 && años <= 10) return 22
+  if (años >= 11 && años <= 15) return 24
+  if (años >= 16 && años <= 20) return 26
+  if (años >= 21 && años <= 25) return 28
+  return 30
+}
+
+function abrirModalAgregarFestivo() {
+  document.getElementById("add-holiday-modal").classList.remove("hidden")
+  document.body.classList.add("no-scroll")
+  const today = new Date().toISOString().split("T")[0]
+  document.getElementById("fechaFestivo").value = today
+}
+
+function cerrarModalAgregarFestivo() {
+  document.getElementById("add-holiday-modal").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+}
+
+function abrirModalBajaEmpleado(idUsuario) {
+  document.body.classList.add("no-scroll")
+  fetch(`/api/empleado/${idUsuario}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("No se encontró el empleado")
+      return res.json()
+    })
+    .then((empleado) => {
+      document.getElementById("nombre-empleado-baja").textContent =
+        `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`
+      document.getElementById("id-empleado-baja").textContent = idUsuario
+      document.getElementById("baja-idUsuario").value = idUsuario
+
+      document.getElementById("modal-baja-empleado").classList.remove("hidden")
+    })
+    .catch((err) => {
+      console.error("Error al cargar empleado:", err)
+      alert("No se pudo abrir el modal de baja.")
+    })
+}
+
+function cerrarModalBajaEmpleado() {
+  document.getElementById("modal-baja-empleado").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+}
+
+function abrirModalAgregarArea() {
+  document.getElementById("add-area-modal").classList.remove("hidden")
+  document.body.classList.add("no-scroll")
+}
+
+function cerrarModalAgregarArea() {
+  document.getElementById("add-area-modal").classList.add("hidden")
+  document.body.classList.remove("no-scroll")
+}
+
+// ===== INICIALIZACIÓN =====
+document.addEventListener("DOMContentLoaded", () => {
+  const idUsuario = verificarSesion()
+  cargarNotificaciones()
+  setInterval(cargarNotificaciones, 1200000)
+
+  if (idUsuario) {
+    cargarNombreUsuario(idUsuario)
+  }
+
+  // Event listeners
+  const filtroEstado = document.getElementById("filtro-estado")
+  const busquedaEmpleado = document.getElementById("busquedaEmpleado")
+
+  if (filtroEstado) {
+    filtroEstado.addEventListener("change", cargarEmpleadosPorEstado)
+  }
+
+  if (busquedaEmpleado) {
+    busquedaEmpleado.addEventListener("input", buscarEmpleado)
+  }
+
+  // Carga inicial
+  cargarEmpleadosPorEstado()
+
+  // Event listeners para formularios
+  const employeeForm = document.getElementById("employee-form")
+  if (employeeForm) {
+    employeeForm.addEventListener("submit", function (e) {
+      e.preventDefault()
+
+      const fechaIngreso = document.getElementById("fechaIngreso").value
+      const diasVacaciones = calcularDiasVacaciones(fechaIngreso)
+
+      const contraseña = document.getElementById("contraseña").value
+      const confirmarContraseña = document.getElementById("confirmarContraseña").value
+
+      if (contraseña !== confirmarContraseña) {
+        alert("Las contraseñas no coinciden")
+        return
       }
 
- 
+      const formData = new FormData(this)
+      const empleadoData = {}
 
-      function cerrarModalExportarExcel() {
-        document.getElementById("export-excel-modal").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
-        camposSeleccionados = [];
-        empleadosSeleccionados = [];
+      formData.forEach((value, key) => {
+        empleadoData[key] = value
+      })
+
+      const areasSeleccionadas = Array.from(document.querySelectorAll('input[name="areas"]:checked')).map((cb) =>
+        Number.parseInt(cb.value),
+      )
+
+      if (areasSeleccionadas.length === 0) {
+        alert("Debes seleccionar al menos un área.")
+        return
       }
 
-      function mostrarModalConfirmacion({
-        texto,
-        textoBotonConfirmar = "Confirmar",
-        claseBotonConfirmar = "btn-danger",
-        onConfirmar,
-        onCancelar,
-      }) {
-        const modal = document.getElementById("modal-confirmacion");
-        const modalTexto = document.getElementById("modal-texto");
-        const btnConfirmar = document.getElementById("modal-confirmar");
-        const btnCancelar = document.getElementById("modal-cancelar");
+      empleadoData.areas = areasSeleccionadas
+      empleadoData.rol_id = empleadoData.tipoRol
+      delete empleadoData.tipoRol
+      delete empleadoData.nombreArea
 
-        modalTexto.textContent = texto;
+      empleadoData.Vacaciones = diasVacaciones
 
-        // Cambiar texto y clases del botón confirmar
-        btnConfirmar.textContent = textoBotonConfirmar;
-        btnConfirmar.className = "btn " + claseBotonConfirmar;
+      // Convertir a número
+      empleadoData.idUsuario = Number(empleadoData.idUsuario)
+      empleadoData.nss = Number(empleadoData.nss)
+      empleadoData.telefono = Number(empleadoData.telefono)
+      empleadoData.telefonoEmergencia = Number(empleadoData.telefonoEmergencia)
+      empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario)
+      empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal)
+      empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal)
+      empleadoData.Vacaciones = Number(empleadoData.Vacaciones)
+      empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles)
 
-        modal.classList.remove("hidden");
-
-        // Remover listeners previos
-        btnConfirmar.onclick = null;
-        btnCancelar.onclick = null;
-
-        btnConfirmar.onclick = () => {
-          if (typeof onConfirmar === "function") onConfirmar();
-          modal.classList.add("hidden");
-        };
-
-        btnCancelar.onclick = () => {
-          if (typeof onCancelar === "function") onCancelar();
-          modal.classList.add("hidden");
-        };
+      // Validaciones finales
+      if (
+        isNaN(empleadoData.idUsuario) ||
+        isNaN(empleadoData.nss) ||
+        isNaN(empleadoData.telefono) ||
+        isNaN(empleadoData.telefonoEmergencia) ||
+        isNaN(empleadoData.SueldoDiario) ||
+        isNaN(empleadoData.SueldoSemanal) ||
+        isNaN(empleadoData.BonoSemanal)
+      ) {
+        alert("Por favor, ingresa valores numéricos válidos en los campos requeridos.")
+        return
       }
 
-      function mostrarModalExito() {
-        const modal = document.getElementById("modal-exito");
-        const btnCerrar = document.getElementById("btn-cerrar-exito");
+      // Enviar al backend
+      fetch("/api/empleado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(empleadoData),
+      })
+        .then((res) => {
+          if (!res.ok)
+            return res.json().then((data) => {
+              throw new Error(data.error || "Error al guardar el empleado")
+            })
+          return res.json()
+        })
+        .then((data) => {
+          alert(data.mensaje)
+          cerrarModalAltaEmpleado()
+          location.reload()
+        })
+        .catch((error) => {
+          console.error("Error al insertar:", error)
+          alert("Hubo un error al guardar el empleado: " + error.message)
+        })
+    })
+  }
 
-        modal.classList.remove("hidden");
+  const editEmployeeForm = document.getElementById("edit-employee-form")
+  if (editEmployeeForm) {
+    editEmployeeForm.addEventListener("submit", (e) => {
+      e.preventDefault()
 
-        btnCerrar.onclick = () => {
-          modal.classList.add("hidden");
-        };
+      const contraseña = document.getElementById("edit-contraseña").value
+      const confirmar = document.getElementById("edit-confirmarContraseña").value
+
+      if (contraseña !== confirmar) {
+        alert("Las contraseñas no coinciden")
+        return
       }
 
-      function calcularDiasVacaciones(fechaIngreso) {
-        const hoy = new Date();
-        const ingreso = new Date(fechaIngreso);
-
-        // Ajustar horas para evitar problemas de zona horaria
-        hoy.setHours(0, 0, 0, 0);
-        ingreso.setHours(0, 0, 0, 0);
-
-        // Calcular diferencia exacta en años
-        let años = hoy.getFullYear() - ingreso.getFullYear();
-        const mesActual = hoy.getMonth();
-        const diaActual = hoy.getDate();
-        const mesIngreso = ingreso.getMonth();
-        const diaIngreso = ingreso.getDate();
-
-        // Ajustar si aún no cumple años en el año actual
-        if (
-          mesActual < mesIngreso ||
-          (mesActual === mesIngreso && diaActual < diaIngreso)
-        ) {
-          años--;
-        }
-
-        // Tabla LFT
-        if (años < 1) return 0; // Menos de 1 año: 0 días
-        if (años === 1) return 12; // 1 año: 12 días
-        if (años === 2) return 14; // 2 años: 14 días
-        if (años === 3) return 16; // 3 años: 16 días
-        if (años === 4) return 18; // ... y así sucesivamente
-        if (años === 5) return 20;
-        if (años >= 6 && años <= 10) return 22;
-        if (años >= 11 && años <= 15) return 24;
-        if (años >= 16 && años <= 20) return 26;
-        if (años >= 21 && años <= 25) return 28;
-        return 30; // 26+ años: 30 días
+      const empleadoData = {
+        idUsuario: Number(document.getElementById("edit-idUsuario").value),
+        rol_id: document.getElementById("edit-tipoRol").value,
+        nombres: document.getElementById("edit-nombres").value,
+        paterno: document.getElementById("edit-paterno").value,
+        materno: document.getElementById("edit-materno").value,
+        fechaNacimiento: document.getElementById("edit-fechaNacimiento").value,
+        direccion: document.getElementById("edit-direccion").value,
+        codigoPostal: document.getElementById("edit-codigoPostal").value,
+        correo: document.getElementById("edit-correo").value,
+        nss: Number(document.getElementById("edit-nss").value),
+        telefono: Number(document.getElementById("edit-telefono").value),
+        fechaIngreso: document.getElementById("edit-fechaIngreso").value,
+        rfc: document.getElementById("edit-rfc").value,
+        curp: document.getElementById("edit-curp").value,
+        puesto: document.getElementById("edit-puesto").value,
+        nombreContactoEmergencia: document.getElementById("edit-nombreContactoEmergencia").value,
+        telefonoEmergencia: Number(document.getElementById("edit-telefonoEmergencia").value),
+        parentesco: document.getElementById("edit-parentesco").value,
+        contraseña: contraseña,
+        SueldoDiario: Number(document.getElementById("edit-sueldoDiario").value),
+        SueldoSemanal: Number(document.getElementById("edit-sueldoSemanal").value),
+        BonoSemanal: Number(document.getElementById("edit-bonoSemanal").value),
+        fechaBaja: document.getElementById("edit-fechaBaja").value || null,
+        comentarioSalida: document.getElementById("edit-comentarioSalida").value || null,
+        Vacaciones: Number(document.getElementById("edit-vacaciones").value) || 0,
+        diasDisponibles: Number(document.getElementById("edit-diasDisponibles").value) || 0,
       }
 
-      // Función para abrir el modal de días festivos
-      function abrirModalAgregarFestivo() {
-        document.getElementById("add-holiday-modal").classList.remove("hidden");
-        document.body.classList.add("no-scroll");
-        const today = new Date().toISOString().split("T")[0];
-        document.getElementById("fechaFestivo").value = today;
+      const checkboxes = document.querySelectorAll("#edit-checkbox-areas input[name='areas']:checked")
+      const areasSeleccionadas = Array.from(checkboxes).map((cb) => Number.parseInt(cb.value))
+      empleadoData.areas = areasSeleccionadas
+
+      fetch(`/api/empleado/${empleadoData.idUsuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(empleadoData),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Error al actualizar el empleado")
+          return res.json()
+        })
+        .then((data) => {
+          alert(data.mensaje)
+          cerrarModalEditarEmpleado()
+          location.reload()
+        })
+        .catch((err) => {
+          console.error("Error:", err)
+          alert("Hubo un error al actualizar: " + err.message)
+        })
+    })
+  }
+
+  const formBajaEmpleado = document.getElementById("form-baja-empleado")
+  if (formBajaEmpleado) {
+    formBajaEmpleado.addEventListener("submit", function (e) {
+      e.preventDefault()
+
+      const idUsuario = document.getElementById("baja-idUsuario").value
+      const fechaBaja = document.getElementById("baja-fecha").value
+      const comentarioSalida = document.getElementById("baja-comentario").value
+
+      if (!fechaBaja || !comentarioSalida) {
+        alert("Todos los campos son obligatorios")
+        return
       }
 
-      // Función para cerrar el modal de días festivos
-      function cerrarModalAgregarFestivo() {
-        document.getElementById("add-holiday-modal").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
+      const body = {
+        fechaBaja,
+        comentarioSalida,
       }
 
-      // Función para abrir el modal de baja
-      function abrirModalBajaEmpleado(idUsuario) {
-        document.body.classList.add("no-scroll");
-        fetch(`/api/empleado/${idUsuario}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("No se encontró el empleado");
-            return res.json();
-          })
-          .then((empleado) => {
-            document.getElementById(
-              "nombre-empleado-baja"
-            ).textContent = `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`;
-            document.getElementById("id-empleado-baja").textContent = idUsuario;
-            document.getElementById("baja-idUsuario").value = idUsuario;
+      const submitBtn = this.querySelector('button[type="submit"]')
+      const originalText = submitBtn.textContent
+      submitBtn.disabled = true
+      submitBtn.textContent = "Procesando..."
 
-            document
-              .getElementById("modal-baja-empleado")
-              .classList.remove("hidden");
-          })
-          .catch((err) => {
-            console.error("Error al cargar empleado:", err);
-            alert("No se pudo abrir el modal de baja.");
-          });
-      }
+      fetch(`/api/empleado/baja/${idUsuario}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then(async (res) => {
+          let data = null
+          try {
+            data = await res.json()
+          } catch (_) {}
 
-      function cerrarModalBajaEmpleado() {
-        document.getElementById("modal-baja-empleado").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
-      }
-
-      // Enviar solicitud de baja
-      document
-        .getElementById("form-baja-empleado")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const idUsuario = document.getElementById("baja-idUsuario").value;
-          const fechaBaja = document.getElementById("baja-fecha").value;
-          const comentarioSalida =
-            document.getElementById("baja-comentario").value;
-
-          if (!fechaBaja || !comentarioSalida) {
-            alert("Todos los campos son obligatorios");
-            return;
+          if (!res.ok || !data) {
+            throw new Error(data?.error || "Error al dar de baja al empleado")
           }
+          return data
+        })
+        .then((data) => {
+          alert("Empleado dado de baja correctamente.")
+          cerrarModalBajaEmpleado()
+          setTimeout(() => location.reload(), 1000)
+        })
+        .catch((err) => {
+          console.error("Error al dar de baja:", err)
+          alert("Hubo un error al procesar la baja: " + err.message)
+        })
+        .finally(() => {
+          submitBtn.disabled = false
+          submitBtn.textContent = originalText
+        })
+    })
+  }
 
-          const body = {
-            fechaBaja,
-            comentarioSalida,
-          };
+  const areaForm = document.getElementById("area-form")
+  if (areaForm) {
+    areaForm.addEventListener("submit", (e) => {
+      e.preventDefault()
 
-          const submitBtn = this.querySelector('button[type="submit"]');
-          const originalText = submitBtn.textContent;
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Procesando...";
+      const nombreArea = document.getElementById("nombreArea").value
 
-          fetch(`/api/empleado/baja/${idUsuario}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-          })
-            .then(async (res) => {
-              let data = null;
-              try {
-                data = await res.json();
-              } catch (_) {}
+      fetch("/api/agregarArea", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ Area: nombreArea }),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Error al guardar el área")
+          return response.json()
+        })
+        .then((data) => {
+          cerrarModalAgregarArea()
+          document.getElementById("area-form").reset()
+        })
+        .catch((error) => {
+          console.error("Error:", error)
+          alert("Error al guardar el área: " + error.message)
+        })
+    })
+  }
 
-              if (!res.ok || !data) {
-                throw new Error(
-                  data?.error || "Error al dar de baja al empleado"
-                );
-              }
-              return data;
-            })
-            .then((data) => {
-              alert("Empleado dado de baja correctamente.");
-              cerrarModalBajaEmpleado();
-              setTimeout(() => location.reload(), 1000);
-            })
-            .catch((err) => {
-              console.error("Error al dar de baja:", err);
-              alert("Hubo un error al procesar la baja: " + err.message);
-            })
-            .finally(() => {
-              submitBtn.disabled = false;
-              submitBtn.textContent = originalText;
-            });
-        });
+  const holidayForm = document.getElementById("holiday-form")
+  if (holidayForm) {
+    holidayForm.addEventListener("submit", (e) => {
+      e.preventDefault()
 
-      document
-        .getElementById("area-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
+      const fecha = document.getElementById("fechaFestivo").value
+      const descripcion = document.getElementById("descripcionFestivo").value
+      const anio = new Date(fecha).getFullYear()
 
-          const nombreArea = document.getElementById("nombreArea").value;
+      fetch("/api/diafestivo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fecha: fecha,
+          descripcion: descripcion,
+          anio: anio,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Error al guardar el día festivo")
+          return response.json()
+        })
+        .then((data) => {
+          cerrarModalAgregarFestivo()
+        })
+        .catch((error) => {
+          console.error("Error:", error)
+          alert("Error al guardar el día festivo: " + error.message)
+        })
+    })
+  }
+})
 
-          fetch("/api/agregarArea", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ Area: nombreArea }),
-          })
-            .then((response) => {
-              if (!response.ok) throw new Error("Error al guardar el área");
-              return response.json();
-            })
-            .then((data) => {
-              //alert("Área agregada correctamente");
-              cerrarModalAgregarArea();
-              document.getElementById("area-form").reset();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              alert("Error al guardar el área: " + error.message);
-            });
-        });
-
-      function abrirModalAgregarArea() {
-        document.getElementById("add-area-modal").classList.remove("hidden");
-        document.body.classList.add("no-scroll");
-      }
-
-      function cerrarModalAgregarArea() {
-        document.getElementById("add-area-modal").classList.add("hidden");
-        document.body.classList.remove("no-scroll");
-      }
-
-      // Enviar día festivo
-      document
-        .getElementById("holiday-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const fecha = document.getElementById("fechaFestivo").value;
-          const descripcion =
-            document.getElementById("descripcionFestivo").value;
-          const anio = new Date(fecha).getFullYear();
-
-          fetch("/api/diafestivo", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fecha: fecha,
-              descripcion: descripcion,
-              anio: anio,
-            }),
-          })
-            .then((response) => {
-              if (!response.ok)
-                throw new Error("Error al guardar el día festivo");
-              return response.json();
-            })
-            .then((data) => {
-              //alert("Día festivo agregado correctamente");
-              cerrarModalAgregarFestivo();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              alert("Error al guardar el día festivo: " + error.message);
-            });
-        });
-    </script>
+</script>
   </body>
 </html>
