@@ -1,893 +1,926 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal de Administrador</title>
-    <link rel="stylesheet" href="css/admin.css" />
-    <link rel="stylesheet" href="css/index.css" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <link rel="icon" href="Media/favicon.ico" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  </head>
-  <body>
-    <header>
-      <div class="header-container">
-        <a href="#" class="back-button" onclick="logout()">
-          <i class="bi bi-arrow-left"></i>
-          Cerrar Sesión
-        </a>
-        <img src="Media/logo.png" alt="Logo" class="logo" />
-        <h1>Portal De Administrador</h1>
-      </div>
-    </header>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portal de Administrador</title>
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="stylesheet" href="css/index.css" />
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link rel="icon" href="Media/favicon.ico" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <div class="welcome-section">
-      <div class="welcome-message">
-        ¡Hola <span id="employee-name">Juan Pérez</span>!
-      </div>
-      <p>¿Qué deseas hacer hoy?</p>
+<style>
+ 
+</style>
+</head>
+<body>
+<header>
+  <div class="header-container">
+    <a href="#" class="back-button" onclick="logout()">
+      <i class="bi bi-arrow-left"></i>
+      Cerrar Sesión
+    </a>
+    <img src="Media/logo.png" alt="Logo" class="logo" />
+    <h1>Portal De Administrador</h1>
+  </div>
+</header>
+
+<div class="welcome-section">
+  <div class="welcome-message">
+    ¡Hola <span id="employee-name">Juan Pérez</span>!
+  </div>
+  <p>¿Qué deseas hacer hoy?</p>
+</div>
+
+<div class="content-wrapper">
+  <div class="employee-table-container">
+    <h2>
+      Empleados Registrados
+      <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">
+        Agregar empleado +
+      </button>
+
+      <button
+        class="add-employee-btn"
+        onclick="abrirModalExportarExcel()"
+        style="margin-left: 2px"
+      >
+        Exportar Excel +
+      </button>
+    </h2>
+
+    <div
+      style="
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 10px;
+      "
+    >
+      <select
+        id="filtro-estado"
+        style="
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-family: Arial, sans-serif;
+          font-size: 1rem;
+          border: 1.5px solid #bbb;
+          background-color: #fff;
+          cursor: pointer;
+          outline: none;
+          transition: border-color 0.3s ease;
+          margin-right: 450px;
+        "
+      >
+        <option value="activos">Activos</option>
+        <option value="inactivos">Inactivos</option>
+        <option value="todos">Todos</option>
+      </select>
+      <input
+        type="text"
+        id="busquedaEmpleado"
+        oninput="buscarEmpleado()"
+        placeholder="Buscar por ID o nombre"
+        style="
+          padding: 8px;
+          width: 250px;
+          margin-right: 8px;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+        "
+      />
+      <button
+        onclick="buscarEmpleado()"
+        style="
+          background-color: #2c3e50;
+          color: white;
+          padding: 8px 12px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        "
+      >
+        <i class="bi bi-search"></i>
+      </button>
     </div>
 
-    <div class="content-wrapper">
-      <div class="employee-table-container">
-        <h2>
-          Empleados Registrados
-          <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">
-            Agregar empleado +
-          </button>
+    <table class="employee-table">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Nombre</th>
+          <th>Puesto</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="empleados-body"></tbody>
+    </table>
+  </div>
+  
+  <!-- Botón dropdown movido más arriba -->
+  <div class="options-container">
+    <div class="dropdown-container">
+      <button class="dropdown-button" onclick="toggleDropdown()">
+<span>Mostrar opciones</span>
+<i class="bi bi-chevron-down dropdown-arrow"></i>
+</button>
+      <div class="dropdown-content" id="dropdownContent">
+        <div class="dropdown-item" onclick="navigateToOption('evaluarSoli.html')">
+          <i class="bi bi-search dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">
+              Solicitudes
+              <span id="dropdown-notificacion-solicitudes" class="notification-badge" style="display: none;">0</span>
+            </div>
+            <div class="dropdown-item-description">Evalúa las solicitudes de tus empleados</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('verSolicitudes.html')">
+          <i class="bi bi-eye dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Ver Solicitudes</div>
+            <div class="dropdown-item-description">Mira el historial de las solicitudes evaluadas</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('incapacidad.html')">
+          <i class="bi bi-hospital dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Incapacidades</div>
+            <div class="dropdown-item-description">Autorizaciones</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('verIncapacidades.html')">
+          <i class="bi bi-hospital dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Ver Incapacidades</div>
+            <div class="dropdown-item-description">Consulta que empleados están en una incapacidad</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="abrirModalAgregarArea()">
+          <i class="bi bi-building dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Área</div>
+            <div class="dropdown-item-description">Agregar</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="abrirModalAgregarFestivo()">
+          <i class="bi bi-calendar-plus dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Día Festivo</div>
+            <div class="dropdown-item-description">Agregar un nuevo día festivo</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('reporte.html')">
+          <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Reportes</div>
+            <div class="dropdown-item-description">Genera un reporte</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('verReportes.html')">
+          <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Ver Reportes</div>
+            <div class="dropdown-item-description">Visualiza los reportes generados</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('vacante.html')">
+          <i class="bi bi-pin-map dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Vacante</div>
+            <div class="dropdown-item-description">Administra</div>
+          </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="navigateToOption('verVacantes.html')">
+          <i class="bi bi-pencil dropdown-item-icon"></i>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">Ver Vacantes</div>
+            <div class="dropdown-item-description">Administra las vacantes solicitadas por tus compañeros</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-          <button
-            class="add-employee-btn"
-            onclick="abrirModalExportarExcel()"
-            style="margin-left: 2px"
-          >
-            Exportar Excel +
-          </button>
-        </h2>
+  <!-- Todos los modales existentes se mantienen igual -->
+  <!-- Modal para ver detalles del empleado -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h2>Detalle del Empleado</h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
 
-        <div
-          style="
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 10px;
-          "
-        >
-          <select
-            id="filtro-estado"
-            style="
-              padding: 8px 12px;
-              border-radius: 6px;
-              font-family: Arial, sans-serif;
-              font-size: 1rem;
-              border: 1.5px solid #bbb;
-              background-color: #fff;
-              cursor: pointer;
-              outline: none;
-              transition: border-color 0.3s ease;
-              margin-right: 450px;
-            "
-          >
-            <option value="activos">Activos</option>
-            <option value="inactivos">Inactivos</option>
-            <option value="todos">Todos</option>
+  <!-- Modal para dar de alta empleado -->
+  <div id="add-employee-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalAltaEmpleado()">&times;</span>
+      <h2>Dar de alta nuevo empleado</h2>
+      <form id="employee-form" class="add-employee-form">
+        <!-- Campo 1 -->
+        <div class="form-group">
+          <label for="idUsuario">ID Usuario:</label>
+          <input type="number" id="idUsuario" name="idUsuario" required />
+        </div>
+
+        <!-- Campo 2 (Combobox) -->
+        <div class="form-group">
+          <label for="tipoRol">Tipo de Rol:</label>
+          <select id="tipoRol" name="tipoRol" required>
+            <option value="">Cargando roles...</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label>Áreas:</label>
+          <button
+            type="button"
+            class="toggle-desplegable"
+            id="toggle-areas"
+            onclick="toggleAreas()"
+          >
+            Mostrar Áreas ▼
+          </button>
+
+          <div id="checkbox-areas" class="desplegable-container">
+            <!-- Checkboxes se cargarán aquí -->
+          </div>
+          <small>Puedes seleccionar una o más áreas.</small>
+        </div>
+
+        <!-- Campo 4 -->
+        <div class="form-group">
+          <label for="nombres">Nombres:</label>
+          <input type="text" id="nombres" name="nombres" required />
+        </div>
+
+        <!-- Campo 5 -->
+        <div class="form-group">
+          <label for="paterno">Apellido Paterno:</label>
+          <input type="text" id="paterno" name="paterno" required />
+        </div>
+
+        <!-- Campo 6 -->
+        <div class="form-group">
+          <label for="materno">Apellido Materno:</label>
+          <input type="text" id="materno" name="materno" />
+        </div>
+
+        <!-- Campo 7 -->
+        <div class="form-group">
+          <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+          <input
+            type="date"
+            id="fechaNacimiento"
+            name="fechaNacimiento"
+            required
+          />
+        </div>
+
+        <!-- Campo 8 -->
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" required />
+        </div>
+
+        <!-- Campo 9 -->
+        <div class="form-group">
+          <label for="codigoPostal">Código Postal:</label>
+          <input type="text" id="codigoPostal" name="codigoPostal" required />
+        </div>
+
+        <!-- Campo 10 -->
+        <div class="form-group">
+          <label for="correo">Correo Electrónico:</label>
+          <input type="email" id="correo" name="correo" required />
+        </div>
+
+        <!-- Campo 11 -->
+        <div class="form-group">
+          <label for="
+          
+          
+          ">Número de Seguro Social (NSS):</label>
+          <input type="text" id="nss" name="nss" required />
+        </div>
+
+        <!-- Campo 12 -->
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" name="telefono" required />
+        </div>
+
+        <!-- Campo 13 -->
+        <div class="form-group">
+          <label for="fechaIngreso">Fecha de Ingreso:</label>
+          <input type="date" id="fechaIngreso" name="fechaIngreso" required />
+        </div>
+
+        <!-- Campo 14 -->
+        <div class="form-group">
+          <label for="rfc">RFC:</label>
+          <input type="text" id="rfc" name="rfc" required />
+        </div>
+
+        <!-- Campo 15 -->
+        <div class="form-group">
+          <label for="curp">CURP:</label>
+          <input type="text" id="curp" name="curp" required />
+        </div>
+
+        <!-- Campo 16 -->
+        <div class="form-group">
+          <label for="puesto">Puesto:</label>
+          <input type="text" id="puesto" name="puesto" required />
+        </div>
+
+        <!-- Campo 17 -->
+        <div class="form-group">
+          <label for="nombreContactoEmergencia"
+            >Beneficiario/Contacto Emergencia:</label
+          >
           <input
             type="text"
-            id="busquedaEmpleado"
-            oninput="buscarEmpleado()"
-            placeholder="Buscar por ID o nombre"
-            style="
-              padding: 8px;
-              width: 250px;
-              margin-right: 8px;
-              border-radius: 4px;
-              border: 1px solid #ccc;
-            "
+            id="nombreContactoEmergencia"
+            name="nombreContactoEmergencia"
+            required
           />
+        </div>
+
+        <!-- Campo 18 -->
+        <div class="form-group">
+          <label for="telefonoEmergencia">Teléfono Emergencia:</label>
+          <input
+            type="tel"
+            id="telefonoEmergencia"
+            name="telefonoEmergencia"
+            required
+          />
+        </div>
+
+        <!-- Campo 19 -->
+        <div class="form-group">
+          <label for="parentesco">Parentesco:</label>
+          <input type="text" id="parentesco" name="parentesco" required />
+        </div>
+
+        <!-- Campo 20 -->
+        <div class="form-group">
+          <label for="contraseña">Contraseña:</label>
+          <input type="password" id="contraseña" name="contraseña" required />
+        </div>
+
+        <!-- Campo 21 -->
+        <div class="form-group">
+          <label for="confirmarContraseña">Confirmar Contraseña:</label>
+          <input
+            type="password"
+            id="confirmarContraseña"
+            name="confirmarContraseña"
+            required
+          />
+        </div>
+
+        <!-- Campo Sueldo Diario -->
+        <div class="form-group">
+          <label for="sueldoDiario">Sueldo Diario:</label>
+          <input
+            type="number"
+            id="sueldoDiario"
+            name="SueldoDiario"
+            required
+          />
+        </div>
+
+        <!-- Campo Sueldo Semanal -->
+        <div class="form-group">
+          <label for="sueldoSemanal">Sueldo Semanal:</label>
+          <input
+            type="number"
+            id="sueldoSemanal"
+            name="SueldoSemanal"
+            required
+          />
+        </div>
+
+        <!-- Campo Bono Semanal -->
+        <div class="form-group">
+          <label for="bonoSemanal">Bono Semanal:</label>
+          <input type="number" id="bonoSemanal" name="BonoSemanal" required />
+        </div>
+
+        <!-- Campo Vacaciones Disponibles -->
+        <div class="form-group">
+          <label for="vacacionesDisponibles">Vacaciones Disponibles:</label>
+          <input
+            type="number"
+            id="diasDisponibles"
+            name="diasDisponibles"
+            required
+          />
+        </div>
+
+        <div class="form-actions">
           <button
-            onclick="buscarEmpleado()"
-            style="
-              background-color: #2c3e50;
-              color: white;
-              padding: 8px 12px;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-            "
+            type="button"
+            class="btn btn-secondary"
+            onclick="cerrarModalAltaEmpleado()"
           >
-            <i class="bi bi-search"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Guardar Empleado
           </button>
         </div>
+      </form>
+    </div>
+  </div>
 
-        <table class="employee-table">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Nombre</th>
-              <th>Puesto</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="empleados-body"></tbody>
-        </table>
-      </div>
-      <div class="options-container">
-        <a href="evaluarSoli.html" class="option-button">
-          <span id="notificacion-solicitudes" class="badge-notificacion"
-            >0</span
+  <!-- Modal para editar empleado -->
+  <div id="edit-employee-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalEditarEmpleado()">&times;</span>
+      <h2>Editar Empleado</h2>
+      <form id="edit-employee-form" class="add-employee-form">
+        <!-- ID -->
+        <div class="form-group">
+          <label for="edit-idUsuario">ID Usuario:</label>
+          <input
+            type="number"
+            id="edit-idUsuario"
+            name="idUsuario"
+            readonly
+          />
+        </div>
+
+        <!-- Rol -->
+        <div class="form-group">
+          <label for="edit-tipoRol">Tipo de Rol:</label>
+          <select id="edit-tipoRol" name="tipoRol" required>
+            <option value="">Cargando roles...</option>
+          </select>
+        </div>
+
+        <!-- Áreas con toggle -->
+        <div class="form-group">
+          <label>Áreas:</label>
+          <button
+            type="button"
+            class="toggle-desplegable"
+            id="edit-toggle-areas"
+            onclick="toggleAreas('edit')"
           >
-          <i class="bi bi-search" style="font-size: 24px"></i>
-          <h2>Solicitudes</h2>
-          <p>Evalúa las solicitudes de tus empleados</p>
-        </a>
-
-        <a href="verSolicitudes.html" class="option-button">
-          <i class="bi bi-search" style="font-size: 24px"></i>
-          <h2>Ver Solicitudes</h2>
-          <p>Mira el historial de las solicitudes evaluadas.</p>
-        </a>
-
-        <a href="incapacidad.html" class="option-button">
-          <i class="bi bi-hospital" style="font-size: 24px"></i>
-          <h2>Incapacidades</h2>
-          <p>Autorizaciones</p>
-        </a>
-
-        <a href="verIncapacidades.html" class="option-button">
-          <i class="bi bi-hospital" style="font-size: 24px"></i>
-          <h2>Ver Incapacidades</h2>
-          <p>Consulta que empleados están en una incapacidad</p>
-        </a>
-
-        <a href="#" class="option-button" onclick="abrirModalAgregarArea()">
-          <i class="bi bi-building" style="font-size: 24px"></i>
-          <h2>Área</h2>
-          <p>Agregar</p>
-        </a>
-
-        <a
-          href="#"
-          class="option-button"
-          onclick="abrirModalAgregarFestivo()"
-          style="text-decoration: none"
-        >
-          <i class="bi bi-calendar-plus" style="font-size: 24px"></i>
-          <h2>Día Festivo</h2>
-          <p>Agregar un nuevo día festivo</p>
-        </a>
-
-        <a href="reporte.html" class="option-button">
-          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
-          <h2>Reportes</h2>
-          <p>Genera un reporte</p>
-        </a>
-
-        <a href="verReportes.html" class="option-button">
-          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
-          <h2>Ver reportes</h2>
-          <p>Visualiza los reportes generados</p>
-        </a>
-
-        <a href="vacante.html" class="option-button">
-          <i class="bi bi-pin-map" style="font-size: 24px"></i>
-          <h2>Vacante</h2>
-          <p>Administra</p>
-        </a>
-
-        <a href="verVacantes.html" class="option-button">
-          <i class="bi bi-pencil" style="font-size: 24px"></i>
-          <h2>Ver Vacantes</h2>
-          <p>Administra las vacantes solicitadas por tus compañeros</p>
-        </a>
-      </div>
-    </div>
-
-    <!-- Modal para ver detalles del empleado -->
-    <div id="modal" class="modal hidden">
-      <div class="modal-content">
-        <span class="close" onclick="cerrarModal()">&times;</span>
-        <h2>Detalle del Empleado</h2>
-        <div id="modal-body"></div>
-      </div>
-    </div>
-
-    <!-- Modal para dar de alta empleado -->
-    <div id="add-employee-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalAltaEmpleado()">&times;</span>
-        <h2>Dar de alta nuevo empleado</h2>
-        <form id="employee-form" class="add-employee-form">
-          <!-- Campo 1 -->
-          <div class="form-group">
-            <label for="idUsuario">ID Usuario:</label>
-            <input type="number" id="idUsuario" name="idUsuario" required />
+            Mostrar Áreas ▼
+          </button>
+          <div id="edit-checkbox-areas" class="desplegable-container">
+            <!-- checkboxes se insertan dinámicamente -->
           </div>
-
-          <!-- Campo 2 (Combobox) -->
-          <div class="form-group">
-            <label for="tipoRol">Tipo de Rol:</label>
-            <select id="tipoRol" name="tipoRol" required>
-              <option value="">Cargando roles...</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Áreas:</label>
-            <button
-              type="button"
-              class="toggle-desplegable"
-              id="toggle-areas"
-              onclick="toggleAreas()"
-            >
-              Mostrar Áreas ▼
-            </button>
-
-            <div id="checkbox-areas" class="desplegable-container">
-              <!-- Checkboxes se cargarán aquí -->
-            </div>
-            <small>Puedes seleccionar una o más áreas.</small>
-          </div>
-
-          <!-- Campo 4 -->
-          <div class="form-group">
-            <label for="nombres">Nombres:</label>
-            <input type="text" id="nombres" name="nombres" required />
-          </div>
-
-          <!-- Campo 5 -->
-          <div class="form-group">
-            <label for="paterno">Apellido Paterno:</label>
-            <input type="text" id="paterno" name="paterno" required />
-          </div>
-
-          <!-- Campo 6 -->
-          <div class="form-group">
-            <label for="materno">Apellido Materno:</label>
-            <input type="text" id="materno" name="materno" />
-          </div>
-
-          <!-- Campo 7 -->
-          <div class="form-group">
-            <label for="fechaNacimiento">Fecha de Nacimiento:</label>
-            <input
-              type="date"
-              id="fechaNacimiento"
-              name="fechaNacimiento"
-              required
-            />
-          </div>
-
-          <!-- Campo 8 -->
-          <div class="form-group">
-            <label for="direccion">Dirección:</label>
-            <input type="text" id="direccion" name="direccion" required />
-          </div>
-
-          <!-- Campo 9 -->
-          <div class="form-group">
-            <label for="codigoPostal">Código Postal:</label>
-            <input type="text" id="codigoPostal" name="codigoPostal" required />
-          </div>
-
-          <!-- Campo 10 -->
-          <div class="form-group">
-            <label for="correo">Correo Electrónico:</label>
-            <input type="email" id="correo" name="correo" required />
-          </div>
-
-          <!-- Campo 11 -->
-          <div class="form-group">
-            <label for="nss">Número de Seguro Social (NSS):</label>
-            <input type="text" id="nss" name="nss" required />
-          </div>
-
-          <!-- Campo 12 -->
-          <div class="form-group">
-            <label for="telefono">Teléfono:</label>
-            <input type="tel" id="telefono" name="telefono" required />
-          </div>
-
-          <!-- Campo 13 -->
-          <div class="form-group">
-            <label for="fechaIngreso">Fecha de Ingreso:</label>
-            <input type="date" id="fechaIngreso" name="fechaIngreso" required />
-          </div>
-
-          <!-- Campo 14 -->
-          <div class="form-group">
-            <label for="rfc">RFC:</label>
-            <input type="text" id="rfc" name="rfc" required />
-          </div>
-
-          <!-- Campo 15 -->
-          <div class="form-group">
-            <label for="curp">CURP:</label>
-            <input type="text" id="curp" name="curp" required />
-          </div>
-
-          <!-- Campo 16 -->
-          <div class="form-group">
-            <label for="puesto">Puesto:</label>
-            <input type="text" id="puesto" name="puesto" required />
-          </div>
-
-          <!-- Campo 17 -->
-          <div class="form-group">
-            <label for="nombreContactoEmergencia"
-              >Beneficiario/Contacto Emergencia:</label
-            >
-            <input
-              type="text"
-              id="nombreContactoEmergencia"
-              name="nombreContactoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Campo 18 -->
-          <div class="form-group">
-            <label for="telefonoEmergencia">Teléfono Emergencia:</label>
-            <input
-              type="tel"
-              id="telefonoEmergencia"
-              name="telefonoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Campo 19 -->
-          <div class="form-group">
-            <label for="parentesco">Parentesco:</label>
-            <input type="text" id="parentesco" name="parentesco" required />
-          </div>
-
-          <!-- Campo 20 -->
-          <div class="form-group">
-            <label for="contraseña">Contraseña:</label>
-            <input type="password" id="contraseña" name="contraseña" required />
-          </div>
-
-          <!-- Campo 21 -->
-          <div class="form-group">
-            <label for="confirmarContraseña">Confirmar Contraseña:</label>
-            <input
-              type="password"
-              id="confirmarContraseña"
-              name="confirmarContraseña"
-              required
-            />
-          </div>
-
-          <!-- Campo Sueldo Diario -->
-          <div class="form-group">
-            <label for="sueldoDiario">Sueldo Diario:</label>
-            <input
-              type="number"
-              id="sueldoDiario"
-              name="SueldoDiario"
-              required
-            />
-          </div>
-
-          <!-- Campo Sueldo Semanal -->
-          <div class="form-group">
-            <label for="sueldoSemanal">Sueldo Semanal:</label>
-            <input
-              type="number"
-              id="sueldoSemanal"
-              name="SueldoSemanal"
-              required
-            />
-          </div>
-
-          <!-- Campo Bono Semanal -->
-          <div class="form-group">
-            <label for="bonoSemanal">Bono Semanal:</label>
-            <input type="number" id="bonoSemanal" name="BonoSemanal" required />
-          </div>
-
-          <!-- Campo Vacaciones Disponibles -->
-          <div class="form-group">
-            <label for="vacacionesDisponibles">Vacaciones Disponibles:</label>
-            <input
-              type="number"
-              id="diasDisponibles"
-              name="diasDisponibles"
-              required
-            />
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalAltaEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Guardar Empleado
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal para editar empleado -->
-    <div id="edit-employee-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalEditarEmpleado()">&times;</span>
-        <h2>Editar Empleado</h2>
-        <form id="edit-employee-form" class="add-employee-form">
-          <!-- ID -->
-          <div class="form-group">
-            <label for="edit-idUsuario">ID Usuario:</label>
-            <input
-              type="number"
-              id="edit-idUsuario"
-              name="idUsuario"
-              readonly
-            />
-          </div>
-
-          <!-- Rol -->
-          <div class="form-group">
-            <label for="edit-tipoRol">Tipo de Rol:</label>
-            <select id="edit-tipoRol" name="tipoRol" required>
-              <option value="">Cargando roles...</option>
-            </select>
-          </div>
-
-          <!-- Áreas con toggle -->
-          <div class="form-group">
-            <label>Áreas:</label>
-            <button
-              type="button"
-              class="toggle-desplegable"
-              id="edit-toggle-areas"
-              onclick="toggleAreas('edit')"
-            >
-              Mostrar Áreas ▼
-            </button>
-            <div id="edit-checkbox-areas" class="desplegable-container">
-              <!-- checkboxes se insertan dinámicamente -->
-            </div>
-            <small>Puedes seleccionar una o más áreas.</small>
-          </div>
-
-          <!-- Nombres -->
-          <div class="form-group">
-            <label for="edit-nombres">Nombres:</label>
-            <input type="text" id="edit-nombres" name="nombres" required />
-          </div>
-
-          <!-- Paterno -->
-          <div class="form-group">
-            <label for="edit-paterno">Apellido Paterno:</label>
-            <input type="text" id="edit-paterno" name="paterno" required />
-          </div>
-
-          <!-- Materno -->
-          <div class="form-group">
-            <label for="edit-materno">Apellido Materno:</label>
-            <input type="text" id="edit-materno" name="materno" />
-          </div>
-
-          <!-- Fecha de Nacimiento -->
-          <div class="form-group">
-            <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
-            <input
-              type="date"
-              id="edit-fechaNacimiento"
-              name="fechaNacimiento"
-              required
-            />
-          </div>
-
-          <!-- Dirección -->
-          <div class="form-group">
-            <label for="edit-direccion">Dirección:</label>
-            <input type="text" id="edit-direccion" name="direccion" required />
-          </div>
-
-          <!-- Código Postal -->
-          <div class="form-group">
-            <label for="edit-codigoPostal">Código Postal:</label>
-            <input
-              type="text"
-              id="edit-codigoPostal"
-              name="codigoPostal"
-              required
-            />
-          </div>
-
-          <!-- Correo -->
-          <div class="form-group">
-            <label for="edit-correo">Correo Electrónico:</label>
-            <input type="email" id="edit-correo" name="correo" required />
-          </div>
-
-          <!-- NSS -->
-          <div class="form-group">
-            <label for="edit-nss">Número de Seguro Social (NSS):</label>
-            <input type="text" id="edit-nss" name="nss" required />
-          </div>
-
-          <!-- Teléfono -->
-          <div class="form-group">
-            <label for="edit-telefono">Teléfono:</label>
-            <input type="tel" id="edit-telefono" name="telefono" required />
-          </div>
-
-          <!-- Fecha de Ingreso -->
-          <div class="form-group">
-            <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
-            <input
-              type="date"
-              id="edit-fechaIngreso"
-              name="fechaIngreso"
-              required
-            />
-          </div>
-
-          <!-- RFC -->
-          <div class="form-group">
-            <label for="edit-rfc">RFC:</label>
-            <input type="text" id="edit-rfc" name="rfc" required />
-          </div>
-
-          <!-- CURP -->
-          <div class="form-group">
-            <label for="edit-curp">CURP:</label>
-            <input type="text" id="edit-curp" name="curp" required />
-          </div>
-
-          <!-- Puesto -->
-          <div class="form-group">
-            <label for="edit-puesto">Puesto:</label>
-            <input type="text" id="edit-puesto" name="puesto" required />
-          </div>
-
-          <!-- Contacto de Emergencia -->
-          <div class="form-group">
-            <label for="edit-nombreContactoEmergencia"
-              >Nombre Contacto Emergencia:</label
-            >
-            <input
-              type="text"
-              id="edit-nombreContactoEmergencia"
-              name="nombreContactoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Teléfono Emergencia -->
-          <div class="form-group">
-            <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
-            <input
-              type="tel"
-              id="edit-telefonoEmergencia"
-              name="telefonoEmergencia"
-              required
-            />
-          </div>
-
-          <!-- Parentesco -->
-          <div class="form-group">
-            <label for="edit-parentesco">Parentesco:</label>
-            <input
-              type="text"
-              id="edit-parentesco"
-              name="parentesco"
-              required
-            />
-          </div>
-
-          <!-- Contraseña -->
-          <div class="form-group">
-            <label for="edit-contraseña">Contraseña:</label>
-            <input
-              type="password"
-              id="edit-contraseña"
-              name="contraseña"
-              required
-            />
-          </div>
-
-          <!-- Confirmar Contraseña -->
-          <div class="form-group">
-            <label for="edit-confirmarContraseña">Confirmar Contraseña:</label>
-            <input
-              type="password"
-              id="edit-confirmarContraseña"
-              name="confirmarContraseña"
-              required
-            />
-          </div>
-
-          <!-- Sueldo Diario -->
-          <div class="form-group">
-            <label for="edit-sueldoDiario">Sueldo Diario:</label>
-            <input
-              type="number"
-              id="edit-sueldoDiario"
-              name="SueldoDiario"
-              required
-            />
-          </div>
-
-          <!-- Sueldo Semanal -->
-          <div class="form-group">
-            <label for="edit-sueldoSemanal">Sueldo Semanal:</label>
-            <input
-              type="number"
-              id="edit-sueldoSemanal"
-              name="SueldoSemanal"
-              required
-            />
-          </div>
-
-          <!-- Bono Semanal -->
-          <div class="form-group">
-            <label for="edit-bonoSemanal">Bono Semanal:</label>
-            <input
-              type="number"
-              id="edit-bonoSemanal"
-              name="BonoSemanal"
-              required
-            />
-          </div>
-
-          <!-- Fecha de Baja -->
-          <div class="form-group">
-            <label for="edit-fechaBaja">Fecha de Baja:</label>
-            <input type="date" id="edit-fechaBaja" name="fechaBaja" />
-          </div>
-
-          <!-- Comentario de Salida -->
-          <div class="form-group">
-            <label for="edit-comentarioSalida">Comentario de Salida:</label>
-            <input
-              type="text"
-              id="edit-comentarioSalida"
-              name="comentarioSalida"
-            />
-          </div>
-
-          <!-- Vacaciones -->
-          <div class="form-group">
-            <label for="edit-vacaciones">Vacaciones:</label>
-            <input type="number" id="edit-vacaciones" name="Vacaciones" />
-          </div>
-
-          <!-- Vacaciones Disponibles -->
-          <div class="form-group">
-            <label for="edit-diasDisponibles">Vacaciones disponibles:</label>
-            <input
-              type="text"
-              id="edit-diasDisponibles"
-              name="diasDisponibles"
-            />
-          </div>
-
-          <!-- Botones -->
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalEditarEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Actualizar Empleado
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal para agregar día festivo -->
-    <div id="add-holiday-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalAgregarFestivo()">&times;</span>
-        <h2>Agregar Día Festivo</h2>
-        <form id="holiday-form" class="add-employee-form">
-          <!-- Campo Fecha -->
-          <div class="form-group">
-            <label for="fechaFestivo">Fecha:</label>
-            <input type="date" id="fechaFestivo" name="fechaFestivo" required />
-          </div>
-
-          <!-- Campo Descripción -->
-          <div class="form-group">
-            <label for="descripcionFestivo">Descripción:</label>
-            <input
-              type="text"
-              id="descripcionFestivo"
-              name="descripcionFestivo"
-              required
-              placeholder="Ej. Día de la Independencia"
-            />
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalAgregarFestivo()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Agregar Festivo
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal para agregar área -->
-    <div id="add-area-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalAgregarArea()">&times;</span>
-        <h2>Agregar Área</h2>
-        <form id="area-form" class="add-employee-form">
-          <!-- Campo Nombre del Área -->
-          <div class="form-group">
-            <label for="nombreArea">Nombre del Área:</label>
-            <input
-              type="text"
-              id="nombreArea"
-              name="nombreArea"
-              required
-              placeholder="Ej. Recursos Humanos"
-            />
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalAgregarArea()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">Agregar Área</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal para exportar a Excel (actualizado) -->
-    <div id="export-excel-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
-
-        <!-- Paso 1: Selección de campos -->
-        <div id="paso-campos">
-          <h2>Exportar datos (1/2)</h2>
-          <p>Selecciona los campos que deseas incluir en el reporte:</p>
-          <div id="export-fields-container" class="fields-grid"></div>
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalExportarExcel()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="mostrarPasoEmpleados()"
-            >
-              Siguiente
-            </button>
-          </div>
+          <small>Puedes seleccionar una o más áreas.</small>
         </div>
 
-        <!-- Paso 2: Selección de empleados -->
-        <div id="paso-empleados" class="hidden">
-          <h2>Exportar datos (2/2)</h2>
-          <p>Selecciona los empleados a incluir en el reporte:</p>
-          <div style="margin-bottom: 10px"></div>
-          <div id="export-employees-container" class="fields-grid"></div>
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="mostrarPasoCampos()"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="exportarExcel()"
-            >
-              Generar Excel
-            </button>
-          </div>
+        <!-- Nombres -->
+        <div class="form-group">
+          <label for="edit-nombres">Nombres:</label>
+          <input type="text" id="edit-nombres" name="nombres" required />
+        </div>
+
+        <!-- Paterno -->
+        <div class="form-group">
+          <label for="edit-paterno">Apellido Paterno:</label>
+          <input type="text" id="edit-paterno" name="paterno" required />
+        </div>
+
+        <!-- Materno -->
+        <div class="form-group">
+          <label for="edit-materno">Apellido Materno:</label>
+          <input type="text" id="edit-materno" name="materno" />
+        </div>
+
+        <!-- Fecha de Nacimiento -->
+        <div class="form-group">
+          <label for="edit-fechaNacimiento">Fecha de Nacimiento:</label>
+          <input
+            type="date"
+            id="edit-fechaNacimiento"
+            name="fechaNacimiento"
+            required
+          />
+        </div>
+
+        <!-- Dirección -->
+        <div class="form-group">
+          <label for="edit-direccion">Dirección:</label>
+          <input type="text" id="edit-direccion" name="direccion" required />
+        </div>
+
+        <!-- Código Postal -->
+        <div class="form-group">
+          <label for="edit-codigoPostal">Código Postal:</label>
+          <input
+            type="text"
+            id="edit-codigoPostal"
+            name="codigoPostal"
+            required
+          />
+        </div>
+
+        <!-- Correo -->
+        <div class="form-group">
+          <label for="edit-correo">Correo Electrónico:</label>
+          <input type="email" id="edit-correo" name="correo" required />
+        </div>
+
+        <!-- NSS -->
+        <div class="form-group">
+          <label for="edit-nss">Número de Seguro Social (NSS):</label>
+          <input type="text" id="edit-nss" name="nss" required />
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label for="edit-telefono">Teléfono:</label>
+          <input type="tel" id="edit-telefono" name="telefono" required />
+        </div>
+
+        <!-- Fecha de Ingreso -->
+        <div class="form-group">
+          <label for="edit-fechaIngreso">Fecha de Ingreso:</label>
+          <input
+            type="date"
+            id="edit-fechaIngreso"
+            name="fechaIngreso"
+            required
+          />
+        </div>
+
+        <!-- RFC -->
+        <div class="form-group">
+          <label for="edit-rfc">RFC:</label>
+          <input type="text" id="edit-rfc" name="rfc" required />
+        </div>
+
+        <!-- CURP -->
+        <div class="form-group">
+          <label for="edit-curp">CURP:</label>
+          <input type="text" id="edit-curp" name="curp" required />
+        </div>
+
+        <!-- Puesto -->
+        <div class="form-group">
+          <label for="edit-puesto">Puesto:</label>
+          <input type="text" id="edit-puesto" name="puesto" required />
+        </div>
+
+        <!-- Contacto de Emergencia -->
+        <div class="form-group">
+          <label for="edit-nombreContactoEmergencia"
+            >Nombre Contacto Emergencia:</label
+          >
+          <input
+            type="text"
+            id="edit-nombreContactoEmergencia"
+            name="nombreContactoEmergencia"
+            required
+          />
+        </div>
+
+        <!-- Teléfono Emergencia -->
+        <div class="form-group">
+          <label for="edit-telefonoEmergencia">Teléfono Emergencia:</label>
+          <input
+            type="tel"
+            id="edit-telefonoEmergencia"
+            name="telefonoEmergencia"
+            required
+          />
+        </div>
+
+        <!-- Parentesco -->
+        <div class="form-group">
+          <label for="edit-parentesco">Parentesco:</label>
+          <input
+            type="text"
+            id="edit-parentesco"
+            name="parentesco"
+            required
+          />
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="edit-contraseña">Contraseña:</label>
+          <input
+            type="password"
+            id="edit-contraseña"
+            name="contraseña"
+            required
+          />
+        </div>
+
+        <!-- Confirmar Contraseña -->
+        <div class="form-group">
+          <label for="edit-confirmarContraseña">Confirmar Contraseña:</label>
+          <input
+            type="password"
+            id="edit-confirmarContraseña"
+            name="confirmarContraseña"
+            required
+          />
+        </div>
+
+        <!-- Sueldo Diario -->
+        <div class="form-group">
+          <label for="edit-sueldoDiario">Sueldo Diario:</label>
+          <input
+            type="number"
+            id="edit-sueldoDiario"
+            name="SueldoDiario"
+            required
+          />
+        </div>
+
+        <!-- Sueldo Semanal -->
+        <div class="form-group">
+          <label for="edit-sueldoSemanal">Sueldo Semanal:</label>
+          <input
+            type="number"
+            id="edit-sueldoSemanal"
+            name="SueldoSemanal"
+            required
+          />
+        </div>
+
+        <!-- Bono Semanal -->
+        <div class="form-group">
+          <label for="edit-bonoSemanal">Bono Semanal:</label>
+          <input
+            type="number"
+            id="edit-bonoSemanal"
+            name="BonoSemanal"
+            required
+          />
+        </div>
+
+        <!-- Fecha de Baja -->
+        <div class="form-group">
+          <label for="edit-fechaBaja">Fecha de Baja:</label>
+          <input type="date" id="edit-fechaBaja" name="fechaBaja" />
+        </div>
+
+        <!-- Comentario de Salida -->
+        <div class="form-group">
+          <label for="edit-comentarioSalida">Comentario de Salida:</label>
+          <input
+            type="text"
+            id="edit-comentarioSalida"
+            name="comentarioSalida"
+          />
+        </div>
+
+        <!-- Vacaciones -->
+        <div class="form-group">
+          <label for="edit-vacaciones">Vacaciones:</label>
+          <input type="number" id="edit-vacaciones" name="Vacaciones" />
+        </div>
+
+        <!-- Vacaciones Disponibles -->
+        <div class="form-group">
+          <label for="edit-diasDisponibles">Vacaciones disponibles:</label>
+          <input
+            type="text"
+            id="edit-diasDisponibles"
+            name="diasDisponibles"
+          />
+        </div>
+
+        <!-- Botones -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="cerrarModalEditarEmpleado()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Actualizar Empleado
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para agregar día festivo -->
+  <div id="add-holiday-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalAgregarFestivo()">&times;</span>
+      <h2>Agregar Día Festivo</h2>
+      <form id="holiday-form" class="add-employee-form">
+        <!-- Campo Fecha -->
+        <div class="form-group">
+          <label for="fechaFestivo">Fecha:</label>
+          <input type="date" id="fechaFestivo" name="fechaFestivo" required />
+        </div>
+
+        <!-- Campo Descripción -->
+        <div class="form-group">
+          <label for="descripcionFestivo">Descripción:</label>
+          <input
+            type="text"
+            id="descripcionFestivo"
+            name="descripcionFestivo"
+            required
+            placeholder="Ej. Día de la Independencia"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="cerrarModalAgregarFestivo()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Agregar Festivo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para agregar área -->
+  <div id="add-area-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalAgregarArea()">&times;</span>
+      <h2>Agregar Área</h2>
+      <form id="area-form" class="add-employee-form">
+        <!-- Campo Nombre del Área -->
+        <div class="form-group">
+          <label for="nombreArea">Nombre del Área:</label>
+          <input
+            type="text"
+            id="nombreArea"
+            name="nombreArea"
+            required
+            placeholder="Ej. Recursos Humanos"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="cerrarModalAgregarArea()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">Agregar Área</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para exportar a Excel (actualizado) -->
+  <div id="export-excel-modal" class="modal hidden">
+    <div class="modal-content add-employee-modal">
+      <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
+
+      <!-- Paso 1: Selección de campos -->
+      <div id="paso-campos">
+        <h2>Exportar datos (1/2)</h2>
+        <p>Selecciona los campos que deseas incluir en el reporte:</p>
+        <div id="export-fields-container" class="fields-grid"></div>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="cerrarModalExportarExcel()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="mostrarPasoEmpleados()"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 2: Selección de empleados -->
+      <div id="paso-empleados" class="hidden">
+        <h2>Exportar datos (2/2)</h2>
+        <p>Selecciona los empleados a incluir en el reporte:</p>
+        <div style="margin-bottom: 10px"></div>
+        <div id="export-employees-container" class="fields-grid"></div>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="mostrarPasoCampos()"
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="exportarExcel()"
+          >
+            Generar Excel
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <div id="modal-confirmacion" class="modal-confirmacion hidden">
-      <div class="modal-contenido">
-        <p id="modal-texto">¿Quieres eliminar este empleado?</p>
-        <div class="modal-botones">
-          <button id="modal-cancelar" class="btn">Cancelar</button>
-          <button id="modal-confirmar" class="btn btn-danger">Eliminar</button>
+  <div id="modal-confirmacion" class="modal-confirmacion hidden">
+    <div class="modal-contenido">
+      <p id="modal-texto">¿Quieres eliminar este empleado?</p>
+      <div class="modal-botones">
+        <button id="modal-cancelar" class="btn">Cancelar</button>
+        <button id="modal-confirmar" class="btn btn-danger">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-exito" class="modal-exito hidden">
+    <div class="modal-contenido-exito">
+      <p>Actualización correcta</p>
+      <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
+    </div>
+  </div>
+
+  <div id="modal-baja-empleado" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
+      <h2>Dar de Baja Empleado</h2>
+
+      <div style="margin-bottom: 15px">
+        <p>
+          Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
+        </p>
+        <p>ID: <strong id="id-empleado-baja"></strong></p>
+      </div>
+
+      <form id="form-baja-empleado">
+        <input type="hidden" id="baja-idUsuario" />
+
+        <div class="form-group">
+          <label for="baja-fecha">Fecha de Baja:</label>
+          <input type="date" id="baja-fecha" name="fechaBaja" required />
         </div>
-      </div>
-    </div>
 
-    <div id="modal-exito" class="modal-exito hidden">
-      <div class="modal-contenido-exito">
-        <p>Actualización correcta</p>
-        <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
-      </div>
-    </div>
-
-    <div id="modal-baja-empleado" class="modal hidden">
-      <div class="modal-content">
-        <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
-        <h2>Dar de Baja Empleado</h2>
-
-        <div style="margin-bottom: 15px">
-          <p>
-            Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
-          </p>
-          <p>ID: <strong id="id-empleado-baja"></strong></p>
+        <div class="form-group">
+          <label for="baja-comentario">Motivo de la baja:</label>
+          <textarea
+            id="baja-comentario"
+            name="comentarioSalida"
+            rows="4"
+            required
+            class="estilo-textarea"
+          ></textarea>
         </div>
 
-        <form id="form-baja-empleado">
-          <input type="hidden" id="baja-idUsuario" />
-
-          <div class="form-group">
-            <label for="baja-fecha">Fecha de Baja:</label>
-            <input type="date" id="baja-fecha" name="fechaBaja" required />
-          </div>
-
-          <div class="form-group">
-            <label for="baja-comentario">Motivo de la baja:</label>
-            <textarea
-              id="baja-comentario"
-              name="comentarioSalida"
-              rows="4"
-              required
-              class="estilo-textarea"
-            ></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalBajaEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-danger">Confirmar Baja</button>
-          </div>
-        </form>
-      </div>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="cerrarModalBajaEmpleado()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-danger">Confirmar Baja</button>
+        </div>
+      </form>
     </div>
+  </div>
 
     <script>
       // ===== VARIABLES GLOBALES =====
@@ -925,6 +958,33 @@
         { id: "Vacaciones", nombre: "Vacaciones" },
         { id: "DiasDisponibles", nombre: "Dias Disponibles" },
       ];
+
+      // ===== FUNCIONES PARA EL DROPDOWN =====
+      function toggleDropdown() {
+        const dropdown = document.getElementById('dropdownContent');
+        const button = document.querySelector('.dropdown-button');
+        
+        dropdown.classList.toggle('show');
+        button.classList.toggle('active');
+      }
+
+      function navigateToOption(url) {
+        window.location.href = url;
+      }
+
+      // Cerrar dropdown si se hace clic fuera
+      window.onclick = function(event) {
+        if (!event.target.matches('.dropdown-button') && !event.target.closest('.dropdown-button')) {
+          const dropdowns = document.getElementsByClassName("dropdown-content");
+          for (let i = 0; i < dropdowns.length; i++) {
+            const openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+              openDropdown.classList.remove('show');
+              document.querySelector('.dropdown-button').classList.remove('active');
+            }
+          }
+        }
+      }
 
       // ===== FUNCIONES DE UTILIDAD =====
       function toggleAreas(context = "") {
@@ -969,17 +1029,26 @@
           const data = await response.json();
           console.log("Datos de notificaciones:", data);
 
+          // Actualizar badge original
           const badge = document.getElementById("notificacion-solicitudes");
-          if (!badge) {
-            console.warn("Elemento badge no encontrado");
-            return;
+          if (badge) {
+            if (data.total > 0) {
+              badge.textContent = data.total;
+              badge.style.display = "inline-block";
+            } else {
+              badge.style.display = "none";
+            }
           }
 
-          if (data.total > 0) {
-            badge.textContent = data.total;
-            badge.style.display = "inline-block";
-          } else {
-            badge.style.display = "none";
+          // Actualizar badge del dropdown
+          const dropdownBadge = document.getElementById("dropdown-notificacion-solicitudes");
+          if (dropdownBadge) {
+            if (data.total > 0) {
+              dropdownBadge.textContent = data.total;
+              dropdownBadge.style.display = "inline-flex";
+            } else {
+              dropdownBadge.style.display = "none";
+            }
           }
         } catch (error) {
           console.error("Error al cargar notificaciones:", error);
