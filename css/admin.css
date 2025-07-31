@@ -885,3 +885,28 @@ textarea.estilo-textarea {
     width: 98%;
   }
 }
+
+.festivo-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.dias-festivos-lista {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+#ver-dias-festivos-modal:not(.hidden) {
+  border: 2px solid red !important; /* Borde rojo para que sea obvio si aparece */
+  min-height: 300px; /* Altura mínima para que no se colapse */
+}
+
+#ver-dias-festivos-modal .modal-content {
+  min-height: 250px; /* Asegura que el contenido del modal también tenga una altura mínima */
+}
+
+/* Opcional: Si el fondo del modal no aparece, puedes forzarlo */
+#ver-dias-festivos-modal {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}

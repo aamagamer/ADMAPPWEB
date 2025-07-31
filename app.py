@@ -213,6 +213,39 @@ def insertar_dia_festivo():
         cursor.close()
         conn.close()
 
+
+@app.route('/api/diasfestivos', methods=['GET'])
+def obtener_dias_festivos():
+    anio = request.args.get('anio', default=datetime.now().year, type=int)
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT fecha, descripcion
+            FROM DiasFestivos
+            WHERE anio = ?
+        """, anio)
+
+        rows = cursor.fetchall()
+        resultado = [
+            {"fecha": row.fecha.strftime('%Y-%m-%d'), "descripcion": row.descripcion}
+            for row in rows
+        ]
+
+        return jsonify(resultado), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
 @app.route('/api/agregarArea', methods=['POST'])
 def insertar_area():
     data = request.get_json()
