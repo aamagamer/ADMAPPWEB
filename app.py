@@ -620,9 +620,9 @@ def actualizar_empleado(id):
             int(data['telefonoEmergencia']),
             data['parentesco'],
             data['contraseña'],
-            int(data['SueldoDiario']),
-            int(data['SueldoSemanal']),
-            int(data['BonoSemanal']),
+            float(data['SueldoDiario']),
+            float(data['SueldoSemanal']),
+            float(data['BonoSemanal']),
             int(data['Vacaciones']),
             int(data['diasDisponibles']),
             id
@@ -689,9 +689,9 @@ def agregar_empleado():
             int(data['telefonoEmergencia']),
             data['parentesco'],
             data['contraseña'],
-            int(data['SueldoDiario']),
-            int(data['SueldoSemanal']),
-            int(data['BonoSemanal']),
+            float(data['SueldoDiario']),
+            float(data['SueldoSemanal']),
+            float(data['BonoSemanal']),
             int(data['Vacaciones']),
             int(data['diasDisponibles'])
         ))

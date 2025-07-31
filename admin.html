@@ -503,6 +503,7 @@
               type="number"
               id="sueldoDiario"
               name="SueldoDiario"
+              step="0.01"
               required
             />
           </div>
@@ -514,6 +515,7 @@
               type="number"
               id="sueldoSemanal"
               name="SueldoSemanal"
+              step="0.01"
               required
             />
           </div>
@@ -525,6 +527,7 @@
               type="number"
               id="bonoSemanal"
               name="BonoSemanal"
+              step="0.01"
               required
             />
           </div>
@@ -755,6 +758,7 @@
               type="number"
               id="edit-sueldoDiario"
               name="SueldoDiario"
+              step="0.01"
               required
             />
           </div>
@@ -766,6 +770,7 @@
               type="number"
               id="edit-sueldoSemanal"
               name="SueldoSemanal"
+              step="0.01"
               required
             />
           </div>
@@ -777,6 +782,7 @@
               type="number"
               id="edit-bonoSemanal"
               name="BonoSemanal"
+              step="0.01"
               required
             />
           </div>
@@ -934,59 +940,71 @@
       </div>
     </div>
 
+    
     <!-- Modal para exportar a Excel (actualizado) -->
-    <div id="export-excel-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
+<div id="export-excel-modal" class="modal hidden">
+  <div class="modal-content add-employee-modal">
+    <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
 
-        <!-- Paso 1: Selección de campos -->
-        <div id="paso-campos">
-          <h2>Exportar datos (1/2)</h2>
-          <p>Selecciona los campos que deseas incluir en el reporte:</p>
-          <div id="export-fields-container" class="fields-grid"></div>
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalExportarExcel()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="mostrarPasoEmpleados()"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
+    <!-- Paso 1: Selección de campos -->
+    <div id="paso-campos">
+      <h2>Exportar datos (1/2)</h2>
+      <p>Selecciona los campos que deseas incluir en el reporte:</p>
 
-        <!-- Paso 2: Selección de empleados -->
-        <div id="paso-empleados" class="hidden">
-          <h2>Exportar datos (2/2)</h2>
-          <p>Selecciona los empleados a incluir en el reporte:</p>
-          <div style="margin-bottom: 10px"></div>
-          <div id="export-employees-container" class="fields-grid"></div>
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="mostrarPasoCampos()"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="exportarExcel()"
-            >
-              Generar Excel
-            </button>
-          </div>
-        </div>
+      <!-- Botones debajo del texto -->
+      <div class="export-nav-buttons" style="display: flex; gap: 10px; margin: 10px 0;">
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('generales')">Datos generales</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('baja')">Baja</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('sueldo')">Sueldo</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('vacaciones')">Vacaciones</button>
+</div>
+
+
+      <div id="export-fields-container" class="fields-grid"></div>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalExportarExcel()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="mostrarPasoEmpleados()"
+        >
+          Siguiente
+        </button>
       </div>
     </div>
+
+    <!-- Paso 2: Selección de empleados -->
+    <div id="paso-empleados" class="hidden">
+      <h2>Exportar datos (2/2)</h2>
+      <p>Selecciona los empleados a incluir en el reporte:</p>
+      <div style="margin-bottom: 10px"></div>
+      <div id="export-employees-container" class="fields-grid"></div>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="mostrarPasoCampos()"
+        >
+          Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="exportarExcel()"
+        >
+          Generar Excel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <div id="modal-confirmacion" class="modal-confirmacion hidden">
       <div class="modal-contenido">
@@ -1642,6 +1660,66 @@ function cargarDiasFestivos() {
         mostrarPasoCampos();
         document.body.classList.add("no-scroll");
       }
+
+      const camposGenerales = [
+    "idUsuario", "Rol", "Areas", "Nombre", "Materno", "Paterno",
+    "Fecha nacimiento", "direccion", "codigo postal",
+    "correo electronico", "telefono", "fecha ingreso", "curp", "puesto"
+  ];
+
+  const camposBaja = [...camposGenerales, "fecha Baja", "comentario salida"];
+  const camposSueldo = [...camposGenerales, "Sueldo Diario", "sueldo Semanal", "Bono Semanal"];
+  const camposVacaciones = [...camposGenerales, "vacaciones", "dias disponibles"];
+
+  function seleccionarCamposPorCategoria(categoria) {
+  let camposASeleccionar = [];
+
+  switch (categoria) {
+    case "generales":
+      camposASeleccionar = [
+        "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+        "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+        "Telefono", "FechaIngreso", "Curp", "Puesto"
+      ];
+      break;
+    case "baja":
+  camposASeleccionar = [
+    "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+    "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+    "Telefono", "FechaIngreso", "Curp", "Puesto",
+    "FechaBaja", "ComentarioSalida"
+  ];
+  break;
+
+    case "sueldo":
+      camposASeleccionar = [
+        ...[
+          "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+          "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+          "Telefono", "FechaIngreso", "Curp", "Puesto"
+        ],
+        "SueldoDiario", "SueldoSemanal", "BonoSemanal"
+      ];
+      break;
+    case "vacaciones":
+      camposASeleccionar = [
+        ...[
+          "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+          "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+          "Telefono", "FechaIngreso", "Curp", "Puesto"
+        ],
+        "Vacaciones", "DiasDisponibles"
+      ];
+      break;
+  }
+
+  // Activar los checkboxes por ID directamente
+  const checkboxes = document.querySelectorAll("#export-fields-container input[type='checkbox']");
+  checkboxes.forEach((cb) => {
+    cb.checked = camposASeleccionar.includes(cb.value);
+  });
+}
+
 
       function mostrarPasoCampos() {
         document.getElementById("paso-empleados").classList.remove("visible");
