@@ -393,10 +393,10 @@
               id="nss"
               name="nss"
               maxlength="13"
-              pattern="^\d{3}-\d{2}-\d{5}$|^\d{11}$"
+              pattern="^(?:\d-?){13}$"
               required
             />
-            <small>Formato permitido: 12345678901 o 123-45-67890</small>
+            <small>Formato permitido: 12345678901 o 12-34-56-7890-1</small>
           </div>
 
           <!-- Campo 12 -->
@@ -410,6 +410,7 @@
               pattern="\d{10}"
               required
             />
+            <small>Formato permitido: 8441234567</small>
           </div>
 
           <!-- Campo 13 -->
@@ -434,6 +435,7 @@
               pattern="[A-Za-z0-9]{13}"
               required
             />
+           <small>Ejemplo: GODE561231GR8 (13 caracteres)</small>
           </div>
 
           <!-- Campo 15 -->
@@ -447,6 +449,7 @@
               pattern="[A-Za-z0-9]{18}"
               required
             />
+            <small>Ejemplo: GOCJ800101HDFRRN08 (18 caracteres)</small>
           </div>
 
           <!-- Campo 16 -->
