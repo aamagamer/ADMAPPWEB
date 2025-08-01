@@ -953,11 +953,12 @@
 
       <!-- Botones debajo del texto -->
       <div class="export-nav-buttons" style="display: flex; gap: 10px; margin: 10px 0;">
-  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('generales')">Datos generales</button>
-  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('baja')">Baja</button>
-  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('sueldo')">Sueldo</button>
-  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('vacaciones')">Vacaciones</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('generales', this)">Datos generales</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('baja', this)">Baja</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('sueldo', this)">Sueldo</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('vacaciones', this)">Vacaciones</button>
 </div>
+
 
 
       <div id="export-fields-container" class="fields-grid"></div>
@@ -1671,7 +1672,7 @@ function cargarDiasFestivos() {
   const camposSueldo = [...camposGenerales, "Sueldo Diario", "sueldo Semanal", "Bono Semanal"];
   const camposVacaciones = [...camposGenerales, "vacaciones", "dias disponibles"];
 
-  function seleccionarCamposPorCategoria(categoria) {
+ function seleccionarCamposPorCategoria(categoria, botonPresionado) {
   let camposASeleccionar = [];
 
   switch (categoria) {
@@ -1682,43 +1683,53 @@ function cargarDiasFestivos() {
         "Telefono", "FechaIngreso", "Curp", "Puesto"
       ];
       break;
+
     case "baja":
-  camposASeleccionar = [
-    "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
-    "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
-    "Telefono", "FechaIngreso", "Curp", "Puesto",
-    "FechaBaja", "ComentarioSalida"
-  ];
-  break;
+      camposASeleccionar = [
+        "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+        "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+        "Telefono", "FechaIngreso", "Curp", "Puesto",
+        "FechaBaja", "ComentarioSalida"
+      ];
+      break;
 
     case "sueldo":
       camposASeleccionar = [
-        ...[
-          "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
-          "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
-          "Telefono", "FechaIngreso", "Curp", "Puesto"
-        ],
+        "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+        "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+        "Telefono", "FechaIngreso", "Curp", "Puesto",
         "SueldoDiario", "SueldoSemanal", "BonoSemanal"
       ];
       break;
+
     case "vacaciones":
       camposASeleccionar = [
-        ...[
-          "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
-          "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
-          "Telefono", "FechaIngreso", "Curp", "Puesto"
-        ],
+        "idUsuario", "TipoRol", "Areas", "Nombres", "Materno", "Paterno",
+        "FechaNacimiento", "Direccion", "CodigoPostal", "Correo",
+        "Telefono", "FechaIngreso", "Curp", "Puesto",
         "Vacaciones", "DiasDisponibles"
       ];
       break;
   }
 
-  // Activar los checkboxes por ID directamente
+  // ✅ Seleccionar los checkboxes correspondientes
   const checkboxes = document.querySelectorAll("#export-fields-container input[type='checkbox']");
   checkboxes.forEach((cb) => {
     cb.checked = camposASeleccionar.includes(cb.value);
   });
+
+  // ✅ Actualizar estilo de los botones
+  document.querySelectorAll(".export-nav-buttons button").forEach(btn => {
+    btn.classList.remove("btn-primary");
+    btn.classList.add("btn-outline-primary");
+  });
+
+  if (botonPresionado) {
+    botonPresionado.classList.remove("btn-outline-primary");
+    botonPresionado.classList.add("btn-primary");
+  }
 }
+
 
 
       function mostrarPasoCampos() {
