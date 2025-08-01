@@ -20,29 +20,43 @@ document.addEventListener("DOMContentLoaded", async function () {
             <button class="btn-conseguir" data-id="${vacante.idVacante}">Vacante conseguida</button>
           `;
 
-        // ✅ Evento del botón debe estar dentro del forEach
-        const boton = card.querySelector(".btn-conseguir");
-        boton.addEventListener("click", async function () {
-          const id = this.getAttribute("data-id");
+       const boton = card.querySelector(".btn-conseguir");
+boton.addEventListener("click", async function () {
+  const id = this.getAttribute("data-id");
 
-          try {
-            const res = await fetch(`/api/vacantes/${id}`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ Estado: "Inactivo" }), // ✅ Estado correcto
-            });
+  try {
+    const res = await fetch(`/api/vacantes/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ Estado: "Inactivo" }),
+    });
 
-            if (!res.ok) throw new Error("Error al actualizar la vacante");
+    if (!res.ok) throw new Error("Error al actualizar la vacante");
 
-            alert("✅ Vacante marcada como conseguida.");
-            card.remove(); // ✅ desaparece de la vista
-          } catch (error) {
-            console.error("Error al actualizar la vacante:", error);
-            alert("❌ No se pudo actualizar la vacante.");
-          }
-        });
+    Swal.fire({
+      icon: "success",
+      title: "Vacante marcada como conseguida",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Aceptar",
+    }).then(() => {
+      // Opcional: eliminar la tarjeta de la vista si no recargas
+      // card.remove();
+      location.reload(); // Recarga para reflejar el cambio
+    });
+
+  } catch (error) {
+    console.error("Error al actualizar la vacante:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudo actualizar la vacante.",
+      confirmButtonColor: "#d33",
+    });
+  }
+});
+
 
         contenedor.appendChild(card);
       });
