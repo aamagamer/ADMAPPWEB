@@ -59,99 +59,47 @@
 
 
 
-                <div class="requests-grid">
-          <!-- Columna 1: Permisos Aceptados -->
-          <div class="request-column">
-            <div class="column-header accepted">
-              <h3>Permisos Aceptados</h3>
-            </div>
-            <div class="requests-list" id="accepted-permissions">
-              <!-- Ejemplo de tarjeta con botón de eliminar -->
-              <div class="request-card">
-                <div class="card-content">
-                  <h4>Juan Pérez</h4>
-                  <p><strong>Tipo:</strong> Permiso médico</p>
-                  <p><strong>Fecha:</strong> 15/07/2023</p>
-                  <p><strong>Horas:</strong> 4 horas</p>
-                  <p><strong>Estado:</strong> Aceptado</p>
-                </div>
-                <button class="delete-btn" title="Eliminar solicitud">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-              <div class="empty-message">No hay solicitudes recientes</div>
-            </div>
-          </div>
+<div class="requests-grid" id="requests-grid-container">
+  <!-- Columna 1: Permisos Aceptados -->
+  <div class="request-column">
+    <div class="column-header accepted">
+      <h3>Permisos Aceptados</h3>
+    </div>
+    <div class="requests-list" id="accepted-permissions">
+      <div class="empty-message">No hay solicitudes recientes</div>
+    </div>
+  </div>
 
-          <!-- Columna 2: Vacaciones Aprobadas -->
-          <div class="request-column">
-            <div class="column-header accepted">
-              <h3>Vacaciones Aprobadas</h3>
-            </div>
-            <div class="requests-list" id="approved-vacations">
-              <!-- Ejemplo de tarjeta con botón de eliminar -->
-              <div class="request-card">
-                <div class="card-content">
-                  <h4>María González</h4>
-                  <p><strong>Periodo:</strong> 01/08/2023 - 15/08/2023</p>
-                  <p><strong>Días:</strong> 10 días</p>
-                  <p><strong>Estado:</strong> Aprobado</p>
-                </div>
-                <button class="delete-btn" title="Eliminar solicitud">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-              <div class="empty-message">No hay solicitudes recientes</div>
-            </div>
-          </div>
+  <!-- Columna 2: Vacaciones Aprobadas -->
+  <div class="request-column">
+    <div class="column-header accepted">
+      <h3>Vacaciones Aprobadas</h3>
+    </div>
+    <div class="requests-list" id="approved-vacations">
+      <div class="empty-message">No hay solicitudes recientes</div>
+    </div>
+  </div>
 
-          <!-- Columna 3: Permisos Rechazados -->
-          <div class="request-column">
-            <div class="column-header rejected">
-              <h3>Permisos Rechazados</h3>
-            </div>
-            <div class="requests-list" id="rejected-permissions">
-              <!-- Ejemplo de tarjeta con botón de eliminar -->
-              <div class="request-card">
-                <div class="card-content">
-                  <h4>Carlos Sánchez</h4>
-                  <p><strong>Tipo:</strong> Permiso personal</p>
-                  <p><strong>Fecha:</strong> 20/07/2023</p>
-                  <p><strong>Horas:</strong> 2 horas</p>
-                  <p><strong>Estado:</strong> Rechazado</p>
-                  <p><strong>Motivo:</strong> Sin justificación suficiente</p>
-                </div>
-                <button class="delete-btn" title="Eliminar solicitud">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-              <div class="empty-message">No hay solicitudes recientes</div>
-            </div>
-          </div>
+  <!-- Columna 3: Permisos Rechazados -->
+  <div class="request-column">
+    <div class="column-header rejected">
+      <h3>Permisos Rechazados</h3>
+    </div>
+    <div class="requests-list" id="rejected-permissions">
+      <div class="empty-message">No hay solicitudes recientes</div>
+    </div>
+  </div>
 
-          <!-- Columna 4: Vacaciones Rechazadas -->
-          <div class="request-column">
-            <div class="column-header rejected">
-              <h3>Vacaciones Rechazadas</h3>
-            </div>
-            <div class="requests-list" id="rejected-vacations">
-              <!-- Ejemplo de tarjeta con botón de eliminar -->
-              <div class="request-card">
-                <div class="card-content">
-                  <h4>Ana Rodríguez</h4>
-                  <p><strong>Periodo:</strong> 10/09/2023 - 20/09/2023</p>
-                  <p><strong>Días:</strong> 8 días</p>
-                  <p><strong>Estado:</strong> Rechazado</p>
-                  <p><strong>Motivo:</strong> Periodo de alta demanda</p>
-                </div>
-                <button class="delete-btn" title="Eliminar solicitud">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-              <div class="empty-message">No hay solicitudes recientes</div>
-            </div>
-          </div>
-        </div>
+  <!-- Columna 4: Vacaciones Rechazadas -->
+  <div class="request-column">
+    <div class="column-header rejected">
+      <h3>Vacaciones Rechazadas</h3>
+    </div>
+    <div class="requests-list" id="rejected-vacations">
+      <div class="empty-message">No hay solicitudes recientes</div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   </body>

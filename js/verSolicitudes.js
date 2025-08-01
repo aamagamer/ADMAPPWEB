@@ -1,69 +1,42 @@
-function exportarExcelDesdeServidor() {
-  const dataParaExportar = [];
-
-  document.querySelectorAll(".request-item").forEach(div => {
-    const contenedor = div.parentElement.id;
-    const tipo = contenedor.includes("vacations") ? "Vacaciones" : "Permiso";
-    const estado =
-      contenedor.includes("approved") || contenedor.includes("accepted")
-        ? "Aceptado"
-        : "Rechazado";
-
-    const empleado = div.querySelector(".request-employee")?.textContent.trim();
-    const fecha = div.querySelector(".request-date")?.textContent.trim();
-    const detalles = div.querySelector(".request-details")?.textContent.trim();
-
-    dataParaExportar.push({
-      Tipo: tipo,
-      Estado: estado,
-      Empleado: empleado,
-      Fecha: fecha,
-      Detalles: detalles
-    });
-  });
-
-  if (dataParaExportar.length === 0) {
-    alert("No hay datos visibles para exportar.");
-    return;
-  }
-
-  fetch("/api/exportar-reportes-vista", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(dataParaExportar)
-  })
-    .then(response => {
-      if (!response.ok) throw new Error("Error al generar el archivo");
-
-      return response.blob();
-    })
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Solicitudes_Visibles.xlsx";
-      a.click();
-      URL.revokeObjectURL(url);
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      alert("Hubo un error al exportar el archivo.");
-    });
-}
-
 function estaActiva(fechaInicio, fechaFin) {
   const hoy = new Date();
-  const inicio = new Date(fechaInicio);
-  const fin = new Date(fechaFin);
+  hoy.setHours(0, 0, 0, 0); // Normalizar 'hoy' al inicio del día
+
+  // Forzar interpretación local de las fechas agregando "T00:00:00"
+  const inicio = new Date(fechaInicio + "T00:00:00");
+  const fin = new Date(fechaFin + "T00:00:00");
+
+  // Validación básica de fechas
+  if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
+    console.error("Fechas inválidas:", fechaInicio, fechaFin);
+    return false;
+  }
+
+  // Normalizar fechas al inicio del día para comparación
+  inicio.setHours(0, 0, 0, 0);
+  fin.setHours(23, 59, 59, 999);
+
+  console.log("Comparando vacación:", {
+    hoy: hoy.toDateString(),
+    inicio: inicio.toDateString(),
+    fin: fin.toDateString(),
+    "¿Activa?": hoy >= inicio && hoy <= fin
+  });
+
   return hoy >= inicio && hoy <= fin;
 }
 
 function esFutura(fechaInicio) {
   const hoy = new Date();
-  const inicio = new Date(fechaInicio);
+  hoy.setHours(23, 59, 59, 999); // Normalizar al final del día
+  const inicio = new Date(fechaInicio + "T00:00:00"); // Forzar interpretación local
   return inicio > hoy;
+}
+
+function formatearFecha(fechaStr) {
+  const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+  const fecha = new Date(fechaStr + "T00:00:00"); // garantiza correcto parseo
+  return fecha.toLocaleDateString('es-MX', opciones);
 }
 
 function permisoEstaActivoAhora(dia, horaInicio, horaFin) {
@@ -119,7 +92,11 @@ function aplicarFiltroUnico() {
       break;
 
     case "vacaciones-activas":
-      vac = vacacionesData.filter(i => i.estado_id === 2 && estaActiva(i.fecha_salida, i.fecha_regreso));
+      vac = vacacionesData.filter(i => {
+        const activa = i.estado_id === 2 && estaActiva(i.fecha_salida, i.fecha_regreso);
+        console.log(`Vacación ${i.nombre}: ${i.fecha_salida} - ${i.fecha_regreso}, activa: ${activa}`);
+        return activa;
+      });
       break;
 
     case "vacaciones-futuras":
@@ -148,67 +125,102 @@ function aplicarFiltroUnico() {
   renderizarFiltradas(vac, perm);
 }
 
+function verificarTodasColumnasOcultas() {
+  const gridContainer = document.getElementById("requests-grid-container");
+  const columnasVisibles = Array.from(gridContainer.querySelectorAll(".request-column"))
+    .filter(col => col.style.display !== "none");
+
+  if (columnasVisibles.length === 0) {
+    const mensaje = document.createElement("div");
+    mensaje.className = "no-visible-columns";
+    mensaje.textContent = "No hay solicitudes que coincidan con los filtros aplicados";
+    gridContainer.appendChild(mensaje);
+  } else {
+    const mensajeExistente = gridContainer.querySelector(".no-visible-columns");
+    if (mensajeExistente) {
+      mensajeExistente.remove();
+    }
+  }
+}
+
 function renderizarFiltradas(vacaciones, permisos) {
   const containers = {
-    permisosAceptados: document.getElementById("accepted-permissions"),
-    permisosRechazados: document.getElementById("rejected-permissions"),
-    vacacionesAprobadas: document.getElementById("approved-vacations"),
-    vacacionesRechazadas: document.getElementById("rejected-vacations"),
+    permisosAceptados: document.getElementById("accepted-permissions").parentElement,
+    permisosRechazados: document.getElementById("rejected-permissions").parentElement,
+    vacacionesAprobadas: document.getElementById("approved-vacations").parentElement,
+    vacacionesRechazadas: document.getElementById("rejected-vacations").parentElement,
   };
 
   for (let key in containers) {
-    containers[key].innerHTML = "";
+    containers[key].style.display = "block";
+    containers[key].querySelector(".requests-list").innerHTML = "";
   }
 
+  // Procesar vacaciones
   vacaciones.forEach(item => {
     const div = document.createElement("div");
     div.className = "request-item";
     div.setAttribute("data-id", item.id);
     div.setAttribute("data-tipo", "Vacaciones");
+
+    const fechaSalida = formatearFecha(item.fecha_salida);
+    const fechaRegreso = formatearFecha(item.fecha_regreso);
+    const mostrarFechas = item.fecha_salida === item.fecha_regreso
+      ? `Fecha: ${fechaSalida}`
+      : `Del ${fechaSalida} al ${fechaRegreso}`;
+
     div.innerHTML = `
       <div style="flex: 1; margin-right: 10px;">
         <div class="request-employee">${item.nombre}</div>
-        <div class="request-date">Del ${item.fecha_salida} al ${item.fecha_regreso}</div>
+        <div class="request-date">${mostrarFechas}</div>
         <div class="request-details">Días solicitados: ${item.dias_solicitados}</div>
       </div>
       <button class="delete-btn" title="Eliminar solicitud">
         <i class="bi bi-x-lg"></i>
       </button>
     `;
+
     if (item.estado_id === 2)
-      containers.vacacionesAprobadas.appendChild(div);
+      containers.vacacionesAprobadas.querySelector(".requests-list").appendChild(div);
     else
-      containers.vacacionesRechazadas.appendChild(div);
+      containers.vacacionesRechazadas.querySelector(".requests-list").appendChild(div);
   });
 
+  // Procesar permisos
   permisos.forEach(item => {
     const div = document.createElement("div");
     div.className = "request-item";
     div.setAttribute("data-id", item.id);
     div.setAttribute("data-tipo", "Permiso");
+
+    const fechaFormateada = formatearFecha(item.dia_solicitado);
+
     div.innerHTML = `
       <div style="flex: 1; margin-right: 10px;">
         <div class="request-employee">${item.nombre}</div>
-        <div class="request-date">Día: ${item.dia_solicitado} (${item.hora_inicio} - ${item.hora_fin})</div>
+        <div class="request-date">Día: ${fechaFormateada} (${item.hora_inicio} - ${item.hora_fin})</div>
         <div class="request-details">Razón: ${item.razon} | Compensación: ${item.tipo_compensacion}</div>
       </div>
       <button class="delete-btn" title="Eliminar solicitud">
         <i class="bi bi-x-lg"></i>
       </button>
     `;
+
     if (item.estado_id === 2)
-      containers.permisosAceptados.appendChild(div);
+      containers.permisosAceptados.querySelector(".requests-list").appendChild(div);
     else
-      containers.permisosRechazados.appendChild(div);
+      containers.permisosRechazados.querySelector(".requests-list").appendChild(div);
   });
 
   for (let key in containers) {
-    if (containers[key].children.length === 0) {
-      containers[key].innerHTML = `<div class="empty-message">No hay solicitudes recientes</div>`;
+    const list = containers[key].querySelector(".requests-list");
+    if (list.children.length === 0) {
+      containers[key].style.display = "none";
+      list.innerHTML = `<div class="empty-message">No hay solicitudes recientes</div>`;
     }
   }
 
-  // Agregar eventos a los botones de eliminación
+  // Eliminar
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const tarjeta = btn.closest(".request-item");
@@ -222,18 +234,91 @@ function renderizarFiltradas(vacaciones, permisos) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tipo, id })
       })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
         if (data.mensaje) {
+          // Éxito - remover la tarjeta y actualizar UI
+          const container = tarjeta.closest(".requests-list").parentElement;
           tarjeta.remove();
+          
+          // Verificar si el contenedor quedó vacío
+          if (container.querySelectorAll(".request-item").length === 0) {
+            container.style.display = "none";
+            container.querySelector(".requests-list").innerHTML = `<div class="empty-message">No hay solicitudes recientes</div>`;
+          }
+          
+          verificarTodasColumnasOcultas();
+          
+          // Mostrar mensaje de éxito (opcional)
+          // alert("Solicitud dada de baja correctamente");
         } else {
-          alert("Error al dar de baja: " + (data.error || "desconocido"));
+          alert("Error al dar de baja: " + (data.error || "respuesta inesperada del servidor"));
         }
       })
       .catch(err => {
-        console.error("Error:", err);
-        alert("No se pudo dar de baja la solicitud.");
+        console.error("Error de red o respuesta:", err);
+        alert("Error de conexión. No se pudo dar de baja la solicitud.");
       });
     });
   });
+}
+
+function exportarExcelDesdeServidor() {
+  const dataParaExportar = [];
+
+  document.querySelectorAll(".request-item").forEach(div => {
+    const contenedor = div.parentElement.id;
+    const tipo = contenedor.includes("vacations") ? "Vacaciones" : "Permiso";
+    const estado =
+      contenedor.includes("approved") || contenedor.includes("accepted")
+        ? "Aceptado"
+        : "Rechazado";
+
+    const empleado = div.querySelector(".request-employee")?.textContent.trim();
+    const fecha = div.querySelector(".request-date")?.textContent.trim();
+    const detalles = div.querySelector(".request-details")?.textContent.trim();
+
+    dataParaExportar.push({
+      Tipo: tipo,
+      Estado: estado,
+      Empleado: empleado,
+      Fecha: fecha,
+      Detalles: detalles
+    });
+  });
+
+  if (dataParaExportar.length === 0) {
+    alert("No hay datos visibles para exportar.");
+    return;
+  }
+
+  fetch("/api/exportar-reportes-vista", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dataParaExportar)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Error al generar el archivo");
+
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Solicitudes_Visibles.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Hubo un error al exportar el archivo.");
+    });
 }
