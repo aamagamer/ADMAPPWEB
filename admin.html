@@ -283,6 +283,17 @@
       </div>
     </div>
 
+    <!-- Modal de datos generales (usa las mismas clases e ID de estilo) -->
+<div id="modal-generales" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalGenerales()">&times;</span>
+    <h2>Datos Generales del Empleado</h2>
+    <div id="modal-generales-body" class="modal-body-estilo"></div>
+  </div>
+</div>
+
+
+
     <!-- Modal para dar de alta empleado -->
     <div id="add-employee-modal" class="modal hidden">
       <div class="modal-content add-employee-modal">
@@ -1348,7 +1359,12 @@ function cargarDiasFestivos() {
               const row = document.createElement("tr");
               row.innerHTML = `
         <td>${emp.id}</td>
-        <td>${emp.nombre}</td>
+        <td>
+  <button onclick="verEmpleadoGenerales(${emp.id})" style="all: unset; cursor: pointer;">
+    ${emp.nombre}
+  </button>
+</td>
+
         <td>${emp.puesto}</td>
         <td>
           <button class="action-btn" onclick="verEmpleado(${emp.id})">
@@ -1439,6 +1455,63 @@ function cargarDiasFestivos() {
             alert("Error al cargar los datos del empleado");
           });
       }
+
+      function verEmpleadoGenerales(id) {
+  document.body.classList.add("no-scroll");
+
+  fetch(`/api/empleado/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Error al cargar datos del empleado");
+      return res.json();
+    })
+    .then((data) => {
+      const modalBody = document.getElementById("modal-generales-body");
+
+      const renderField = (label, value) => {
+        const texto =
+          value === null || value === undefined || value === "" || value === "null"
+            ? "Sin información"
+            : value;
+        return `<p><strong>${label}:</strong> ${texto}</p>`;
+      };
+
+      const areasTexto =
+        data.Areas && data.Areas.length > 0
+          ? data.Areas.map((area) => area.NombreArea).join(", ")
+          : "Sin información";
+
+      modalBody.innerHTML = `
+        ${renderField("ID", data.idUsuario)}
+        ${renderField("Rol", data.TipoRol)}
+        ${renderField("Áreas", areasTexto)}
+        ${renderField("Nombre", data.Nombres)}
+        ${renderField("Paterno", data.Paterno)}
+        ${renderField("Materno", data.Materno)}
+        ${renderField("Fecha nacimiento", data.FechaNacimiento)}
+        ${renderField("Dirección", data.Direccion)}
+        ${renderField("Código postal", data.CodigoPostal)}
+        ${renderField("Correo electrónico", data.Correo)}
+        ${renderField("Teléfono", data.Telefono)}
+        ${renderField("Fecha ingreso", data.FechaIngreso)}
+        ${renderField("CURP", data.Curp)}
+        ${renderField("Puesto", data.Puesto)}
+      `;
+
+      document.getElementById("modal-generales").classList.remove("hidden");
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error al cargar los datos generales del empleado");
+    });
+}
+
+function cerrarModalGenerales() {
+  document.getElementById("modal-generales").classList.add("hidden");
+  document.body.classList.remove("no-scroll");
+}
+
+
+
 
       function cerrarModal() {
         document.getElementById("modal").classList.add("hidden");
