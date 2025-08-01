@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import pyodbc
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime, date
 from flask import Flask, session, redirect, url_for, render_template
 from flask import send_file
 import pandas as pd
@@ -559,6 +559,17 @@ def obtener_empleado(id):
 
         columns = [col[0] for col in cursor.description]
         usuario = dict(zip(columns, row))
+
+        # 👉 Convertir objetos datetime o date a texto con formato "d de mes de YYYY"
+        for key, value in usuario.items():
+            if isinstance(value, (datetime, date)):
+                # Lista de meses en español
+                meses = [
+                    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+                ]
+                # Formatear la fecha como "d de mes de YYYY"
+                usuario[key] = f"{value.day} de {meses[value.month - 1]} de {value.year}"
 
         # Consulta de áreas corregida
         cursor.execute("""
