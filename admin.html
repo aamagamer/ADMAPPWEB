@@ -2446,7 +2446,7 @@ function cerrarModalGenerales() {
 
             // Convertir a número
             empleadoData.idUsuario = Number(empleadoData.idUsuario);
-            empleadoData.nss = Number(empleadoData.nss);
+            empleadoData.nss = empleadoData.nss;
             empleadoData.telefono = Number(empleadoData.telefono);
             empleadoData.telefonoEmergencia = Number(
               empleadoData.telefonoEmergencia
@@ -2460,7 +2460,6 @@ function cerrarModalGenerales() {
             // Validaciones finales
             if (
               isNaN(empleadoData.idUsuario) ||
-              isNaN(empleadoData.nss) ||
               isNaN(empleadoData.telefono) ||
               isNaN(empleadoData.telefonoEmergencia) ||
               isNaN(empleadoData.SueldoDiario) ||
