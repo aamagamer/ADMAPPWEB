@@ -368,18 +368,17 @@
 
           <!-- Campo 9 -->
           <div class="form-group">
-            <label for="codigoPostal">Código Postal:</label>
-            <input
-              type="text"
-              id="codigoPostal"
-              placeholder="Ej. 12345"
-              name="codigoPostal"
-              maxlength="5"
-             
-              required
-            />
-            
-          </div>
+  <label for="codigoPostal">Código Postal:</label>
+  <input
+    type="text"
+    id="codigoPostal"
+    placeholder="Ej. 12345"
+    name="codigoPostal"
+    maxlength="5"
+    title="Por favor ingrese exactamente 5 dígitos numéricos"
+    required
+  />
+</div>
 
           <!-- Campo 10 -->
           <div class="form-group">
@@ -395,7 +394,6 @@
               id="nss"
               name="nss"
               placeholder="Ej. 54-14-96-2319-8"
-              maxlength="15"
               required
             />
           </div>
@@ -409,7 +407,7 @@
               name="telefono"
               maxlength="10"
               placeholder="Ej. 8441234567"
-           
+              title="Por favor ingrese 10 dígitos seguidos."
               required
             />
             
@@ -447,6 +445,7 @@
               id="curp"
               name="curp"
               placeholder="Ej. GARC850701HDFRNS09"
+              title="Por favor ingrese 18 caracteres alfanuméricos"
               maxlength="18"
               
               required
@@ -480,6 +479,7 @@
               type="tel"
               id="telefonoEmergencia"
               name="telefonoEmergencia"
+              title="Por favor ingrese 1o dígitos sin espacios."
               required
             />
           </div>
@@ -2298,11 +2298,103 @@ function cerrarModalGenerales() {
         // Carga inicial
         cargarEmpleadosPorEstado();
 
+        //Validaciones
+        function validarCampos() {
+    // Obtener valores de los campos
+    const codigoPostal = document.getElementById('codigoPostal').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const telefonoEmergencia = document.getElementById('telefonoEmergencia').value.trim();
+    const curp = document.getElementById('curp').value.trim();
+    const rfc = document.getElementById('rfc').value.trim();
+    const nss = document.getElementById('nss').value.trim();
+    
+    // Expresiones regulares para validación
+    const regexCP = /^\d{5}$/; // 5 dígitos exactos
+    const regexTelefono = /^\d{10}$/; // 10 dígitos exactos
+    const regexCURP = /^[A-Z0-9]{18}$/i; // 18 alfanuméricos (case insensitive)
+    const regexRFC = /^[A-Z0-9]{13}$/i; // 13 alfanuméricos (case insensitive)
+    const regexNSS = /^(?:\d{11}|\d{2}-\d{2}-\d{2}-\d{4}-\d{1}|\d{2}-\d{2}-\d{2}-\d{2}-\d{2}-\d{1})$/;
+
+    // Validar cada campo
+    if (!regexCP.test(codigoPostal)) {
+        Swal.fire({
+          icon: "warning",
+          title: "Campo incorrecto",
+          text: "El código postal debe tener 5 dígitos.",
+          confirmButtonColor:"#3085d6",
+          confirmButtonText: "Aceptar",
+        });
+        return false;
+    }
+
+    if (!regexTelefono.test(telefono)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Campo incorrecto",
+            text: "El número telefónico debe de tener 10 dígitos.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Aceptar",
+        });
+        return false;
+    }
+    if (!regexTelefono.test(telefonoEmergencia)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Campo incorrecto",
+            text: "El número telefónico de emergencia debe de tener 10 dígitos.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Aceptar",
+        }); 
+        return false;
+    }
+
+    if (!regexCURP.test(curp)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Campo incorrecto",
+            text: "La CURP debe tener 18 caracteres alfanúmericos.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Aceptar",
+          });
+        return false;
+    }
+
+    if (!regexRFC.test(rfc)) {
+        Swal.fire({
+          icon: "warning",
+          title: "Campo incorrecto",
+          text: "El RFC debe tener 13 caracteres alfánumericos.",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "Aceptar",
+        });
+        return false;
+    }
+
+    if(!regexNSS.test(nss)){
+      Swal.fire({
+        icon: "warning",
+        title: "Campo incorrecto",
+        text: "El NSS debe de contener 11 dígitos, puede contener guión o no.",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+      });
+      return false;
+    }
+
+    // Si todo es válido
+    return true;
+}
+
         // Event listeners para formularios
         const employeeForm = document.getElementById("employee-form");
         if (employeeForm) {
           employeeForm.addEventListener("submit", function (e) {
             e.preventDefault();
+
+             // Primero validar los campos
+        if (!validarCampos()) {
+            return; // Detener el envío si hay errores
+        }
 
             const fechaIngreso = document.getElementById("fechaIngreso").value;
             const diasVacaciones = calcularDiasVacaciones(fechaIngreso);
@@ -2596,6 +2688,7 @@ function cerrarModalGenerales() {
           const rfc = document.getElementById("rfc").value.trim();
           const telefono = document.getElementById("telefono").value.trim();
           const nss = document.getElementById("nss").value.trim();
+          const telefonoEmergencia = document.getElementById("telefonoEmergencia").value.trim();
 
           // Código Postal: 5 dígitos numéricos
           if (!/^\d{5}$/.test(cp)) {
@@ -2624,10 +2717,15 @@ function cerrarModalGenerales() {
           }
 
           // NSS: 11 dígitos, con o sin guiones (ej: 123-45-67890 o 12345678901)
-          if (!/^(\d{3}-\d{2}-\d{5}|\d{11})$/.test(nss)) {
+          if (!/^(\d{2}-\d{2}-\d{2}-\d{4}-\d{1}|\d{11})$/.test(nss)) {
             alert(
-              "El NSS debe tener 11 dígitos, con o sin guiones (ej: 123-45-67890)."
+              "El NSS debe tener 11 dígitos, con o sin guiones (ej: 12-34-56-7890-1."
             );
+            return false;
+          }
+
+          if (!/^\d{10}$/.test(telefonoEmergencia)) {
+            alert("El teléfono debe tener exactamente 10 dígitos.");
             return false;
           }
 
