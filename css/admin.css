@@ -944,3 +944,12 @@ textarea.estilo-textarea {
   font-size: 14px;
 }
 
+a{
+  text-decoration: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-size: 12px; /* o el tamaño que tú quieras */
+      /* opcional: cambia el color también si quieres */
+}

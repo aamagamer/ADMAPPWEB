@@ -372,11 +372,13 @@
             <input
               type="text"
               id="codigoPostal"
+              placeholder="Ej. 12345"
               name="codigoPostal"
               maxlength="5"
               pattern="\d{5}"
               required
             />
+            
           </div>
 
           <!-- Campo 10 -->
@@ -392,11 +394,11 @@
               type="text"
               id="nss"
               name="nss"
-              maxlength="13"
-              pattern="^\d{3}-\d{2}-\d{5}$|^\d{11}$"
+              placeholder="Ej. 54-14-96-2319-8"
+              maxlength="15"
+              pattern="^\d{2}-\d{2}-\d{2}-\d{4}-\d{1}$"
               required
             />
-            <small>Formato permitido: 12345678901 o 123-45-67890</small>
           </div>
 
           <!-- Campo 12 -->
@@ -407,9 +409,11 @@
               id="telefono"
               name="telefono"
               maxlength="10"
+              placeholder="Ej. 8441234567"
               pattern="\d{10}"
               required
             />
+            
           </div>
 
           <!-- Campo 13 -->
@@ -430,6 +434,7 @@
               type="text"
               id="rfc"
               name="rfc"
+              placeholder="OACD123456789"
               maxlength="13"
               pattern="[A-Za-z0-9]{13}"
               required
@@ -443,10 +448,12 @@
               type="text"
               id="curp"
               name="curp"
+              placeholder="Ej. GARC850701HDFRNS09"
               maxlength="18"
               pattern="[A-Za-z0-9]{18}"
               required
             />
+          
           </div>
 
           <!-- Campo 16 -->
