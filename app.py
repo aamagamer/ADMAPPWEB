@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import pyodbc
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime, date
 from flask import Flask, session, redirect, url_for, render_template
 from flask import send_file
 import pandas as pd
@@ -534,11 +534,6 @@ def actualizar_estado_permiso():
             conn.close()
 
 
-
-
-
-
-
 @app.route('/api/empleado/<int:id>', methods=['GET'])
 def obtener_empleado(id):
     try:
@@ -560,7 +555,12 @@ def obtener_empleado(id):
         columns = [col[0] for col in cursor.description]
         usuario = dict(zip(columns, row))
 
-        # Consulta de áreas corregida
+        # 👉 Formatear las fechas: solo día-mes-año
+        for key, value in usuario.items():
+            if isinstance(value, (date, datetime)):
+                usuario[key] = value.strftime("%Y-%m-%d")  # o "%d/%m/%Y" si prefieres ese formato
+
+        # Consulta de áreas
         cursor.execute("""
             SELECT a.idArea, a.NombreArea
             FROM Usuario_Area ua
