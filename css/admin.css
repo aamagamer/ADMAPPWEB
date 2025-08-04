@@ -950,6 +950,12 @@ a{
 
 input::placeholder,
 textarea::placeholder {
-  font-size: 12px; /* o el tamaño que tú quieras */
-      /* opcional: cambia el color también si quieres */
+  font-size: 14px; 
 }
+
+input.invalid {
+  border: 2px solid red;
+  background-color: #ffe6e6;
+}
+
+
