@@ -2852,7 +2852,12 @@ if (editEmployeeForm) {
                 return response.json();
               })
               .then((data) => {
-                cerrarModalAgregarFestivo();
+                Swal.fire({
+                  icon : "success",
+                  title: "Día Festivo agregado al calendario",
+                  confirmButtonColor: "#3085d6",
+                  confirmButtonText: "Aceptar",
+                })
               })
               .catch((error) => {
                 console.error("Error:", error);

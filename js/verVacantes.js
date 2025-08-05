@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", async function () {
   const contenedor = document.getElementById("vacantes-container");
 
@@ -35,8 +36,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
 
             if (!res.ok) throw new Error("Error al actualizar la vacante");
-
-            alert("✅ Vacante marcada como conseguida.");
+            Swal.fire({
+                  icon : "success",
+                  title: "Vacante marcada como conseguida",
+                  confirmButtonColor: "#3085d6",
+                  confirmButtonText: "Aceptar",
+                }); 
             card.remove(); // ✅ desaparece de la vista
           } catch (error) {
             console.error("Error al actualizar la vacante:", error);
