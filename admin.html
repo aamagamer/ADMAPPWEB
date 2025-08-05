@@ -2107,120 +2107,166 @@ function validarCamposEdicion() {
         }
       }
 
-      function exportarExcel() {
-        const camposSeleccionados = Array.from(
-          document.querySelectorAll(
-            '#export-fields-container input[type="checkbox"]:checked'
-          )
-        ).map((cb) => cb.value);
+async function exportarExcel() {
+  const camposSeleccionados = Array.from(
+    document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked')
+  ).map((cb) => cb.value);
+  
+  const checkboxes = document.querySelectorAll(
+    '#export-employees-container input[type="checkbox"]:checked'
+  );
+  
+  const empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value);
 
-        const checkboxes = document.querySelectorAll(
-          '#export-employees-container input[type="checkbox"]:checked'
-        );
-        const empleadosSeleccionados = Array.from(checkboxes).map(
-          (cb) => cb.value
-        );
+  if (empleadosSeleccionados.length === 0 || camposSeleccionados.length === 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "Selección incompleta",
+      text: "Por favor selecciona al menos un empleado y al menos un campo para exportar",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
 
-        if (
-          empleadosSeleccionados.length === 0 ||
-          camposSeleccionados.length === 0
-        ) {
-          Swal.fire({
-            icon: "warning",
-            title: "Selección incompleta",
-            text: "Por favor selecciona al menos un empleado y al menos un campo para exportar",
-            confirmButtonColor: "#3085d6",
-            confirmButtonText: "Aceptar",
-          });
-          return;
+  const exportBtn = document.querySelector("#paso-empleados .btn-primary");
+  const originalText = exportBtn.textContent;
+  exportBtn.textContent = "Generando...";
+  exportBtn.disabled = true;
+
+  try {
+    const promises = empleadosSeleccionados.map((id) =>
+      fetch(`/api/empleado/${id}`).then((res) => res.json())
+    );
+
+    const empleadosCompletos = await Promise.all(promises);
+
+    const datosExcel = empleadosCompletos.map((empleado) => {
+      const fila = {};
+      camposSeleccionados.forEach((campo) => {
+        if (campo === "Areas" && Array.isArray(empleado.Areas)) {
+          fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ");
+        } else {
+          fila[campo] = empleado[campo] !== undefined ? empleado[campo] : "";
         }
+      });
+      return fila;
+    });
 
-        const exportBtn = document.querySelector(
-          "#paso-empleados .btn-primary"
-        );
-        const originalText = exportBtn.textContent;
-        exportBtn.textContent = "Generando...";
-        exportBtn.disabled = true;
+    // Crear workbook con ExcelJS
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Empleados');
 
-        const promises = empleadosSeleccionados.map((id) =>
-          fetch(`/api/empleado/${id}`).then((res) => res.json())
-        );
+    // Definir las columnas
+    worksheet.columns = camposSeleccionados.map(campo => ({
+      header: campo,
+      key: campo,
+      width: Math.max(campo.length + 2, 10)
+    }));
 
-        Promise.all(promises)
-          .then((empleadosCompletos) => {
-            const datosExcel = empleadosCompletos.map((empleado) => {
-              const fila = {};
+    // Agregar los datos
+    datosExcel.forEach(empleado => {
+      worksheet.addRow(empleado);
+    });
 
-              camposSeleccionados.forEach((campo) => {
-                if (campo === "Areas" && Array.isArray(empleado.Areas)) {
-                  fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(
-                    ", "
-                  );
-                } else {
-                  fila[campo] =
-                    empleado[campo] !== undefined ? empleado[campo] : "";
-                }
-              });
+    // Aplicar estilos al encabezado (fila 1) - AMARILLO
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFFFFF00' } // Amarillo
+      };
+      cell.font = {
+        bold: true,
+        size: 10,
+        name: 'Arial'
+      };
+      cell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+    });
 
-              return fila;
-            });
+    // Aplicar estilos a las filas de datos
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i);
+      const empleado = datosExcel[i - 2];
+      
+      // Verificar si tiene fecha baja Y comentario baja
+      const tieneFechaBaja = empleado['FechaBaja'] && empleado['FechaBaja'].toString().trim() !== '';
+      const tieneComentarioBaja = empleado['ComentarioSalida'] && empleado['ComentarioSalida'].toString().trim() !== '';
+      
+      const esFilaRoja = tieneFechaBaja && tieneComentarioBaja;
+      
+      row.eachCell((cell) => {
+        if (esFilaRoja) {
+          // Fila completa en ROJO
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFF0000' } // Rojo
+          };
+          cell.font = {
+            color: { argb: 'FFFFFFFF' }, // Texto blanco para contraste
+            size: 10,
+            name: 'Arial'
+          };
+        } else {
+          // Fila normal
+          cell.font = {
+            size: 10,
+            name: 'Arial'
+          };
+        }
+        
+        cell.alignment = {
+          vertical: 'middle'
+        };
+      });
+    }
 
-            // Crear hoja Excel
-            const XLSX = window.XLSX; // Declare XLSX variable
-            const worksheet = XLSX.utils.json_to_sheet(datosExcel, {
-              header: camposSeleccionados,
-            });
+    // Ajustar ancho de columnas automáticamente
+    worksheet.columns.forEach((column, index) => {
+      const campo = camposSeleccionados[index];
+      let maxLength = campo.length;
+      
+      // Buscar el valor más largo en esta columna
+      datosExcel.forEach(row => {
+        const cellValue = row[campo] ? row[campo].toString() : '';
+        if (cellValue.length > maxLength) {
+          maxLength = cellValue.length;
+        }
+      });
+      
+      column.width = Math.min(maxLength + 2, 50); // Máximo 50 caracteres
+    });
 
-            // Aplicar estilo al encabezado
-            const range = XLSX.utils.decode_range(worksheet["!ref"]);
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-              const cell_address = XLSX.utils.encode_cell({
- r: 0, c: C });
-              if (!worksheet[cell_address]) continue;
+    // Generar el archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
 
-              worksheet[cell_address].s = {
-                fill: {
-                  patternType: "solid",
-                  fgColor: { rgb: "FFFF00" },
-                },
-                font: {
-                  bold: true,
-                },
-                alignment: {
-                  horizontal: "center",
-                },
-              };
-            }
+    // Descargar el archivo
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `empleados_exportados_${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
 
-            // Ajustar ancho de columnas automáticamente
-            worksheet["!cols"] = camposSeleccionados.map((campo) => {
-              const maxLength = Math.max(
-                campo.length,
-                ...datosExcel.map((row) =>
-                  row[campo] ? row[campo].toString().length : 0
-                )
-              );
-              return { wch: maxLength + 2 };
-            });
-
-            // Crear libro y descargar
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Empleados");
-
-            XLSX.writeFile(workbook, "empleados_exportados.xlsx");
-          })
-          .catch((error) => {
-            console.error("Error al exportar a Excel:", error);
-            alert(
-              "Ocurrió un error al generar el archivo Excel: " + error.message
-            );
-          })
-          .finally(() => {
-            exportBtn.textContent = originalText;
-            exportBtn.disabled = false;
-            cerrarModalExportarExcel();
-          });
-      }
+  } catch (error) {
+    console.error("Error al exportar a Excel:", error);
+    alert("Ocurrió un error al generar el archivo Excel: " + error.message);
+  } finally {
+    exportBtn.textContent = originalText;
+    exportBtn.disabled = false;
+    cerrarModalExportarExcel();
+  }
+}
 
       function cerrarModalExportarExcel() {
         document.getElementById("export-excel-modal").classList.add("hidden");
