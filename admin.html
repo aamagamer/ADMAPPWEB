@@ -21,8 +21,6 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-  <style></style>
 </head>
 <body>
   <header>
@@ -405,7 +403,6 @@
               type="tel"
               id="telefono"
               name="telefono"
-              maxlength="10"
               placeholder="Ej. 8441234567"
               title="Por favor ingrese 10 dígitos seguidos."
               required
@@ -2310,7 +2307,7 @@ function cerrarModalGenerales() {
     
     // Expresiones regulares para validación
     const regexCP = /^\d{5}$/; // 5 dígitos exactos
-    const regexTelefono = /^\d{10}$/; // 10 dígitos exactos
+    const regexTelefono = /^(?:\d\s*){10}$/; // 10 dígitos exactos
     const regexCURP = /^[A-Z0-9]{18}$/i; // 18 alfanuméricos (case insensitive)
     const regexRFC = /^[A-Z0-9]{13}$/i; // 13 alfanuméricos (case insensitive)
     const regexNSS = /^(?:\d{11}|\d{2}-\d{2}-\d{2}-\d{4}-\d{1}|\d{2}-\d{2}-\d{2}-\d{2}-\d{2}-\d{1})$/;
@@ -2447,10 +2444,6 @@ function cerrarModalGenerales() {
             // Convertir a número
             empleadoData.idUsuario = Number(empleadoData.idUsuario);
             empleadoData.nss = empleadoData.nss;
-            empleadoData.telefono = Number(empleadoData.telefono);
-            empleadoData.telefonoEmergencia = Number(
-              empleadoData.telefonoEmergencia
-            );
             empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
             empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
             empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
@@ -2460,8 +2453,6 @@ function cerrarModalGenerales() {
             // Validaciones finales
             if (
               isNaN(empleadoData.idUsuario) ||
-              isNaN(empleadoData.telefono) ||
-              isNaN(empleadoData.telefonoEmergencia) ||
               isNaN(empleadoData.SueldoDiario) ||
               isNaN(empleadoData.SueldoSemanal) ||
               isNaN(empleadoData.BonoSemanal)
