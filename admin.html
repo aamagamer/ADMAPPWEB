@@ -59,59 +59,83 @@
       </h2>
 
       <div
-        style="
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          margin-bottom: 10px;
-        "
-      >
-        <select
-          id="filtro-estado"
-          style="
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-family: Arial, sans-serif;
-            font-size: 1rem;
-            border: 1.5px solid #bbb;
-            background-color: #fff;
-            cursor: pointer;
-            outline: none;
-            transition: border-color 0.3s ease;
-            margin-right: 450px;
-          "
-        >
-          <option value="activos">Activos</option>
-          <option value="inactivos">Inactivos</option>
-          <option value="todos">Todos</option>
-        </select>
-        <input
-          type="text"
-          id="busquedaEmpleado"
-          oninput="buscarEmpleado()"
-          placeholder="Buscar por ID o nombre"
-          style="
-            padding: 8px;
-            width: 250px;
-            margin-right: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-          "
-        />
-        <button
-          onclick="buscarEmpleado()"
-          style="
-            background-color: #2c3e50;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-          "
-        >
-          <i class="bi bi-search"></i>
-        </button>
-      </div>
+  style="
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+  "
+>
+  <!-- Filtro por Estado -->
+  <select
+    id="filtro-estado"
+    onchange="aplicarFiltros()"
+    style="
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      border: 1.5px solid #bbb;
+      background-color: #fff;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.3s ease;
+    "
+  >
+    <option value="activos">Activos</option>
+    <option value="inactivos">Inactivos</option>
+    <option value="todos">Todos</option>
+  </select>
+
+  <!-- Filtro por Área -->
+  <select
+    id="filtro-area"
+    onchange="aplicarFiltros()"
+    style="
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      border: 1.5px solid #bbb;
+      background-color: #fff;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.3s ease;
+      margin-right: 350px;
+    "
+  >
+    <option value="">Todas las áreas</option>
+    <!-- Las opciones se llenarán dinámicamente -->
+  </select>
+
+  <input
+    type="text"
+    id="busquedaEmpleado"
+    oninput="buscarEmpleado()"
+    placeholder="Buscar por ID o nombre"
+    style="
+      padding: 8px;
+      width: 250px;
+      margin-right: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    "
+  />
+  <button
+    onclick="buscarEmpleado()"
+    style="
+      background-color: #2c3e50;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    "
+  >
+    <i class="bi bi-search"></i>
+  </button>
+</div>
 
       <table class="employee-table">
         <thead>
@@ -1332,64 +1356,11 @@ function cargarDiasFestivos() {
       }
 
       function cargarEmpleadosPorEstado() {
-        const estadoSeleccionado =
-          document.getElementById("filtro-estado").value;
-        const termino = document
-          .getElementById("busquedaEmpleado")
-          .value.toLowerCase();
-
-        fetch(`/api/empleados?estado=${estadoSeleccionado}`)
-          .then((response) => response.json())
-          .then((data) => {
-            const empleadosFiltrados = data.filter(
-              (emp) =>
-                emp.id.toString().includes(termino) ||
-                emp.nombre.toLowerCase().includes(termino)
-            );
-
-            empleadosVisibles = empleadosFiltrados;
-
-            const tbody = document.getElementById("empleados-body");
-            tbody.innerHTML = "";
-
-            if (empleadosFiltrados.length === 0) {
-              tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
-              return;
-            }
-
-            empleadosFiltrados.forEach((emp) => {
-              const row = document.createElement("tr");
-              row.innerHTML = `
-        <td>${emp.id}</td>
-        <td>
-  <button onclick="verEmpleadoGenerales(${emp.id})" style="all: unset; cursor: pointer;">
-    ${emp.nombre}
-  </button>
-</td>
-
-        <td>${emp.puesto}</td>
-        <td>
-          <button class="action-btn" onclick="verEmpleado(${emp.id})">
-            <i class="bi bi-eye"></i>
-          </button>
-          <button class="action-btn" onclick="editarEmpleado(${emp.id})">
-            <i class="bi bi-pencil"></i>
-          </button>
-          <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      `;
-              tbody.appendChild(row);
-            });
-          })
-          .catch((error) => {
-            console.error("Error al cargar empleados:", error);
-          });
+      aplicarFiltros();
       }
 
       function buscarEmpleado() {
-        cargarEmpleadosPorEstado();
+         aplicarFiltros(); 
       }
 
       function verEmpleado(id) {
@@ -1568,6 +1539,30 @@ function cerrarModalGenerales() {
             });
           });
       }
+
+// Función para cargar las áreas dinámicamente
+async function cargarAreas() {
+    try {
+        const response = await fetch('/api/areas');
+        const areas = await response.json();
+        
+        const selectArea = document.getElementById('filtro-area');
+        
+        // Limpiar opciones existentes (excepto la primera)
+        selectArea.innerHTML = '<option value="">Todas las áreas</option>';
+        
+        // Agregar las áreas obtenidas del endpoint
+        areas.forEach(area => {
+            const option = document.createElement('option');
+            option.value = area.idArea;
+            option.textContent = area.NombreArea;
+            selectArea.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error al cargar las áreas:', error);
+    }
+}
 
       function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
         fetch("/api/areas")
@@ -2353,6 +2348,91 @@ async function exportarExcel() {
         return 30;
       }
 
+      // Función para aplicar ambos filtros
+// Función para aplicar ambos filtros
+async function aplicarFiltros() {
+    const estado = document.getElementById('filtro-estado').value;
+    const area = document.getElementById('filtro-area').value;
+    const termino = document.getElementById('busquedaEmpleado').value.toLowerCase();
+    
+    console.log('Aplicando filtros:', { estado, area, termino }); // Para debug
+    
+    try {
+        // Construir la URL con los parámetros
+        let url = '/api/empleados?estado=' + encodeURIComponent(estado);
+        if (area && area.trim() !== '') {
+            url += '&area=' + encodeURIComponent(area);
+        }
+        
+        console.log('URL generada:', url); // Para debug
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const empleados = await response.json();
+        console.log('Empleados recibidos:', empleados.length); // Para debug
+        
+        // Aplicar filtro de búsqueda por nombre/ID si hay término de búsqueda
+        let empleadosFiltrados = empleados;
+        if (termino && termino.trim() !== '') {
+            empleadosFiltrados = empleados.filter(emp => 
+                emp.id.toString().includes(termino) ||
+                emp.nombre.toLowerCase().includes(termino)
+            );
+        }
+        
+        console.log('Empleados después del filtro de búsqueda:', empleadosFiltrados.length); // Para debug
+        
+        // Actualizar la tabla con los empleados filtrados
+        actualizarTablaEmpleados(empleadosFiltrados);
+        
+    } catch (error) {
+        console.error('Error al aplicar filtros:', error);
+        // Mostrar error al usuario
+        const tbody = document.getElementById("empleados-body");
+        tbody.innerHTML = `<tr><td colspan="4">Error al cargar empleados: ${error.message}</td></tr>`;
+    }
+}
+
+function actualizarTablaEmpleados(empleados) {
+    empleadosVisibles = empleados; // Actualizar variable global
+    
+    const tbody = document.getElementById("empleados-body");
+    tbody.innerHTML = "";
+
+    if (empleados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
+        return;
+    }
+
+    empleados.forEach((emp) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${emp.id}</td>
+            <td>
+                <button onclick="verEmpleadoGenerales(${emp.id})" style="all: unset; cursor: pointer;">
+                    ${emp.nombre}
+                </button>
+            </td>
+            <td>${emp.puesto}</td>
+            <td>
+                <button class="action-btn" onclick="verEmpleado(${emp.id})">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="action-btn" onclick="editarEmpleado(${emp.id})">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
       function abrirModalAgregarFestivo() {
         document.getElementById("add-holiday-modal").classList.remove("hidden");
         document.body.classList.add("no-scroll");
@@ -2427,6 +2507,8 @@ async function exportarExcel() {
         }
 
         // Carga inicial
+         cargarAreas(); // Cargar áreas al iniciar
+         aplicarFiltros(); // Cargar empleados iniciales con filtros
         cargarEmpleadosPorEstado();
 
         //Validaciones

@@ -365,26 +365,60 @@ def lider():
 @app.route('/api/empleados', methods=['GET'])
 def obtener_empleados():
     estado = request.args.get('estado')  # puede ser 'activos', 'inactivos' o 'todos'
+    area_id = request.args.get('area')   # ID del área a filtrar
+    
     conn = get_connection()
     cursor = conn.cursor()
-
-    if estado == 'activos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto, Rol_idRol FROM Usuario WHERE Estado = 'Activo'"
-    elif estado == 'inactivos':
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto, Rol_idRol FROM Usuario WHERE Estado = 'Inactivo'"
+    
+    # Query base - SIEMPRE incluir el JOIN con Usuario_Area si queremos filtrar por área
+    if area_id:
+        base_query = """
+            SELECT DISTINCT Usuario.idUsuario, nombres, paterno, materno, puesto, Rol_idRol, Usuario.Estado
+            FROM Usuario
+            INNER JOIN Usuario_Area ON Usuario.idUsuario = Usuario_Area.idUsuario
+        """
     else:
-        query = "SELECT idUsuario, nombres, paterno, materno, puesto, Rol_idRol FROM Usuario"
-
-    cursor.execute(query)
+        base_query = """
+            SELECT Usuario.idUsuario, nombres, paterno, materno, puesto, Rol_idRol, Usuario.Estado
+            FROM Usuario
+        """
+    
+    # Condiciones WHERE
+    conditions = []
+    params = []
+    
+    # Si se especifica un área, agregar condición
+    if area_id:
+        conditions.append("Usuario_Area.idArea = ?")
+        params.append(area_id)
+    
+    # Filtro por estado - IMPORTANTE: manejar correctamente el caso "todos"
+    if estado == 'activos':
+        conditions.append("Usuario.Estado = 'Activo'")
+    elif estado == 'inactivos':
+        conditions.append("Usuario.Estado = 'Inactivo'")
+    # Si es 'todos', no agregamos condición de estado (mostramos activos e inactivos)
+    
+    # Construir query final
+    if conditions:
+        query = base_query + " WHERE " + " AND ".join(conditions)
+    else:
+        query = base_query
+    
+    print(f"Query ejecutada: {query}")  # Para debug
+    print(f"Parámetros: {params}")      # Para debug
+    
+    cursor.execute(query, params)
     empleados = [
-    {
-        "id": row.idUsuario,
-        "nombre": f"{row.nombres} {row.paterno} {row.materno}",
-        "puesto": row.puesto,
-        "Rol_idRol": row.Rol_idRol  # ✅ Aquí está la clave para que JS lo detecte
-    } for row in cursor.fetchall()
-]
-
+        {
+            "id": row.idUsuario,
+            "nombre": f"{row.nombres} {row.paterno} {row.materno}",
+            "puesto": row.puesto,
+            "Rol_idRol": row.Rol_idRol,
+            "estado": row.Estado  # Incluir estado para debug
+        } for row in cursor.fetchall()
+    ]
+    
     conn.close()
     return jsonify(empleados)
 
