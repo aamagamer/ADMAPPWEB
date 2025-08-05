@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gráficos RH</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link rel="icon" href="Media/favicon.ico" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Header estilizado */
+    header {
+      background-color: #19375b;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .logo {
+      height: 50px;
+    }
+
+    .menu-button {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .menu-button:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    .menu-button i {
+      font-size: 18px;
+    }
+
+    /* Contenedor de gráficas */
+    .main-container {
+      padding: 2rem;
+    }
+
+    .chart-container {
+      max-width: 700px;
+      margin: 2rem auto;
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="#" class="menu-button" onclick="history.back(); return false;">
+        <i class="bi bi-arrow-left"></i>
+        Regresar
+      </a>
+      <img src="Media/logo.png" alt="Logo" class="logo" />
+      <h1>Asesoría y Diseño Mecánico</h1>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div class="chart-container">
+      <h2>Distribución por Rol</h2>
+      <canvas id="graficoRoles"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Distribución por Área</h2>
+      <canvas id="graficoAreas"></canvas>
+    </div>
+  </div>
+
+  <script>
+    async function cargarGraficos() {
+      const res = await fetch('/api/graficos/distribucion');
+      const data = await res.json();
+
+      // Gráfico de Roles
+      const labelsRoles = data.roles.map(item => item.label);
+      const valoresRoles = data.roles.map(item => item.count);
+
+      new Chart(document.getElementById('graficoRoles'), {
+        type: 'doughnut',
+        data: {
+          labels: labelsRoles,
+          datasets: [{
+            label: 'Empleados por Rol',
+            data: valoresRoles,
+            backgroundColor: [
+              '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'
+            ]
+          }]
+        }
+      });
+
+      // Gráfico de Áreas
+      const labelsAreas = data.areas.map(item => item.label);
+      const valoresAreas = data.areas.map(item => item.count);
+
+      new Chart(document.getElementById('graficoAreas'), {
+        type: 'bar',
+        data: {
+          labels: labelsAreas,
+          datasets: [{
+            label: 'Empleados por Área',
+            data: valoresAreas,
+            backgroundColor: '#36A2EB'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarGraficos);
+  </script>
+</body>
+</html>

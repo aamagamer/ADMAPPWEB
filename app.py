@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 import pyodbc
 from flask_cors import CORS
 from datetime import datetime, date
@@ -1979,6 +1979,47 @@ def exportar_incapacidades_excel():
             cursor.close()
         if conn:
             conn.close()
+
+@app.route('/api/graficos/distribucion', methods=['GET'])
+def graficos_distribucion():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Distribución por Rol
+    cursor.execute("""
+        SELECT r.TipoRol, COUNT(*) as total
+        FROM Usuario u
+        JOIN Rol r ON u.Rol_idRol = r.idRol
+        WHERE u.Estado = 'Activo'
+        GROUP BY r.TipoRol
+    """)
+    roles = cursor.fetchall()
+    data_roles = [{"label": r[0], "count": r[1]} for r in roles]
+
+    # Distribución por Área
+    cursor.execute("""
+       SELECT a.NombreArea, COUNT(*) as total
+       FROM Usuario_Area ua
+       JOIN Area a ON ua.idArea = a.idArea
+       JOIN Usuario u ON u.idUsuario = ua.idUsuario
+       WHERE u.Estado = 'Activo'
+       GROUP BY a.NombreArea
+    """)
+    areas = cursor.fetchall()
+    data_areas = [{"label": a[0], "count": a[1]} for a in areas]
+
+    return jsonify({
+        "roles": data_roles,
+        "areas": data_areas
+    })
+
+
+
+
+@app.route('/graficos')
+def vista_graficos():
+    return render_template('stats.html')
+
 
 
 
