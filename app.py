@@ -405,8 +405,8 @@ def obtener_empleados():
     else:
         query = base_query
     
-    print(f"Query ejecutada: {query}")  # Para debug
-    print(f"Parámetros: {params}")      # Para debug
+    #print(f"Query ejecutada: {query}")  # Para debug
+    #print(f"Parámetros: {params}")      # Para debug
     
     cursor.execute(query, params)
     empleados = [
