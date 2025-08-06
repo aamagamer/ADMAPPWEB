@@ -63,19 +63,24 @@
       font-size: 18px;
     }
 
-    /* Contenedor de gráficas */
     .main-container {
-      padding: 2rem;
-    }
+  display: flex;
+  justify-content: center; /* Centra las gráficas horizontalmente */
+  gap: 2rem; /* Espacio entre gráficas */
+  padding: 2rem;
+  flex-wrap: wrap; /* Permite que se muevan a la siguiente línea en pantallas pequeñas */
+}
 
-    .chart-container {
-      max-width: 700px;
-      margin: 2rem auto;
-      background-color: #fff;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
+.chart-container {
+  flex: 1 1 400px;
+  max-width: 700px; 
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 0;
+}
+
 
     h2 {
       text-align: center;
