@@ -1996,22 +1996,111 @@ def graficos_distribucion():
     roles = cursor.fetchall()
     data_roles = [{"label": r[0], "count": r[1]} for r in roles]
 
-    # Distribución por Área
+    # Distribución por Área (usuarios activos)
     cursor.execute("""
-       SELECT a.NombreArea, COUNT(*) as total
-       FROM Usuario_Area ua
-       JOIN Area a ON ua.idArea = a.idArea
-       JOIN Usuario u ON u.idUsuario = ua.idUsuario
-       WHERE u.Estado = 'Activo'
-       GROUP BY a.NombreArea
+        SELECT a.NombreArea, COUNT(*) as total
+        FROM Usuario_Area ua
+        JOIN Area a ON ua.idArea = a.idArea
+        JOIN Usuario u ON u.idUsuario = ua.idUsuario
+        WHERE u.Estado = 'Activo'
+        GROUP BY a.NombreArea
     """)
     areas = cursor.fetchall()
     data_areas = [{"label": a[0], "count": a[1]} for a in areas]
 
+    # Reportes por Área (usando área principal)
+    cursor.execute("""
+        ;WITH AreaPrincipalPorUsuario AS (
+            SELECT 
+                ua.idUsuario,
+                MIN(ua.idArea) AS idAreaPrincipal
+            FROM Usuario_Area ua
+            GROUP BY ua.idUsuario
+        )
+        SELECT 
+            a.NombreArea,
+            COUNT(r.idReporte) AS TotalReportes
+        FROM 
+            Reporte r
+        JOIN 
+            Usuario u ON r.Usuario_idUsuario = u.idUsuario
+        JOIN 
+            AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN 
+            Area a ON apu.idAreaPrincipal = a.idArea
+        GROUP BY 
+            a.NombreArea
+        ORDER BY 
+            TotalReportes DESC;
+    """)
+    reportes = cursor.fetchall()
+    data_reportes = [{"label": r[0], "count": r[1]} for r in reportes]
+
+    # Vacaciones por Área (usando área principal)
+    cursor.execute("""
+        ;WITH AreaPrincipalPorUsuario AS (
+            SELECT 
+                ua.idUsuario,
+                MIN(ua.idArea) AS idAreaPrincipal
+            FROM Usuario_Area ua
+            GROUP BY ua.idUsuario
+        )
+        SELECT 
+            a.NombreArea,
+            COUNT(v.idVacaciones) AS TotalVacaciones
+        FROM 
+            Vacaciones v
+        JOIN 
+            Usuario u ON v.Usuario_idUsuario = u.idUsuario
+        JOIN 
+            AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN 
+            Area a ON apu.idAreaPrincipal = a.idArea
+        GROUP BY 
+            a.NombreArea
+        ORDER BY 
+            TotalVacaciones DESC;
+    """)
+    vacaciones = cursor.fetchall()
+    data_vacaciones = [{"label": v[0], "count": v[1]} for v in vacaciones]
+
+    # Permisos por Área (usando área principal)
+    cursor.execute("""
+        ;WITH AreaPrincipalPorUsuario AS (
+            SELECT 
+                ua.idUsuario,
+                MIN(ua.idArea) AS idAreaPrincipal
+            FROM Usuario_Area ua
+            GROUP BY ua.idUsuario
+        )
+        SELECT 
+            a.NombreArea,
+            COUNT(p.idPermiso) AS TotalPermisos
+        FROM 
+            Permiso p
+        JOIN 
+            Usuario u ON p.Usuario_idUsuario = u.idUsuario
+        JOIN 
+            AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN 
+            Area a ON apu.idAreaPrincipal = a.idArea
+        GROUP BY 
+            a.NombreArea
+        ORDER BY 
+            TotalPermisos DESC;
+    """)
+    permisos = cursor.fetchall()
+    data_permisos = [{"label": p[0], "count": p[1]} for p in permisos]
+
+    # Retornar todo junto
     return jsonify({
         "roles": data_roles,
-        "areas": data_areas
+        "areas": data_areas,
+        "reportes_por_area": data_reportes,
+        "vacaciones_por_area": data_vacaciones,
+        "permisos_por_area": data_permisos
     })
+
 
 
 

@@ -8,92 +8,98 @@
   <link rel="icon" href="Media/favicon.ico" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f6f9;
-      margin: 0;
-      padding: 0;
-    }
+  :root {
+    --primary: #19375b;
+    --light-bg: #f4f6f9;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --radius: 12px;
+  }
 
-    /* Header estilizado */
-    header {
-      background-color: #19375b;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      position: relative;
-    }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+  }
 
-    .header-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
+  header {
+    background-color: var(--primary);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+  }
 
-    .logo {
-      height: 50px;
-    }
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
 
-    .menu-button {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
+  .logo {
+    height: 40px;
+  }
 
-    .menu-button:hover {
-      background-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-50%) scale(1.05);
-    }
+  .menu-button {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: background 0.3s ease;
+  }
 
-    .menu-button i {
-      font-size: 18px;
-    }
+  .menu-button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
 
-    .main-container {
-  display: flex;
-  justify-content: center; /* Centra las gráficas horizontalmente */
-  gap: 2rem; /* Espacio entre gráficas */
-  padding: 2rem;
-  flex-wrap: wrap; /* Permite que se muevan a la siguiente línea en pantallas pequeñas */
-}
+  .main-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
 
-.chart-container {
-  flex: 1 1 400px;
-  max-width: 700px; 
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin: 0;
-}
+  .chart-container {
+    flex: 1 1 350px;
+    max-width: 550px;
+    background-color: var(--card-bg);
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
+  h2 {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin: 0 0 0.75rem 0;
+    text-align: center;
+    font-weight: 600;
+  }
 
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 1.5rem;
-    }
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+</style>
 
-    canvas {
-      display: block;
-      max-width: 100%;
-      height: auto !important;
-    }
-  </style>
 </head>
 <body>
 
@@ -108,6 +114,8 @@
     </div>
   </header>
 
+  <!-- ...tu HTML actual arriba permanece igual... -->
+
   <div class="main-container">
     <div class="chart-container">
       <h2>Distribución por Rol</h2>
@@ -118,6 +126,21 @@
       <h2>Distribución por Área</h2>
       <canvas id="graficoAreas"></canvas>
     </div>
+
+    <div class="chart-container">
+      <h2>Reportes por Área</h2>
+      <canvas id="graficoReportes"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Vacaciones por Área</h2>
+      <canvas id="graficoVacaciones"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Permisos por Área</h2>
+      <canvas id="graficoPermisos"></canvas>
+    </div>
   </div>
 
   <script>
@@ -125,47 +148,91 @@
       const res = await fetch('/api/graficos/distribucion');
       const data = await res.json();
 
-      // Gráfico de Roles
-      const labelsRoles = data.roles.map(item => item.label);
-      const valoresRoles = data.roles.map(item => item.count);
-
+      // === Roles ===
       new Chart(document.getElementById('graficoRoles'), {
         type: 'doughnut',
         data: {
-          labels: labelsRoles,
+          labels: data.roles.map(r => r.label),
           datasets: [{
             label: 'Empleados por Rol',
-            data: valoresRoles,
-            backgroundColor: [
-              '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'
-            ]
+            data: data.roles.map(r => r.count),
+            backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
           }]
         }
       });
 
-      // Gráfico de Áreas
-      const labelsAreas = data.areas.map(item => item.label);
-      const valoresAreas = data.areas.map(item => item.count);
-
+      // === Áreas ===
       new Chart(document.getElementById('graficoAreas'), {
         type: 'bar',
         data: {
-          labels: labelsAreas,
+          labels: data.areas.map(a => a.label),
           datasets: [{
             label: 'Empleados por Área',
-            data: valoresAreas,
+            data: data.areas.map(a => a.count),
             backgroundColor: '#36A2EB'
           }]
         },
         options: {
           responsive: true,
           scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
-              }
-            }
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+
+      // === Reportes por Área ===
+      new Chart(document.getElementById('graficoReportes'), {
+        type: 'bar',
+        data: {
+          labels: data.reportes_por_area.map(r => r.label),
+          datasets: [{
+            label: 'Reportes',
+            data: data.reportes_por_area.map(r => r.count),
+            backgroundColor: '#FF6384'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+
+      // === Vacaciones por Área ===
+      new Chart(document.getElementById('graficoVacaciones'), {
+        type: 'bar',
+        data: {
+          labels: data.vacaciones_por_area.map(v => v.label),
+          datasets: [{
+            label: 'Vacaciones',
+            data: data.vacaciones_por_area.map(v => v.count),
+            backgroundColor: '#4BC0C0'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+
+      // === Permisos por Área ===
+      new Chart(document.getElementById('graficoPermisos'), {
+        type: 'bar',
+        data: {
+          labels: data.permisos_por_area.map(p => p.label),
+          datasets: [{
+            label: 'Permisos',
+            data: data.permisos_por_area.map(p => p.count),
+            backgroundColor: '#9966FF'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
           }
         }
       });
@@ -175,3 +242,4 @@
   </script>
 </body>
 </html>
+
