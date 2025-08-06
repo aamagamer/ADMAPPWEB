@@ -1532,9 +1532,18 @@ def obtener_reportes_usuarios():
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT Nombres, Paterno, Materno, Asunto, Observaciones, idReporte
-            FROM Usuario
-            INNER JOIN Reporte ON Usuario.idUsuario = Reporte.Usuario_idUsuario where Reporte.Estado is null;
+            SELECT 
+                u.Nombres, 
+                u.Paterno, 
+                u.Materno, 
+                a.TipoAsunto,        
+                r.Observaciones, 
+                r.FechaReporte,     
+                r.idReporte
+            FROM Usuario u
+            INNER JOIN Reporte r ON u.idUsuario = r.Usuario_idUsuario
+            INNER JOIN Asunto a ON r.Asunto_idAsunto = a.idAsunto
+            WHERE r.Estado IS NULL;
         """)
         resultados = cursor.fetchall()
 
@@ -1547,7 +1556,8 @@ def obtener_reportes_usuarios():
                 "Materno": fila[2],
                 "Asunto": fila[3],
                 "Observaciones": fila[4],
-                "idReporte": fila[5]
+                "FechaReporte": fila[5].strftime('%Y-%m-%d') if fila[5] else None,  # Formatear fecha
+                "idReporte": fila[6]
             })
 
         return jsonify(lista_reportes), 200
@@ -1558,6 +1568,7 @@ def obtener_reportes_usuarios():
     finally:
         cursor.close()
         conn.close()
+
 
 @app.route('/api/reportes/<int:id_reporte>/enterado', methods=['PUT'])
 def marcar_reporte_enterado(id_reporte):
