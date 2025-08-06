@@ -15,9 +15,7 @@ input.addEventListener("input", async () => {
     return;
   }
   try {
-    const res = await fetch(
-      `/api/usuarios/buscar?q=${encodeURIComponent(query)}`
-    );
+    const res = await fetch(`/api/usuarios/buscar?q=${encodeURIComponent(query)}`);
     const usuarios = await res.json();
 
     dropdown.innerHTML = "";
@@ -66,13 +64,26 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  const asunto = document.getElementById("subject").value.trim();
+  const selectAsunto = document.getElementById("subject");
+  const asuntoId = selectAsunto.value;
+  if (!asuntoId) {
+    alert("Por favor selecciona un asunto");
+    selectAsunto.focus();
+    return;
+  }
+
   const observaciones = document.getElementById("observations").value.trim();
+  const fecha = document.getElementById("fecha-reporte").value;
+  if (!fecha) {
+    alert("Por favor selecciona la fecha del incidente");
+    return;
+  }
 
   // Mostrar resumen en modal
   resumen.textContent =
     `Empleado: ${input.value}\n` +
-    `Asunto: ${asunto}\n\n` +
+    `Asunto: ${selectAsunto.options[selectAsunto.selectedIndex].text}\n` +
+    `Fecha del incidente: ${fecha}\n\n` +
     `Observaciones:\n${observaciones}`;
 
   modal.classList.add("show");
@@ -85,21 +96,30 @@ btnCancelar.addEventListener("click", () => {
 
 // Confirmar envío
 btnConfirmar.addEventListener("click", () => {
-  const asunto = document.getElementById("subject").value.trim();
+  const selectAsunto = document.getElementById("subject");
+  const asuntoId = selectAsunto.value;
   const observaciones = document.getElementById("observations").value.trim();
+  const fecha = document.getElementById("fecha-reporte").value;
 
   fetch("/api/reportes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       Usuario_idUsuario: selectedId,
-      Asunto: asunto,
+      Asunto: asuntoId,
       Observaciones: observaciones,
+      FechaReporte: fecha,
     }),
   })
     .then((res) => res.json())
     .then((data) => {
-      //alert(data.mensaje || "Reporte enviado correctamente");
+      Swal.fire({
+          icon: "success",
+          title: "Listo",
+          text: "Reporte creado correctamente.",
+          confirmButtonColor:"#43d44fff",
+          confirmButtonText: "Aceptar",
+        });
       form.reset();
       input.value = "";
       selectedId = null;
@@ -118,4 +138,19 @@ modal.addEventListener("click", (e) => {
   }
 });
 
-
+// Cargar asuntos en el select al cargar la página
+document.addEventListener("DOMContentLoaded", async () => {
+const selectAsunto = document.getElementById("subject");
+try {
+  const res = await fetch("/api/asuntos");
+  const data = await res.json();
+  data.forEach((asunto) => {
+    const option = document.createElement("option");
+    option.value = asunto.id; // CORREGIDO: usa 'id'
+    option.textContent = asunto.texto; // CORREGIDO: usa 'texto'
+    selectAsunto.appendChild(option);
+  });
+} catch (err) {
+  console.error("Error al cargar asuntos:", err);
+}
+});

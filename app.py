@@ -1330,18 +1330,19 @@ def crear_reporte():
         id_usuario = data.get('Usuario_idUsuario')
         asunto = data.get('Asunto')
         observaciones = data.get('Observaciones')
+        fecha_reporte = data.get('FechaReporte')  # <- nuevo campo
 
-        if not id_usuario or not asunto or not observaciones:
+        if not id_usuario or not asunto or not observaciones or not fecha_reporte:
             return jsonify({'error': 'Faltan datos requeridos'}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
 
         query = '''
-            INSERT INTO Reporte (Usuario_idUsuario, Asunto, Observaciones)
-            VALUES (?, ?, ?)
+            INSERT INTO Reporte (Usuario_idUsuario, Asunto_idAsunto, Observaciones, FechaReporte)
+            VALUES (?, ?, ?, ?)
         '''
-        cursor.execute(query, (id_usuario, asunto, observaciones))
+        cursor.execute(query, (id_usuario, asunto, observaciones, fecha_reporte))
         conn.commit()
 
         return jsonify({'mensaje': 'Reporte creado correctamente'}), 201
@@ -1355,6 +1356,24 @@ def crear_reporte():
             cursor.close()
         if conn:
             conn.close()
+
+
+
+@app.route('/api/asuntos', methods=['GET'])
+def obtener_asuntos():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT idAsunto, TipoAsunto FROM Asunto")
+    resultados = cursor.fetchall()
+
+    asuntos = [{'id': row[0], 'texto': row[1]} for row in resultados]
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(asuntos)
+
 
 @app.route('/solicitudes-aprobadas-rechazadas', methods=['GET'])
 def obtener_solicitudes_aprobadas_rechazadas():
