@@ -2199,8 +2199,8 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     actualizar_vacaciones_automaticamente,
     trigger='cron',  # Ejecución programada
-    hour=8,          # A las 8:00 AM (ajusta la hora según necesites)
-    minute=0,
+    hour=9,          # A las 8:00 AM (ajusta la hora según necesites)
+    minute=5,
 )
 scheduler.start()
 
