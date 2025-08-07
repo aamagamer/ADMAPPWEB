@@ -2312,7 +2312,7 @@ def obtener_datos_generales():
         # Consulta de reportes (sin la columna Estado)
         reportes = fetch_all_dict("""
             SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
-                   r.Observaciones, a.TipoAsunto
+                   r.Observaciones, a.TipoAsunto, r.FechaReporte
             FROM Reporte r
             INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
             INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto

@@ -1,163 +1,163 @@
 :root {
-    --primary: #2c3e50;
-    --secondary: #666;
-    --success: #4caf50;
-    --warning: #ff9800;
-    --danger: #f44336;
-    --info: #2196f3;
-    --light: #f5f5f5;
-    --dark: #212121;
+  --primary: #2c3e50;
+  --secondary: #666;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --danger: #f44336;
+  --info: #2196f3;
+  --light: #f5f5f5;
+  --dark: #212121;
 }
 
 /* Reset y estilos generales */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-decoration: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-decoration: none;
 }
 
 body {
-    background-color: #f8f9fa;
-    color: #333;
-    line-height: 1.6;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
 }
 
 /* Header */
 header {
-    background: linear-gradient(135deg, var(--primary) 0%, #1a2a3a 100%);
-    color: white;
-    padding: 60px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    height: 180px;
-    display: flex;
-    align-items: center;
-    position: relative;
+  background: linear-gradient(135deg, var(--primary) 0%, #1a2a3a 100%);
+  color: white;
+  padding: 60px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 .header-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
 }
 
 .logo {
-    height: 60px;
-    margin-bottom: 15px;
-    filter: brightness(0) invert(1);
+  height: 60px;
+  margin-bottom: 15px;
+  
 }
 
 h1 {
-    font-size: 28px;
-    font-weight: 600;
-    text-align: center;
-    letter-spacing: 0.5px;
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 
 /* Botón Regresar */
 .back-button {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(5px);
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(5px);
 }
 
 .back-button:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-50%) scale(1.05);
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .back-button i {
-    font-size: 18px;
+  font-size: 18px;
 }
 
 /* Contenedor principal */
 .main-container {
-    max-width: 1400px;
-    margin: 30px auto 50px;
-    padding: 0 20px;
+  max-width: 1400px;
+  margin: 30px auto 50px;
+  padding: 0 20px;
 }
 
 /* Sección de saludo */
 .welcome-section {
-    text-align: center;
-    margin-bottom: 30px;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 .welcome-message {
-    font-size: 2.2rem;
-    color: var(--primary);
-    font-weight: 600;
-    margin-bottom: 10px;
+  font-size: 2.2rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 
 .welcome-submessage {
-    font-size: 1rem;
-    color: var(--secondary);
-    opacity: 0.8;
+  font-size: 1rem;
+  color: var(--secondary);
+  opacity: 0.8;
 }
 
 /* Panel de control (para los botones de filtro de tabla) */
 .control-panel {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Centrar los botones de filtro */
-    align-items: center;
-    gap: 20px;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Centrar los botones de filtro */
+  align-items: center;
+  gap: 20px;
 }
 
 .filter-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .filter-btn {
-    margin: 0;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    background-color: #e0e0e0; /* Default inactive state */
-    color: #333;
+  margin: 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  background-color: #e0e0e0; /* Default inactive state */
+  color: #333;
 }
 
 .filter-btn i {
-    font-size: 1rem;
+  font-size: 1rem;
 }
 
 .filter-btn.active {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Specific filter button colors */
@@ -168,85 +168,85 @@ h1 {
 
 /* Table Sections */
 .table-section {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 25px; /* Space between sections if multiple are visible */
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px; /* Space between sections if multiple are visible */
 }
 
 .table-section.hidden {
-    display: none;
+  display: none;
 }
 
 .table-section.active {
-    display: block;
+  display: block;
 }
 
 /* Controls within each table section */
 .section-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 20px;
-    border-bottom: 1px solid #f0f0f0;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .search-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-grow: 1; /* Allow search box to take available space */
-    max-width: 350px; /* Limit search box width */
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Allow search box to take available space */
+  max-width: 750px; /* Limit search box width */
 }
 
 .search-box i {
-    position: absolute;
-    left: 12px;
-    color: var(--secondary);
+  position: absolute;
+  left: 12px;
+  color: var(--secondary);
 }
 
 .search-input, .date-filter-start, .date-filter-end {
-    padding: 10px 15px 10px 40px; /* Adjust padding for search icon */
-    border: 1px solid #ddd;
-    border-radius: 30px;
-    width: 100%; /* Full width within its container */
-    transition: all 0.3s;
-    font-size: 0.9rem;
+  padding: 10px 15px 10px 40px; /* Adjust padding for search icon */
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  width: 100%; /* Full width within its container */
+  transition: all 0.3s;
+  font-size: 0.9rem;
 }
 
 .date-filter-start, .date-filter-end {
-    padding: 10px 15px; /* No icon for date inputs */
-    width: auto; /* Allow natural width for date inputs */
-    min-width: 150px;
+  padding: 10px 15px; /* No icon for date inputs */
+  width: auto; /* Allow natural width for date inputs */
+  min-width: 150px;
 }
 
 .search-input:focus, .date-filter-start:focus, .date-filter-end:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
 }
 
 .export-btn {
-    padding: 10px 20px;
-    background-color: var(--success);
-    color: white;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
+  padding: 10px 20px;
+  background-color: var(--success);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
 }
 
 .export-btn:hover {
-    background-color: #3d8b40;
-    transform: translateY(-2px);
+  background-color: #3d8b40;
+  transform: translateY(-2px);
 }
 
 /* DataTables specific overrides */
@@ -254,358 +254,372 @@ h1 {
 .dataTables_wrapper .dataTables_filter,
 .dataTables_wrapper .dataTables_info,
 .dataTables_wrapper .dataTables_paginate {
-    padding: 15px 20px;
-    background-color: #f8f9fa; /* Light background for pagination/info */
-    border-top: 1px solid #eee;
+  padding: 15px 20px;
+  background-color: #f8f9fa; /* Light background for pagination/info */
+  border-top: 1px solid #eee;
 }
 
 .dataTables_wrapper .dataTables_filter label,
 .dataTables_wrapper .dataTables_length label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    color: var(--secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--secondary);
 }
 
 .dataTables_wrapper .dataTables_filter input,
 .dataTables_wrapper .dataTables_length select {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 5px 10px;
-    transition: all 0.3s;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 5px 10px;
+  transition: all 0.3s;
 }
 
 .dataTables_wrapper .dataTables_filter input:focus,
 .dataTables_wrapper .dataTables_length select:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 8px 12px;
-    margin: 0 3px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: white;
-    color: var(--primary) !important;
-    cursor: pointer;
-    transition: all 0.3s;
+  padding: 8px 12px; /* Ajustar el padding para un mejor aspecto */
+  margin: 0; /* El margen se manejará en el li si existe, o directamente aquí si no hay li */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: white;
+  color: var(--primary) !important;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-block; /* Asegurar que los botones se comporten como bloques en línea */
 }
 
+/* Mantener las reglas existentes para hover y current */
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background-color: var(--light);
-    border-color: var(--primary);
+  background-color: var(--light);
+  border-color: var(--primary);
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-    background-color: var(--primary);
-    color: white !important;
-    border-color: var(--primary);
+  background-color: var(--primary);
+  color: white !important;
+  border-color: var(--primary);
+}
+
+/* Eliminar las viñetas si DataTables las renderiza como lista */
+.dataTables_wrapper .dataTables_paginate ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex; /* Asegurar que los elementos de la lista también sean flex para alineación */
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dataTables_wrapper .dataTables_paginate ul li {
+  margin: 0 3px; /* Ajustar el margen entre los botones de paginación */
+}
+
+/* Ajustes para pantallas muy pequeñas si es necesario, pero la regla principal ya es flex-row */
+@media (max-width: 576px) {
+  .dataTables_wrapper .dataTables_info,
+  .dataTables_wrapper .dataTables_paginate {
+    flex-direction: row; /* Asegurar que siempre sea horizontal */
+    justify-content: center;
+  }
+  .dataTables_wrapper .dataTables_paginate .paginate_button {
+    margin: 5px 3px; /* Ajuste de margen para pantallas pequeñas */
+  }
 }
 
 /* Table */
 .table-responsive {
-    /* This class is now on the .table-section, so it applies to the container */
-    /* The overflow hidden and box-shadow are already handled by .table-section */
+  /* This class is now on the .table-section, so it applies to the container */
+  /* The overflow hidden and box-shadow are already handled by .table-section */
 }
 
 table {
-    width: 100% !important;
-    border-collapse: collapse; /* Ensure borders collapse for clean lines */
+  width: 100% !important;
+  border-collapse: collapse; /* Ensure borders collapse for clean lines */
 }
 
 table thead th {
-    background-color: var(--primary);
-    color: white;
-    font-weight: 600;
-    padding: 15px 10px;
-    text-align: left;
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+  padding: 15px 10px;
+  text-align: left;
 }
 
 table tbody td {
-    padding: 12px 10px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f0f0f0;
+  padding: 12px 10px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 table tbody tr:hover {
-    background-color: #f8f9fa;
+  background-color: #f8f9fa;
 }
 
 /* Badges */
 .badge {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: inline-block;
-    text-align: center;
-    min-width: 80px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  text-align: center;
+  min-width: 80px;
 }
 
 .badge-reporte {
-    background-color: #e3f2fd;
-    color: #1565c0;
+  background-color: #e3f2fd;
+  color: #1565c0;
 }
 
 .badge-vacaciones {
-    background-color: #f3e5f5;
-    color: #7b1fa2;
+  background-color: #f3e5f5;
+  color: #7b1fa2;
 }
 
 .badge-permiso {
-    background-color: #fff3e0;
-    color: #ef6c00;
+  background-color: #fff3e0;
+  color: #ef6c00;
 }
 
 /* Estados */
 .estado-pendiente {
-    color: var(--warning);
-    font-weight: 600;
+  color: var(--warning);
+  font-weight: 600;
 }
 
 .estado-aprobado, .estado-aprobada {
-    color: var(--success);
-    font-weight: 600;
+  color: var(--success);
+  font-weight: 600;
 }
 
 .estado-rechazado, .estado-rechazada {
-    color: var(--danger);
-    font-weight: 600;
+  color: var(--danger);
+  font-weight: 600;
 }
 
 /* View Button */
 .view-btn {
-    background: var(--info); /* Using --info for a blue color */
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-flex; /* Use inline-flex to keep it inline but allow gap */
-    align-items: center;
-    gap: 6px;
-    transition: background 0.3s;
-    font-size: 0.9rem;
-    font-weight: 500;
+  background: var(--info); /* Using --info for a blue color */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex; /* Use inline-flex to keep it inline but allow gap */
+  align-items: center;
+  gap: 6px;
+  transition: background 0.3s;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 .view-btn:hover {
-    background: #1a73e8; /* A slightly darker blue */
+  background: #1a73e8; /* A slightly darker blue */
 }
 .view-btn i {
-    font-size: 0.8rem;
+  font-size: 0.8rem;
 }
-
 
 /* Modal */
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    overflow: auto;
-    backdrop-filter: blur(3px);
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow: auto;
+  backdrop-filter: blur(3px);
 }
 
 .modal-content {
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    width: 80%;
-    max-width: 700px;
-    position: relative;
-    animation: modalopen 0.4s;
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 700px;
+  position: relative;
+  animation: modalopen 0.4s;
 }
 
 @keyframes modalopen {
-    from { opacity: 0; transform: translateY(-50px); }
-    to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-50px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .close-modal {
-    position: absolute;
-    right: 25px;
-    top: 20px;
-    color: #aaa;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s;
+  position: absolute;
+  right: 25px;
+  top: 20px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
 }
 
 .close-modal:hover {
-    color: var(--danger);
+  color: var(--danger);
 }
 
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .modal-header h3 {
-    color: var(--primary);
-    font-size: 1.5rem;
+  color: var(--primary);
+  font-size: 1.5rem;
 }
 
 .modal-body {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .detail-row {
-    display: flex;
-    margin-bottom: 10px;
+  display: flex;
+  margin-bottom: 10px;
 }
 
 .detail-label {
-    font-weight: 600;
-    color: var(--primary);
-    min-width: 150px;
+  font-weight: 600;
+  color: var(--primary);
+  min-width: 150px;
 }
 
 .detail-value {
-    flex: 1;
+  flex: 1;
 }
 
 .modal-footer {
-    text-align: right;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
+  text-align: right;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
 }
 
 .modal-btn {
-    padding: 8px 20px;
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
+  padding: 8px 20px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .modal-btn:hover {
-    background-color: #1a2a3a;
+  background-color: #1a2a3a;
 }
 
 /* Responsive */
 @media (max-width: 992px) {
-    .control-panel {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .control-panel {
+      flex-direction: column;
+      align-items: flex-start;
+  }
 
-    .section-controls {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .section-controls {
+      flex-direction: column;
+      align-items: flex-start;
+  }
 
-    .search-box {
-        width: 100%;
-        max-width: none; /* Remove max-width on smaller screens */
-    }
+  .search-box {
+      width: 100%;
+      max-width: none; /* Remove max-width on smaller screens */
+  }
 
-    .search-input, .date-filter-start, .date-filter-end, .export-btn {
-        width: 100%; /* Make all controls full width */
-        min-width: unset;
-    }
+  .search-input, .date-filter-start, .date-filter-end, .export-btn {
+      width: 100%; /* Make all controls full width */
+      min-width: unset;
+  }
 }
 
 @media (max-width: 768px) {
-    .welcome-message {
-        font-size: 1.8rem;
-    }
+  .welcome-message {
+      font-size: 1.8rem;
+  }
 
-    .modal-content {
-        width: 95%;
-        margin: 10% auto;
-    }
+  .modal-content {
+      width: 95%;
+      margin: 10% auto;
+  }
 
-    .filter-buttons {
-        width: 100%;
-        justify-content: center;
-    }
+  .filter-buttons {
+      width: 100%;
+      justify-content: center;
+  }
 }
 
 @media (max-width: 576px) {
-    header {
-        height: 160px;
-        padding: 40px 0;
-    }
+  header {
+      height: 160px;
+      padding: 40px 0;
+  }
 
-    .back-button {
-        padding: 8px 15px;
-        font-size: 14px;
-    }
+  .back-button {
+      padding: 8px 15px;
+      font-size: 14px;
+  }
 
-    .logo {
-        height: 50px;
-    }
+  .logo {
+      height: 50px;
+  }
 
-    h1 {
-        font-size: 24px;
-    }
+  h1 {
+      font-size: 24px;
+  }
 
-    .welcome-message {
-        font-size: 1.5rem;
-    }
+  .welcome-message {
+      font-size: 1.5rem;
+  }
 
-    .filter-btn {
-        padding: 8px 15px;
-        font-size: 0.8rem;
-    }
+  .filter-btn {
+      padding: 8px 15px;
+      font-size: 0.8rem;
+  }
 
-    /* DataTables responsive behavior for small screens */
-    table thead {
-        display: none; /* Hide table headers */
-    }
+  /* DataTables responsive behavior for small screens */
+  table thead {
+      display: none; /* Hide table headers */
+  }
 
-    table tbody td {
-        display: block; /* Make table cells block-level */
-        text-align: right;
-        padding-left: 50%; /* Space for the pseudo-element label */
-        position: relative;
-    }
+  table tbody td {
+      display: block; /* Make table cells block-level */
+      text-align: right;
+      padding-left: 50%; /* Space for the pseudo-element label */
+      position: relative;
+  }
 
-    table tbody td::before {
-        content: attr(data-label); /* Use data-label for pseudo-element */
-        position: absolute;
-        left: 10px;
-        width: 45%;
-        padding-right: 10px;
-        font-weight: 600;
-        text-align: left;
-        color: var(--primary);
-    }
+  table tbody td::before {
+      content: attr(data-label); /* Use data-label for pseudo-element */
+      position: absolute;
+      left: 10px;
+      width: 45%;
+      padding-right: 10px;
+      font-weight: 600;
+      text-align: left;
+      color: var(--primary);
+  }
 
-    table tbody tr {
-        margin-bottom: 15px;
-        display: block;
-        border: 1px solid #eee;
-        border-radius: 5px;
-    }
-
-    /* Adjust DataTables pagination for small screens */
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        margin: 5px 0;
-    }
+  table tbody tr {
+      margin-bottom: 15px;
+      display: block;
+      border: 1px solid #eee;
+      border-radius: 5px;
+  }
 }

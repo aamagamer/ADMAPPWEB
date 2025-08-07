@@ -29,14 +29,14 @@ $(document).ready(function () {
                 categoria: r.TipoAsunto || 'No especificado',
                 detalles: r.Observaciones || 'Sin observaciones',
                 fecha: r.FechaReporte,
-                original: r // Store original for detail view
+                original: r
             };
             reportes.push(processed);
             todos.push({
                 tipo: { key: 'reporte', class: 'reporte', icon: '📋', text: 'Reporte' },
                 ...processed,
-                estado: null, // Reportes don't have a direct 'estado' in this structure
-                fecha: r.FechaReporte // Use original date for sorting/filtering
+                estado: null,
+                fecha: r.FechaReporte
             });
         });
 
@@ -55,9 +55,9 @@ $(document).ready(function () {
             todos.push({
                 tipo: { key: 'vacaciones', class: 'vacaciones', icon: '🏖️', text: 'Vacaciones' },
                 ...processed,
-                categoria: `${v.DiasSolicitados} días`, // For 'Todos' table
-                detalles: `Del ${formatDate(v.FechaSalida)} al ${formatDate(v.FechaRegreso)}`, // For 'Todos' table
-                fecha: v.FechaSolicitud // Use original date for sorting/filtering
+                categoria: `${v.DiasSolicitados} días`,
+                detalles: `Del ${formatDate(v.FechaSalida)} al ${formatDate(v.FechaRegreso)}`,
+                fecha: v.FechaSolicitud
             });
         });
 
@@ -68,7 +68,7 @@ $(document).ready(function () {
             const processed = {
                 id: p.idPermiso,
                 empleado: `${p.Nombres} ${p.Paterno} ${p.Materno}`,
-                tipo: p.TipoCompensacion || 'No especificado',
+                tipoPermiso: p.TipoCompensacion || 'No especificado',
                 fecha: p.DiaSolicitado,
                 horario: horario,
                 razon: p.Razon,
@@ -79,9 +79,9 @@ $(document).ready(function () {
             todos.push({
                 tipo: { key: 'permiso', class: 'permiso', icon: '⏰', text: 'Permiso' },
                 ...processed,
-                categoria: p.TipoCompensacion || 'No especificado', // For 'Todos' table
-                detalles: `${p.Razon} (${horario})`, // For 'Todos' table
-                fecha: p.DiaSolicitado // Use original date for sorting/filtering
+                categoria: p.TipoCompensacion || 'No especificado',
+                detalles: `${p.Razon} (${horario})`,
+                fecha: p.DiaSolicitado
             });
         });
 
@@ -91,8 +91,9 @@ $(document).ready(function () {
     // Initialize DataTables
     function initializeTables(processedData) {
         const commonTableConfig = {
-            dom: '<"top"lf>rt<"bottom"ipB>', // l: length changing input, f: filtering input, r: processing display, t: table, i: information, p: pagination, B: buttons
+            dom: '<"top"lf>rt<"bottom"ipB>',
             pageLength: 10,
+            pagingType: 'full_numbers',
             language: {
                 url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
             },
@@ -104,7 +105,15 @@ $(document).ready(function () {
                     className: 'dt-button export-excel-btn',
                     title: 'Historial_ADM'
                 }
-            ]
+            ],
+            drawCallback: function () {
+                $('.dataTables_paginate').css({
+                    'display': 'flex',
+                    'flex-direction': 'row',
+                    'justify-content': 'center',
+                    'gap': '5px'
+                });
+            }
         };
 
         // Reportes Table
@@ -116,31 +125,12 @@ $(document).ready(function () {
                 { title: "Empleado", data: "empleado" },
                 { title: "Categoría", data: "categoria" },
                 { title: "Detalles", data: "detalles" },
+                { title: "Fecha", data: "fecha", render: formatDate },
                 {
-                    title: "Fecha",
-                    data: "fecha",
-                    render: function (data) { return formatDate(data); }
-                },
-                {
-                    title: "Acciones",
-                    data: "id",
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return `<button class="view-btn" data-id="${data}" data-type="reporte">
-                                    <i class="fas fa-eye"></i> Ver
-                                </button>`;
-                    }
+                    title: "Acciones", data: "id", orderable: false,
+                    render: d => `<button class="view-btn" data-id="${d}" data-type="reporte"><i class="fas fa-eye"></i> Ver</button>`
                 }
-            ],
-            // Add data-label for responsive mode
-            createdRow: function(row, data, dataIndex) {
-                $(row).find('td:eq(0)').attr('data-label', 'ID:');
-                $(row).find('td:eq(1)').attr('data-label', 'Empleado:');
-                $(row).find('td:eq(2)').attr('data-label', 'Categoría:');
-                $(row).find('td:eq(3)').attr('data-label', 'Detalles:');
-                $(row).find('td:eq(4)').attr('data-label', 'Fecha:');
-                $(row).find('td:eq(5)').attr('data-label', 'Acciones:');
-            }
+            ]
         });
 
         // Vacaciones Table
@@ -152,37 +142,13 @@ $(document).ready(function () {
                 { title: "Empleado", data: "empleado" },
                 { title: "Días Solicitados", data: "diasSolicitados" },
                 { title: "Periodo", data: "periodo" },
+                { title: "Estado", data: "estado", render: d => d ? `<span class="estado-${d.toLowerCase()}">${d}</span>` : '-' },
+                { title: "Fecha de Solicitud", data: "fechaSolicitud", render: formatDate },
                 {
-                    title: "Estado",
-                    data: "estado",
-                    render: function (data) { return data ? `<span class="estado-${data.toLowerCase()}">${data}</span>` : '-'; }
-                },
-                {
-                    title: "Fecha de Solicitud",
-                    data: "fechaSolicitud",
-                    render: function (data) { return formatDate(data); }
-                },
-                {
-                    title: "Acciones",
-                    data: "id",
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return `<button class="view-btn" data-id="${data}" data-type="vacaciones">
-                                    <i class="fas fa-eye"></i> Ver
-                                </button>`;
-                    }
+                    title: "Acciones", data: "id", orderable: false,
+                    render: d => `<button class="view-btn" data-id="${d}" data-type="vacaciones"><i class="fas fa-eye"></i> Ver</button>`
                 }
-            ],
-            // Add data-label for responsive mode
-            createdRow: function(row, data, dataIndex) {
-                $(row).find('td:eq(0)').attr('data-label', 'ID:');
-                $(row).find('td:eq(1)').attr('data-label', 'Empleado:');
-                $(row).find('td:eq(2)').attr('data-label', 'Días Solicitados:');
-                $(row).find('td:eq(3)').attr('data-label', 'Periodo:');
-                $(row).find('td:eq(4)').attr('data-label', 'Estado:');
-                $(row).find('td:eq(5)').attr('data-label', 'Fecha de Solicitud:');
-                $(row).find('td:eq(6)').attr('data-label', 'Acciones:');
-            }
+            ]
         });
 
         // Permisos Table
@@ -192,209 +158,118 @@ $(document).ready(function () {
             columns: [
                 { title: "ID", data: "id" },
                 { title: "Empleado", data: "empleado" },
-                { title: "Tipo", data: "tipo" },
-                {
-                    title: "Fecha",
-                    data: "fecha",
-                    render: function (data) { return formatDate(data); }
-                },
+                { title: "Tipo", data: "tipoPermiso" },
+                { title: "Fecha", data: "fecha", render: formatDate },
                 { title: "Horario", data: "horario" },
                 { title: "Razón", data: "razon" },
+                { title: "Estado", data: "estado", render: d => d ? `<span class="estado-${d.toLowerCase()}">${d}</span>` : '-' },
                 {
-                    title: "Estado",
-                    data: "estado",
-                    render: function (data) { return data ? `<span class="estado-${data.toLowerCase()}">${data}</span>` : '-'; }
-                },
-                {
-                    title: "Acciones",
-                    data: "id",
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return `<button class="view-btn" data-id="${data}" data-type="permiso">
-                                    <i class="fas fa-eye"></i> Ver
-                                </button>`;
-                    }
+                    title: "Acciones", data: "id", orderable: false,
+                    render: d => `<button class="view-btn" data-id="${d}" data-type="permiso"><i class="fas fa-eye"></i> Ver</button>`
                 }
-            ],
-            // Add data-label for responsive mode
-            createdRow: function(row, data, dataIndex) {
-                $(row).find('td:eq(0)').attr('data-label', 'ID:');
-                $(row).find('td:eq(1)').attr('data-label', 'Empleado:');
-                $(row).find('td:eq(2)').attr('data-label', 'Tipo:');
-                $(row).find('td:eq(3)').attr('data-label', 'Fecha:');
-                $(row).find('td:eq(4)').attr('data-label', 'Horario:');
-                $(row).find('td:eq(5)').attr('data-label', 'Razón:');
-                $(row).find('td:eq(6)').attr('data-label', 'Estado:');
-                $(row).find('td:eq(7)').attr('data-label', 'Acciones:');
-            }
+            ]
         });
 
-        // Todos Table (Combined)
+        // Todos Table
         todosTable = $('#tabla-todos').DataTable({
             ...commonTableConfig,
             data: processedData.todos,
             columns: [
                 {
-                    title: "Tipo",
-                    data: "tipo",
-                    render: function (data) {
-                        return `<span class="badge badge-${data.class}">${data.icon} ${data.text}</span>`;
-                    }
+                    title: "Tipo", data: "tipo",
+                    render: data => `<span class="badge badge-${data.class}">${data.icon} ${data.text}</span>`
                 },
                 { title: "ID", data: "id" },
                 { title: "Empleado", data: "empleado" },
                 { title: "Categoría", data: "categoria" },
                 { title: "Detalles", data: "detalles" },
+                { title: "Estado", data: "estado", render: d => d ? `<span class="estado-${d.toLowerCase()}">${d}</span>` : '-' },
+                { title: "Fecha", data: "fecha", render: formatDate },
                 {
-                    title: "Estado",
-                    data: "estado",
-                    render: function (data) { return data ? `<span class="estado-${data.toLowerCase()}">${data}</span>` : '-'; }
-                },
-                {
-                    title: "Fecha",
-                    data: "fecha",
-                    render: function (data) { return formatDate(data); }
-                },
-                {
-                    title: "Acciones",
-                    data: "id",
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return `<button class="view-btn" data-id="${data}" data-type="${row.tipo.key}">
-                                    <i class="fas fa-eye"></i> Ver
-                                </button>`;
-                    }
+                    title: "Acciones", data: "id", orderable: false,
+                    render: (d, t, r) => `<button class="view-btn" data-id="${d}" data-type="${r.tipo.key}"><i class="fas fa-eye"></i> Ver</button>`
                 }
-            ],
-            // Add data-label for responsive mode
-            createdRow: function(row, data, dataIndex) {
-                $(row).find('td:eq(0)').attr('data-label', 'Tipo:');
-                $(row).find('td:eq(1)').attr('data-label', 'ID:');
-                $(row).find('td:eq(2)').attr('data-label', 'Empleado:');
-                $(row).find('td:eq(3)').attr('data-label', 'Categoría:');
-                $(row).find('td:eq(4)').attr('data-label', 'Detalles:');
-                $(row).find('td:eq(5)').attr('data-label', 'Estado:');
-                $(row).find('td:eq(6)').attr('data-label', 'Fecha:');
-                $(row).find('td:eq(7)').attr('data-label', 'Acciones:');
-            }
+            ]
         });
     }
 
-    // Date range filtering function for DataTables
-    $.fn.dataTable.ext.search.push(
-        function (settings, data, dataIndex) {
-            const $tableSection = $('#' + settings.sTableId).closest('.table-section');
-            const startDate = $tableSection.find('.date-filter-start').val();
-            const endDate = $tableSection.find('.date-filter-end').val();
-            let dateColumnIndex;
+    // Date range filtering function
+    $.fn.dataTable.ext.search.push(function (settings, data) {
+        const $tableSection = $('#' + settings.sTableId).closest('.table-section');
+        const startDate = $tableSection.find('.date-filter-start').val();
+        const endDate = $tableSection.find('.date-filter-end').val();
+        let dateColumnIndex;
 
-            // Determine the date column index based on table ID
-            switch (settings.sTableId) {
-                case 'tabla-reportes':
-                    dateColumnIndex = 4; // 'Fecha' column
-                    break;
-                case 'tabla-vacaciones':
-                    dateColumnIndex = 5; // 'Fecha de Solicitud' column
-                    break;
-                case 'tabla-permisos':
-                    dateColumnIndex = 3; // 'Fecha' column
-                    break;
-                case 'tabla-todos':
-                    dateColumnIndex = 6; // 'Fecha' column
-                    break;
-                default:
-                    return true; // No date filtering for unknown tables
-            }
-
-            const columnDate = data[dateColumnIndex]; // Use the raw date string from the data array
-
-            if (!columnDate) return true; // If no date, include the row
-
-            const min = startDate ? new Date(startDate) : null;
-            const max = endDate ? new Date(endDate) : null;
-            const date = new Date(columnDate);
-
-            if (
-                (min === null && max === null) ||
-                (min === null && date <= max) ||
-                (min <= date && max === null) ||
-                (min <= date && date <= max)
-            ) {
-                return true;
-            }
-            return false;
+        switch (settings.sTableId) {
+            case 'tabla-reportes': dateColumnIndex = 4; break;
+            case 'tabla-vacaciones': dateColumnIndex = 5; break;
+            case 'tabla-permisos': dateColumnIndex = 3; break;
+            case 'tabla-todos': dateColumnIndex = 6; break;
+            default: return true;
         }
-    );
 
-    // Fetch data and initialize
-    fetch('/api/datos-generales') // Assuming you have this endpoint or a local JSON file
+        const columnDate = data[dateColumnIndex];
+        if (!columnDate) return true;
+
+        const min = startDate ? new Date(startDate) : null;
+        const max = endDate ? new Date(endDate) : null;
+        const date = new Date(columnDate);
+
+        return (
+            (min === null && max === null) ||
+            (min === null && date <= max) ||
+            (min <= date && max === null) ||
+            (min <= date && date <= max)
+        );
+    });
+
+    // Fetch and init
+    fetch('/api/datos-generales')
         .then(res => res.json())
         .then(data => {
-            allRawData = data; // Store original data
+            allRawData = data;
             const processedData = procesarDatos(data);
             initializeTables(processedData);
 
-            // Event listeners for search inputs
             $('.search-input').on('keyup', function () {
-                const tableId = $(this).data('table-id');
-                const table = $.fn.dataTable.tables({ id: tableId, api: true });
-                if (table.length > 0) {
-                    table.search(this.value).draw();
-                }
+                const table = $('#' + $(this).data('table-id')).DataTable();
+                table.search(this.value).draw();
             });
 
-            // Event listeners for date filters
             $('.date-filter-start, .date-filter-end').on('change', function () {
-                const tableId = $(this).data('table-id');
-                const table = $.fn.dataTable.tables({ id: tableId, api: true });
-                if (table.length > 0) {
-                    table.draw(); // Redraw table to apply date filter
-                }
+                const table = $('#' + $(this).data('table-id')).DataTable();
+                table.draw();
             });
 
-            // Event listeners for export buttons
             $('.export-btn').on('click', function () {
-                const tableId = $(this).data('table-id');
-                const table = $.fn.dataTable.tables({ id: tableId, api: true });
-                if (table.length > 0) {
-                    table.button('.buttons-excel').trigger();
-                }
+                const table = $('#' + $(this).data('table-id')).DataTable();
+                table.button('.buttons-excel').trigger();
             });
 
-            // Event listener for view details buttons (delegated)
             $('#tables-container').on('click', '.view-btn', function () {
                 const id = $(this).data('id');
                 const type = $(this).data('type');
-                mostrarDetalles(id, type, allRawData); // Pass original raw data
+                mostrarDetalles(id, type, allRawData);
             });
 
-            // Initial display: show reportes section
             showTableSection('reportes');
         })
         .catch(err => {
             console.error("Error cargando datos:", err);
-            mostrarError("Error al cargar los datos. Por favor, intente nuevamente.");
+            alert("Error al cargar los datos. Por favor, intente nuevamente.");
         });
 
-    // Function to show/hide table sections
     function showTableSection(sectionId) {
         $('.table-section').removeClass('active').addClass('hidden');
         $(`#${sectionId}-section`).removeClass('hidden').addClass('active');
-
-        // Redraw the active table to ensure correct layout after visibility change
-        const activeTableId = $(`#${sectionId}-section`).find('table').attr('id');
-        const activeTable = $.fn.dataTable.tables({ id: activeTableId, api: true });
-        if (activeTable.length > 0) {
-            activeTable.columns.adjust().draw();
-        }
+        const table = $(`#${sectionId}-section table`).DataTable();
+        table.columns.adjust().draw();
     }
 
-    // Event listener for filter buttons (tabs)
     $('.filter-btn').on('click', function () {
-        const filter = $(this).data('filter');
         $('.filter-btn').removeClass('active');
         $(this).addClass('active');
-        showTableSection(filter);
+        showTableSection($(this).data('filter'));
     });
 
     // Function to display details in the modal
