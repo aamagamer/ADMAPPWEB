@@ -2248,7 +2248,6 @@ def empleados_por_mes(mes):
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Empleados de todos los años, filtrado solo por mes
         cursor.execute("""
             SELECT idUsuario, Nombres, Paterno, Materno, FechaIngreso
             FROM Usuario
@@ -2260,22 +2259,15 @@ def empleados_por_mes(mes):
         columnas = [col[0] for col in cursor.description]
         empleados = [dict(zip(columnas, row)) for row in rows]
 
-        # Debug temporal - IMPORTANTE para diagnosticar
-        print(f"🔍 DEBUG - Buscando mes {mes}:")
+        from datetime import datetime
         for emp in empleados:
-            fecha_obj = emp['FechaIngreso']
-            if hasattr(fecha_obj, 'month'):  # Si es un objeto datetime
-                mes_real = fecha_obj.month
-            else:  # Si es string
-                from datetime import datetime
-                fecha_obj = datetime.strptime(str(fecha_obj)[:10], '%Y-%m-%d')
-                mes_real = fecha_obj.month
-            
-            print(f"  - {emp['Nombres']} {emp['Paterno']}: {emp['FechaIngreso']} (Mes real: {mes_real})")
-            
-            # ALERTA si no coincide
-            if mes_real != mes:
-                print(f"    ⚠️  PROBLEMA: Este empleado tiene mes {mes_real} pero apareció en filtro de mes {mes}")
+            fecha_ingreso = emp.get('FechaIngreso')
+            if isinstance(fecha_ingreso, datetime):
+                # Convertir a string YYYY-MM-DD para evitar problemas de zona horaria
+                emp['FechaIngreso'] = fecha_ingreso.strftime('%Y-%m-%d')
+            else:
+                # Asegura formato consistente si viene como string
+                emp['FechaIngreso'] = str(fecha_ingreso)[:10]
 
         return jsonify({'empleados': empleados}), 200
 
@@ -2286,6 +2278,7 @@ def empleados_por_mes(mes):
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
 
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
 def exportar_reportes_visibles():

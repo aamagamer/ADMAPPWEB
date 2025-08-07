@@ -1186,8 +1186,7 @@
         </form>
       </div>
     </div>
-
-    <script>
+   <script>
       // Mover estas funciones ANTES del DOMContentLoaded
 function abrirModalVerDiasFestivos() {
   document.getElementById('ver-dias-festivos-modal').classList.remove('hidden');
@@ -2819,62 +2818,24 @@ document.getElementById("cerrar-modal-mes").addEventListener("click", () => {
 });
 
 
-// Función helper para formatear fechas sin problemas de timezone - VERSIÓN CORREGIDA
-function formatearFechaSinTimezone(fecha) {
+function formatearFechaLocal(fecha) {
   try {
-    // Verificar si la fecha es válida
     if (!fecha || fecha === 'null' || fecha === null || fecha === undefined) {
       return 'Sin fecha';
     }
-    
-    let fechaStr;
-    
-    // Si ya es un objeto Date
-    if (fecha instanceof Date) {
-      if (isNaN(fecha.getTime())) {
-        return 'Fecha inválida';
-      }
-      fechaStr = fecha.toISOString().split('T')[0];
-    } 
-    // Si es string
-    else if (typeof fecha === 'string') {
-      // Limpiar la cadena y verificar formato
-      fechaStr = fecha.trim().split('T')[0];
-      
-      // Verificar que tenga formato YYYY-MM-DD
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
-        return 'Formato de fecha inválido';
-      }
-    }
-    // Si viene en otro formato, convertir a string primero
-    else {
-      fechaStr = fecha.toString().split('T')[0];
-    }
-    
-    // Extraer componentes: "2023-06-01"
-    const [año, mes, dia] = fechaStr.split('-').map(num => parseInt(num, 10));
-    
-    // Validar componentes
-    if (isNaN(año) || isNaN(mes) || isNaN(dia)) {
-      return 'Componentes de fecha inválidos';
-    }
-    
-    if (mes < 1 || mes > 12 || dia < 1 || dia > 31) {
-      return 'Fecha fuera de rango';
-    }
-    
-    // Crear fecha local sin problemas de timezone (mes es 0-indexado)
-    const fechaLocal = new Date(año, mes - 1, dia);
-    
-    // Verificar que la fecha creada sea válida
-    if (isNaN(fechaLocal.getTime())) {
+
+    // Esperamos formato "YYYY-MM-DD"
+    const [anio, mes, dia] = fecha.split('-').map(Number);
+    const fechaObj = new Date(anio, mes - 1, dia);
+
+    if (isNaN(fechaObj.getTime())) {
       return 'Fecha inválida';
     }
-    
-    return fechaLocal.toLocaleDateString('es-MX', { 
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric' 
+
+    return fechaObj.toLocaleDateString('es-MX', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
     });
   } catch (error) {
     console.error('Error al formatear fecha:', fecha, error);
@@ -2882,7 +2843,6 @@ function formatearFechaSinTimezone(fecha) {
   }
 }
 
-// También mejora la función de carga de empleados por mes
 async function cargarEmpleadosPorMes(mes) {
   try {
     const res = await fetch(`/api/empleados/mes/${mes}`);
@@ -2896,45 +2856,38 @@ async function cargarEmpleadosPorMes(mes) {
 
     if (!data.empleados || data.empleados.length === 0) {
       resultadoDiv.innerHTML = `
-        <p style="color: #555; font-style: italic; text-align: center; padding: 20px;">
-          No hay empleados con ingreso en este mes.
+        <p style="color: #666; text-align: center; padding: 20px; font-style: italic;">
+          No hay empleados con aniversario laboral en este mes.
         </p>`;
       return;
     }
 
+    // Ordenar por día de ingreso (día del mes)
+    data.empleados.sort((a, b) => {
+      return new Date(a.FechaIngreso).getDate() - new Date(b.FechaIngreso).getDate();
+    });
+
     resultadoDiv.innerHTML = `
-      <div style="
-        display: flex; 
-        flex-direction: column; 
-        gap: 8px;
-        max-height: 250px; 
-        overflow-y: auto;
-      ">
+      <div style="max-height: 300px; overflow-y: auto;">
         ${data.empleados.map(empleado => {
-          // Verificar que el empleado tenga los campos necesarios
           const nombre = empleado.Nombres || 'Sin nombre';
           const paterno = empleado.Paterno || '';
           const materno = empleado.Materno || '';
-          const fechaFormateada = formatearFechaSinTimezone(empleado.FechaIngreso);
-          
+          const nombreCompleto = `${nombre} ${paterno} ${materno}`.trim();
+          const fechaFormateada = formatearFechaLocal(empleado.FechaIngreso);
+
           return `
             <div style="
-              background-color: #fff;
-              padding: 10px 15px;
-              border-radius: 8px;
-              box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+              padding: 12px;
+              border-bottom: 1px solid #eee;
               display: flex;
               justify-content: space-between;
               align-items: center;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              color: #34495e;
-              cursor: default;
-              transition: background-color 0.2s;
-            " onmouseover="this.style.backgroundColor='#f0f4ff'" onmouseout="this.style.backgroundColor='#fff'">
-              <span style="font-weight: 600;">
-                ${nombre} ${paterno} ${materno}
+            ">
+              <span style="font-weight: 500; color: #333;">
+                ${nombreCompleto}
               </span>
-              <span style="font-size: 12px; color: #7f8c8d;">
+              <span style="color: #666; font-size: 14px;">
                 ${fechaFormateada}
               </span>
             </div>
@@ -2950,6 +2903,7 @@ async function cargarEmpleadosPorMes(mes) {
       </p>`;
   }
 }
+
 
   // Cambiar mes
   selectMes.addEventListener('change', () => {
@@ -3239,5 +3193,6 @@ if (editEmployeeForm) {
         }
       });
     </script>
+
   </body>
 </html>
