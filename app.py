@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory, render_template
 import pyodbc
 from flask_cors import CORS
 from datetime import datetime, date
-from flask import Flask, session, redirect, url_for, render_template
+from flask import Flask, session, redirect, url_for
 from flask import send_file
 import pandas as pd
 from io import BytesIO
@@ -2238,19 +2238,9 @@ def graficos_distribucion():
     "retardos_por_area": data_retardos   # <-- AQUÍ CORREGIDO
 })
 
-
-
-
-
-
-
 @app.route('/graficos')
 def vista_graficos():
     return render_template('stats.html')
-
-
-
-
 
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
 def exportar_reportes_visibles():
