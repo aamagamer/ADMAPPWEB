@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ADM - Historial Inteligente</title>
+    <link rel="stylesheet" href="css/historial.css" />
+    <link rel="icon" href="Media/favicon.ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <!-- DataTables CSS con Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/historial.js"></script>
+</head>
+<body>
+    <header>
+        <button class="back-button" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Regresar
+        </button>
+        <div class="header-container">
+            <img src="Media/logo.png" alt="Logo" class="logo" />
+            <h1>Historial Inteligente</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="welcome-section">
+            <h2 class="welcome-message">Historial de actividades</h2>
+            <p class="welcome-submessage">Visualiza y gestiona todos tus registros históricos</p>
+        </div>
+
+        <!-- Panel de control -->
+        <div class="control-panel">
+            <div class="filter-buttons">
+                <button class="filter-btn todos active" data-filter="all">
+                    <i class="fas fa-table"></i> Todos
+                </button>
+                <button class="filter-btn reportes" data-filter="reporte">
+                    <i class="fas fa-file-alt"></i> Reportes
+                </button>
+                <button class="filter-btn vacaciones" data-filter="vacaciones">
+                    <i class="fas fa-umbrella-beach"></i> Vacaciones
+                </button>
+                <button class="filter-btn permisos" data-filter="permiso">
+                    <i class="fas fa-clock"></i> Permisos
+                </button>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Buscar en todos los registros...">
+                </div>
+                <button id="export-excel" class="export-btn">
+                    <i class="fas fa-file-excel"></i> Exportar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla dinámica -->
+        <div class="table-responsive">
+            <table id="tabla-historial" class="table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>ID</th>
+                        <th class="col-empleado">Empleado</th>
+                        <th class="col-categoria">Categoría</th>
+                        <th class="col-detalles">Detalles</th>
+                        <th class="col-estado">Estado</th>
+                        <th class="col-fecha">Fecha</th>
+                        <th class="col-acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Se llenará dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal para detalles -->
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div class="modal-header">
+                    <h3 id="modal-title">Detalles del Registro</h3>
+                    <span id="modal-badge" class="badge"></span>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Contenido dinámico -->
+                </div>
+                <div class="modal-footer">
+                    <button id="modal-close-btn" class="modal-btn">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

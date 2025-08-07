@@ -302,6 +302,19 @@
               </div>
             </div>
           </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('historial.html')"
+          >
+            <i class="bi bi-clock dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Historial</div>
+              <div class="dropdown-item-description">
+                Consulta todos los reportes, permisos y vacaciones.
+              </div>
+            </div>
+          </div>
           
 
           <div
@@ -2903,8 +2916,6 @@ async function cargarEmpleadosPorMes(mes) {
       </p>`;
   }
 }
-
-
   // Cambiar mes
   selectMes.addEventListener('change', () => {
     cargarEmpleadosPorMes(selectMes.value);

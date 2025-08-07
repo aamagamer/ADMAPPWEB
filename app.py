@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template
 import pyodbc
 from flask_cors import CORS
-from datetime import datetime, date
+from datetime import datetime, date, time
 from flask import Flask, session, redirect, url_for
 from flask import send_file
 import pandas as pd
@@ -2278,6 +2278,79 @@ def empleados_por_mes(mes):
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
+
+
+
+@app.route('/api/datos-generales', methods=['GET'])
+def obtener_datos_generales():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        def fetch_all_dict(query):
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            if not cursor.description:
+                return []
+            cols = [column[0] for column in cursor.description]
+            data = []
+            for row in rows:
+                row_dict = {}
+                for col_name, value in zip(cols, row):
+                    if value is None:
+                        row_dict[col_name] = ""  # String vacío para valores NULL
+                    elif isinstance(value, (date, datetime)):
+                        row_dict[col_name] = value.isoformat()
+                    elif isinstance(value, time):
+                        row_dict[col_name] = value.strftime("%H:%M:%S")
+                    else:
+                        row_dict[col_name] = value
+                data.append(row_dict)
+            return data
+
+        # Consulta de reportes (sin la columna Estado)
+        reportes = fetch_all_dict("""
+            SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
+                   r.Observaciones, a.TipoAsunto
+            FROM Reporte r
+            INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
+            INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
+        """)
+
+        vacaciones = fetch_all_dict("""
+            SELECT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
+                   e.Estado AS EstadoSolicitud, v.DiasSolicitados,
+                   v.FechaSalida, v.FechaRegreso
+            FROM Vacaciones v
+            INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
+            INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
+        """)
+
+        permisos = fetch_all_dict("""
+            SELECT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
+                   e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
+                   p.Razon, c.TipoCompensacion
+            FROM Permiso p
+            INNER JOIN Usuario u ON u.idUsuario = p.Usuario_idUsuario
+            INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
+            INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
+        """)
+
+        conn.close()
+
+        return jsonify({
+            "reportes": reportes,
+            "vacaciones": vacaciones,
+            "permisos": permisos
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
