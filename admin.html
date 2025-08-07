@@ -245,6 +245,16 @@
             </div>
           </div>
 
+          <div class="dropdown-item" onclick="abrirModalMes()">
+            <i class="bi bi-calendar-plus dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Aniversario Laboral</div>
+              <div class="dropdown-item-description">
+                Ver aniversarios laborales por mes.
+              </div>
+            </div>
+          </div>
+
           <div
             class="dropdown-item"
             onclick="navigateToOption('reporte.html')"
@@ -1068,6 +1078,62 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Empleados por Mes de Ingreso -->
+<div id="modal-mes-ingreso" class="modal-confirmacion" style="display: none;"
+
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); display: flex;
+            justify-content: center; align-items: center; z-index: 9999;">
+  
+  <div class="modal-contenido"
+       style="background-color: #fff; padding: 24px; border-radius: 10px;
+              width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+    
+    <h3 style="margin-top: 0; font-size: 20px; color: #2c3e50; text-align: center;">
+      Empleados por Mes de Ingreso
+    </h3>
+
+    <label for="filtro-mes" style="display: block; margin: 16px 0 8px; font-weight: bold; color: #333;">
+      Selecciona un mes:
+    </label>
+
+    <select id="filtro-mes" class="form-control"
+            style="width: 100%; padding: 8px 10px; font-size: 14px;
+                   border: 1px solid #ccc; border-radius: 5px;">
+      <option value="1">Enero</option>
+      <option value="2">Febrero</option>
+      <option value="3">Marzo</option>
+      <option value="4">Abril</option>
+      <option value="5">Mayo</option>
+      <option value="6">Junio</option>
+      <option value="7">Julio</option>
+      <option value="8">Agosto</option>
+      <option value="9">Septiembre</option>
+      <option value="10">Octubre</option>
+      <option value="11">Noviembre</option>
+      <option value="12">Diciembre</option>
+    </select>
+
+    <div id="resultado-empleados"
+         style="margin-top: 1rem; max-height: 250px; overflow-y: auto;
+                padding: 10px; background-color: #f9f9f9; border: 1px solid #eee;
+                border-radius: 5px; font-size: 14px;">
+      <!-- Resultados aquí -->
+    </div>
+
+    <div class="modal-botones"
+         style="margin-top: 20px; text-align: right;">
+      <button id="cerrar-modal-mes" class="btn"
+              style="padding: 8px 16px; background-color: #007bff;
+                     border: none; color: #fff; border-radius: 5px;
+                     cursor: pointer; transition: background-color 0.3s;">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
 
     <div id="modal-exito" class="modal-exito hidden">
       <div class="modal-contenido-exito">
@@ -2731,6 +2797,169 @@ function actualizarTablaEmpleados(empleados) {
               });
           });
         }
+
+  const modal = document.getElementById('modal-mes-ingreso');
+  const selectMes = document.getElementById('filtro-mes');
+  const cerrarBtn = document.getElementById('cerrar-modal-mes');
+  const resultadoDiv = document.getElementById('resultado-empleados');
+
+  // Función para abrir el modal
+  window.abrirModalMes = () => {
+  const modal = document.getElementById('modal-mes-ingreso');
+  modal.style.display = 'flex'; // en lugar de quitar clase 'hidden'
+  
+  const selectMes = document.getElementById('filtro-mes');
+  const mesActual = new Date().getMonth() + 1;
+  selectMes.value = mesActual;
+  cargarEmpleadosPorMes(mesActual);
+};
+
+document.getElementById("cerrar-modal-mes").addEventListener("click", () => {
+  document.getElementById("modal-mes-ingreso").style.display = "none";
+});
+
+
+// Función helper para formatear fechas sin problemas de timezone - VERSIÓN CORREGIDA
+function formatearFechaSinTimezone(fecha) {
+  try {
+    // Verificar si la fecha es válida
+    if (!fecha || fecha === 'null' || fecha === null || fecha === undefined) {
+      return 'Sin fecha';
+    }
+    
+    let fechaStr;
+    
+    // Si ya es un objeto Date
+    if (fecha instanceof Date) {
+      if (isNaN(fecha.getTime())) {
+        return 'Fecha inválida';
+      }
+      fechaStr = fecha.toISOString().split('T')[0];
+    } 
+    // Si es string
+    else if (typeof fecha === 'string') {
+      // Limpiar la cadena y verificar formato
+      fechaStr = fecha.trim().split('T')[0];
+      
+      // Verificar que tenga formato YYYY-MM-DD
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+        return 'Formato de fecha inválido';
+      }
+    }
+    // Si viene en otro formato, convertir a string primero
+    else {
+      fechaStr = fecha.toString().split('T')[0];
+    }
+    
+    // Extraer componentes: "2023-06-01"
+    const [año, mes, dia] = fechaStr.split('-').map(num => parseInt(num, 10));
+    
+    // Validar componentes
+    if (isNaN(año) || isNaN(mes) || isNaN(dia)) {
+      return 'Componentes de fecha inválidos';
+    }
+    
+    if (mes < 1 || mes > 12 || dia < 1 || dia > 31) {
+      return 'Fecha fuera de rango';
+    }
+    
+    // Crear fecha local sin problemas de timezone (mes es 0-indexado)
+    const fechaLocal = new Date(año, mes - 1, dia);
+    
+    // Verificar que la fecha creada sea válida
+    if (isNaN(fechaLocal.getTime())) {
+      return 'Fecha inválida';
+    }
+    
+    return fechaLocal.toLocaleDateString('es-MX', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  } catch (error) {
+    console.error('Error al formatear fecha:', fecha, error);
+    return 'Error en fecha';
+  }
+}
+
+// También mejora la función de carga de empleados por mes
+async function cargarEmpleadosPorMes(mes) {
+  try {
+    const res = await fetch(`/api/empleados/mes/${mes}`);
+    
+    if (!res.ok) {
+      throw new Error(`Error HTTP: ${res.status}`);
+    }
+    
+    const data = await res.json();
+    const resultadoDiv = document.getElementById('resultado-empleados');
+
+    if (!data.empleados || data.empleados.length === 0) {
+      resultadoDiv.innerHTML = `
+        <p style="color: #555; font-style: italic; text-align: center; padding: 20px;">
+          No hay empleados con ingreso en este mes.
+        </p>`;
+      return;
+    }
+
+    resultadoDiv.innerHTML = `
+      <div style="
+        display: flex; 
+        flex-direction: column; 
+        gap: 8px;
+        max-height: 250px; 
+        overflow-y: auto;
+      ">
+        ${data.empleados.map(empleado => {
+          // Verificar que el empleado tenga los campos necesarios
+          const nombre = empleado.Nombres || 'Sin nombre';
+          const paterno = empleado.Paterno || '';
+          const materno = empleado.Materno || '';
+          const fechaFormateada = formatearFechaSinTimezone(empleado.FechaIngreso);
+          
+          return `
+            <div style="
+              background-color: #fff;
+              padding: 10px 15px;
+              border-radius: 8px;
+              box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              color: #34495e;
+              cursor: default;
+              transition: background-color 0.2s;
+            " onmouseover="this.style.backgroundColor='#f0f4ff'" onmouseout="this.style.backgroundColor='#fff'">
+              <span style="font-weight: 600;">
+                ${nombre} ${paterno} ${materno}
+              </span>
+              <span style="font-size: 12px; color: #7f8c8d;">
+                ${fechaFormateada}
+              </span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error en cargarEmpleadosPorMes:', error);
+    document.getElementById('resultado-empleados').innerHTML = `
+      <p style="color: red; text-align: center; padding: 20px;">
+        Error al cargar empleados: ${error.message}
+      </p>`;
+  }
+}
+
+  // Cambiar mes
+  selectMes.addEventListener('change', () => {
+    cargarEmpleadosPorMes(selectMes.value);
+  });
+
+  // Cerrar modal
+  cerrarBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
 
 // Modificar el event listener del formulario de edición
 const editEmployeeForm = document.getElementById("edit-employee-form");

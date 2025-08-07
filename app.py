@@ -2242,6 +2242,51 @@ def graficos_distribucion():
 def vista_graficos():
     return render_template('stats.html')
 
+@app.route('/api/empleados/mes/<int:mes>', methods=['GET'])
+def empleados_por_mes(mes):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Empleados de todos los años, filtrado solo por mes
+        cursor.execute("""
+            SELECT idUsuario, Nombres, Paterno, Materno, FechaIngreso
+            FROM Usuario
+            WHERE MONTH(FechaIngreso) = ?
+            ORDER BY FechaIngreso DESC
+        """, mes)
+        
+        rows = cursor.fetchall()
+        columnas = [col[0] for col in cursor.description]
+        empleados = [dict(zip(columnas, row)) for row in rows]
+
+        # Debug temporal - IMPORTANTE para diagnosticar
+        print(f"🔍 DEBUG - Buscando mes {mes}:")
+        for emp in empleados:
+            fecha_obj = emp['FechaIngreso']
+            if hasattr(fecha_obj, 'month'):  # Si es un objeto datetime
+                mes_real = fecha_obj.month
+            else:  # Si es string
+                from datetime import datetime
+                fecha_obj = datetime.strptime(str(fecha_obj)[:10], '%Y-%m-%d')
+                mes_real = fecha_obj.month
+            
+            print(f"  - {emp['Nombres']} {emp['Paterno']}: {emp['FechaIngreso']} (Mes real: {mes_real})")
+            
+            # ALERTA si no coincide
+            if mes_real != mes:
+                print(f"    ⚠️  PROBLEMA: Este empleado tiene mes {mes_real} pero apareció en filtro de mes {mes}")
+
+        return jsonify({'empleados': empleados}), 200
+
+    except Exception as e:
+        print(f'❌ ERROR en /api/empleados/mes/{mes}: {e}')
+        return jsonify({'error': 'Error al obtener los empleados'}), 500
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
 def exportar_reportes_visibles():
     try:
