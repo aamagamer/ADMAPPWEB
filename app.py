@@ -2160,14 +2160,85 @@ def graficos_distribucion():
     permisos = cursor.fetchall()
     data_permisos = [{"label": p[0], "count": p[1]} for p in permisos]
 
+    # Ausentismo por Área (usando área principal, año actual)
+    cursor.execute("""
+    ;WITH AreaPrincipalPorUsuario AS (
+        SELECT 
+            ua.idUsuario,
+            MIN(ua.idArea) AS idAreaPrincipal
+        FROM Usuario_Area ua
+        GROUP BY ua.idUsuario
+    )
+    SELECT 
+        a.NombreArea,
+        COUNT(r.idReporte) AS TotalAusentismo
+    FROM 
+        Reporte r
+    JOIN 
+        Asunto s ON r.Asunto_idAsunto = s.idAsunto
+    JOIN 
+        Usuario u ON r.Usuario_idUsuario = u.idUsuario
+    JOIN 
+        AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+    JOIN 
+        Area a ON apu.idAreaPrincipal = a.idArea
+    WHERE 
+        s.TipoAsunto = 'Ausentismo' AND
+        YEAR(r.FechaReporte) = YEAR(GETDATE())
+    GROUP BY 
+        a.NombreArea
+    ORDER BY 
+        TotalAusentismo DESC;
+    """)
+    ausentismo = cursor.fetchall()
+    data_ausentismo = [{"label": r[0], "count": r[1]} for r in ausentismo]
+
+# Retardos por Área (usando área principal, año actual)
+    cursor.execute("""
+    ;WITH AreaPrincipalPorUsuario AS (
+        SELECT 
+            ua.idUsuario,
+            MIN(ua.idArea) AS idAreaPrincipal
+        FROM Usuario_Area ua
+        GROUP BY ua.idUsuario
+    )
+    SELECT 
+        a.NombreArea,
+        COUNT(r.idReporte) AS TotalRetardos
+    FROM 
+        Reporte r
+    JOIN 
+        Asunto s ON r.Asunto_idAsunto = s.idAsunto
+    JOIN 
+        Usuario u ON r.Usuario_idUsuario = u.idUsuario
+    JOIN 
+        AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+    JOIN 
+        Area a ON apu.idAreaPrincipal = a.idArea
+    WHERE 
+        s.TipoAsunto = 'Retardo' AND
+        YEAR(r.FechaReporte) = YEAR(GETDATE())
+    GROUP BY 
+        a.NombreArea
+    ORDER BY 
+        TotalRetardos DESC;
+""")
+    retardos = cursor.fetchall()
+    data_retardos = [{"label": r[0], "count": r[1]} for r in retardos]
+
+
     # Retornar todo junto
     return jsonify({
-        "roles": data_roles,
-        "areas": data_areas,
-        "reportes_por_area": data_reportes,
-        "vacaciones_por_area": data_vacaciones,
-        "permisos_por_area": data_permisos
-    })
+    "roles": data_roles,
+    "areas": data_areas,
+    "reportes_por_area": data_reportes,
+    "vacaciones_por_area": data_vacaciones,
+    "permisos_por_area": data_permisos,
+    "ausentismo_por_area": data_ausentismo,
+    "retardos_por_area": data_retardos   # <-- AQUÍ CORREGIDO
+})
+
+
 
 
 

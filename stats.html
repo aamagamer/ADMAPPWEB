@@ -141,105 +141,152 @@
       <h2>Permisos por Área</h2>
       <canvas id="graficoPermisos"></canvas>
     </div>
+    <div class="chart-container">
+      <h2>Retardos por área</h2>
+      <canvas id="graficoRetardos"></canvas>
+    </div>
+    <div class="chart-container">
+      <h2>Ausentismo por área</h2>
+      <canvas id="graficoAusentismo"></canvas>
+    </div>
   </div>
 
-  <script>
-    async function cargarGraficos() {
-      const res = await fetch('/api/graficos/distribucion');
-      const data = await res.json();
+<script>
+  async function cargarGraficos() {
+    const res = await fetch('/api/graficos/distribucion');
+    const data = await res.json();
 
-      // === Roles ===
-      new Chart(document.getElementById('graficoRoles'), {
-        type: 'doughnut',
-        data: {
-          labels: data.roles.map(r => r.label),
-          datasets: [{
-            label: 'Empleados por Rol',
-            data: data.roles.map(r => r.count),
-            backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
-          }]
+    // === Roles ===
+    new Chart(document.getElementById('graficoRoles'), {
+      type: 'doughnut',
+      data: {
+        labels: data.roles.map(r => r.label),
+        datasets: [{
+          label: 'Empleados por Rol',
+          data: data.roles.map(r => r.count),
+          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+        }]
+      }
+    });
+
+    // === Empleados por Área ===
+    new Chart(document.getElementById('graficoAreas'), {
+      type: 'bar',
+      data: {
+        labels: data.areas.map(a => a.label),
+        datasets: [{
+          label: 'Empleados por Área',
+          data: data.areas.map(a => a.count),
+          backgroundColor: '#36A2EB'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      });
+      }
+    });
 
-      // === Áreas ===
-      new Chart(document.getElementById('graficoAreas'), {
-        type: 'bar',
-        data: {
-          labels: data.areas.map(a => a.label),
-          datasets: [{
-            label: 'Empleados por Área',
-            data: data.areas.map(a => a.count),
-            backgroundColor: '#36A2EB'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
+    // === Reportes por Área ===
+    new Chart(document.getElementById('graficoReportes'), {
+      type: 'bar',
+      data: {
+        labels: data.reportes_por_area.map(r => r.label),
+        datasets: [{
+          label: 'Reportes',
+          data: data.reportes_por_area.map(r => r.count),
+          backgroundColor: '#FF6384'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      });
+      }
+    });
 
-      // === Reportes por Área ===
-      new Chart(document.getElementById('graficoReportes'), {
-        type: 'bar',
-        data: {
-          labels: data.reportes_por_area.map(r => r.label),
-          datasets: [{
-            label: 'Reportes',
-            data: data.reportes_por_area.map(r => r.count),
-            backgroundColor: '#FF6384'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
+    // === Vacaciones por Área ===
+    new Chart(document.getElementById('graficoVacaciones'), {
+      type: 'bar',
+      data: {
+        labels: data.vacaciones_por_area.map(v => v.label),
+        datasets: [{
+          label: 'Vacaciones',
+          data: data.vacaciones_por_area.map(v => v.count),
+          backgroundColor: '#4BC0C0'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      });
+      }
+    });
 
-      // === Vacaciones por Área ===
-      new Chart(document.getElementById('graficoVacaciones'), {
-        type: 'bar',
-        data: {
-          labels: data.vacaciones_por_area.map(v => v.label),
-          datasets: [{
-            label: 'Vacaciones',
-            data: data.vacaciones_por_area.map(v => v.count),
-            backgroundColor: '#4BC0C0'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
+    // === Permisos por Área ===
+    new Chart(document.getElementById('graficoPermisos'), {
+      type: 'bar',
+      data: {
+        labels: data.permisos_por_area.map(p => p.label),
+        datasets: [{
+          label: 'Permisos',
+          data: data.permisos_por_area.map(p => p.count),
+          backgroundColor: '#9966FF'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      });
+      }
+    });
 
-      // === Permisos por Área ===
-      new Chart(document.getElementById('graficoPermisos'), {
-        type: 'bar',
-        data: {
-          labels: data.permisos_por_area.map(p => p.label),
-          datasets: [{
-            label: 'Permisos',
-            data: data.permisos_por_area.map(p => p.count),
-            backgroundColor: '#9966FF'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
+    // === Ausentismo por Área ===
+    new Chart(document.getElementById('graficoAusentismo'), {
+      type: 'bar',
+      data: {
+        labels: data.ausentismo_por_area.map(a => a.label),
+        datasets: [{
+          label: 'Ausentismo',
+          data: data.ausentismo_por_area.map(a => a.count),
+          backgroundColor: '#FFA07A'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      });
-    }
+      }
+    });
 
-    document.addEventListener('DOMContentLoaded', cargarGraficos);
-  </script>
+    // === Retardos por Área ===
+    new Chart(document.getElementById('graficoRetardos'), {
+      type: 'bar',
+      data: {
+        labels: data.retardos_por_area.map(r => r.label),
+        datasets: [{
+          label: 'Retardos',
+          data: data.retardos_por_area.map(r => r.count),
+          backgroundColor: '#FFD700'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', cargarGraficos);
+</script>
+
 </body>
 </html>
 
