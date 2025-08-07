@@ -82,7 +82,7 @@
   color: #666;
 }
 
-.btn-conseguir {
+button {
   margin-top: 12px;
   background-color: #0b1c68;
   color: white;
@@ -94,7 +94,7 @@
   transition: background-color 0.3s ease;
 }
 
-.btn-conseguir:hover {
+button:hover {
   background-color: #01001b;
 }
 

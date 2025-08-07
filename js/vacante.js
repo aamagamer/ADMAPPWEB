@@ -30,14 +30,29 @@ document.addEventListener("DOMContentLoaded", function () {
     const area_idarea = select.value;
     const areaTexto = select.options[select.selectedIndex].textContent;
     const puesto = document.getElementById("puesto").value;
+    const cantidad = document.getElementById("cantidad").value;
     const perfil = document.getElementById("perfil").value;
     const habilidades = document.getElementById("habilidades").value;
-    const Usuario_idUsuario = localStorage.getItem("idUsuario") || 105;
+    const Usuario_idUsuario = localStorage.getItem("idUsuario");
+
+      //cantidad debe ser mayor a 0
+  if (isNaN(cantidad) || cantidad <= 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "Cantidad inválida",
+      text: "Debes ingresar un número mayor a 0 para las vacantes.",
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Corregir"
+    });
+    return; //no continúa
+  }
+
 
     payloadTemporal = {
       area_idarea: parseInt(area_idarea),
       Usuario_idUsuario: parseInt(Usuario_idUsuario),
       Puesto: puesto,
+      cantidad: parseInt(cantidad),
       Perfil: perfil,
       Habilidades: habilidades,
     };
@@ -45,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
     resumenVacante.innerHTML = `
             <p><strong>Área:</strong> ${areaTexto}</p>
             <p><strong>Puesto:</strong> ${puesto}</p>
+            <p><strong>Vacantes solicitadas:</strong> ${cantidad}</p>
             <p><strong>Perfil:</strong> ${perfil}</p>
             <p><strong>Habilidades:</strong> ${habilidades}</p>
           `;
@@ -69,7 +85,13 @@ document.addEventListener("DOMContentLoaded", function () {
         return res.json();
       })
       .then((data) => {
-        //alert("✅ " + data.message);
+        Swal.fire({
+          icon: "success",
+          title: "Listo",
+          text: "Vacante solicitada",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "Aceptar",
+        });
         modal.classList.add("hidden");
         form.reset();
       })

@@ -839,7 +839,7 @@ def crear_vacante():
     data = request.get_json()
 
     # Validación básica (puedes mejorarla si quieres)
-    required_fields = ['area_idarea', 'Usuario_idUsuario', 'Puesto', 'Perfil', 'Habilidades']
+    required_fields = ['area_idarea', 'Usuario_idUsuario', 'Puesto', 'Perfil', 'Habilidades', 'cantidad']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Faltan campos requeridos'}), 400
 
@@ -847,15 +847,16 @@ def crear_vacante():
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO Vacante (area_idarea, Usuario_idUsuario, Puesto, Perfil, Habilidades, Estado)
-            VALUES (?, ?, ?, ?, ?, 'Activo')
+            INSERT INTO Vacante (area_idarea, Usuario_idUsuario, Puesto, Perfil, Habilidades, Estado, cantidad)
+            VALUES (?, ?, ?, ?, ?, 'Activo',?)
         """
         cursor.execute(query, (
             data['area_idarea'],
             data['Usuario_idUsuario'],
             data['Puesto'],
             data['Perfil'],
-            data['Habilidades']
+            data['Habilidades'],
+            int(data['cantidad']),
         ))
         conn.commit()
         conn.close()
@@ -1257,7 +1258,8 @@ def obtener_vacantes():
         query = '''
             SELECT 
                 Area.NombreArea, 
-                Vacante.Puesto, 
+                Vacante.Puesto,
+                Vacante.cantidad,
                 Vacante.Perfil, 
                 Vacante.Habilidades,
                 Vacante.idVacante
@@ -1283,6 +1285,42 @@ def obtener_vacantes():
             cursor.close()
         if conn:
             conn.close()
+
+@app.route('/api/vacantes/<int:id>/restar', methods=['PUT'])
+def restar_vacante(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener la cantidad actual
+        cursor.execute("SELECT cantidad FROM Vacante WHERE idVacante = ?", (id,))
+        result = cursor.fetchone()
+
+        if not result:
+            return jsonify({'error': 'Vacante no encontrada'}), 404
+
+        cantidad_actual = result[0]
+
+        if cantidad_actual <= 1:
+            return jsonify({'error': 'Cantidad ya es mínima'}), 400
+
+        # Actualizar restando 1
+        nueva_cantidad = cantidad_actual - 1
+        cursor.execute("UPDATE Vacante SET cantidad = ? WHERE idVacante = ?", (nueva_cantidad, id))
+        conn.commit()
+
+        return jsonify({'message': f'Cantidad actualizada a {nueva_cantidad}'}), 200
+
+    except Exception as e:
+        print(f"❌ ERROR en PUT /api/vacantes/{id}/restar: {e}")
+        return jsonify({'error': 'Error al actualizar la vacante'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
         
     
 @app.route('/api/vacantes/<int:idVacante>', methods=['PUT'])
