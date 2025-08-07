@@ -7,16 +7,16 @@
     <link rel="stylesheet" href="css/historial.css" />
     <link rel="icon" href="Media/favicon.ico" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <!-- DataTables CSS con Bootstrap -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/historial.js"></script>
 </head>
@@ -36,57 +36,136 @@
             <h2 class="welcome-message">Historial de actividades</h2>
             <p class="welcome-submessage">Visualiza y gestiona todos tus registros históricos</p>
         </div>
-
-        <!-- Panel de control -->
         <div class="control-panel">
             <div class="filter-buttons">
-                <button class="filter-btn todos active" data-filter="all">
-                    <i class="fas fa-table"></i> Todos
-                </button>
-                <button class="filter-btn reportes" data-filter="reporte">
+                <button class="filter-btn active" data-filter="reportes">
                     <i class="fas fa-file-alt"></i> Reportes
                 </button>
-                <button class="filter-btn vacaciones" data-filter="vacaciones">
+                <button class="filter-btn" data-filter="vacaciones">
                     <i class="fas fa-umbrella-beach"></i> Vacaciones
                 </button>
-                <button class="filter-btn permisos" data-filter="permiso">
+                <button class="filter-btn" data-filter="permisos">
                     <i class="fas fa-clock"></i> Permisos
                 </button>
-            </div>
-            
-            <div class="search-container">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="global-search" placeholder="Buscar en todos los registros...">
-                </div>
-                <button id="export-excel" class="export-btn">
-                    <i class="fas fa-file-excel"></i> Exportar
+                <button class="filter-btn" data-filter="todos">
+                    <i class="fas fa-table"></i> Todos
                 </button>
             </div>
         </div>
 
-        <!-- Tabla dinámica -->
-        <div class="table-responsive">
-            <table id="tabla-historial" class="table-hover" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Tipo</th>
-                        <th>ID</th>
-                        <th class="col-empleado">Empleado</th>
-                        <th class="col-categoria">Categoría</th>
-                        <th class="col-detalles">Detalles</th>
-                        <th class="col-estado">Estado</th>
-                        <th class="col-fecha">Fecha</th>
-                        <th class="col-acciones">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Se llenará dinámicamente -->
-                </tbody>
-            </table>
-        </div>
+        <div id="tables-container"> 
+            <div id="reportes-section" class="table-section active">
+                <div class="section-controls">
+                    
+                    <input type="date" class="date-filter-start" data-table-id="tabla-reportes" placeholder="Fecha inicio">
+                    <input type="date" class="date-filter-end" data-table-id="tabla-reportes" placeholder="Fecha fin">
+                   
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-reportes" class="table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Empleado</th>
+                                <th>Categoría</th>
+                                <th>Detalles</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        <!-- Modal para detalles -->
+
+            <div id="vacaciones-section" class="table-section hidden">
+                <div class="section-controls">
+                   
+                    <input type="date" class="date-filter-start" data-table-id="tabla-vacaciones" placeholder="Fecha inicio">
+                    <input type="date" class="date-filter-end" data-table-id="tabla-vacaciones" placeholder="Fecha fin">
+                   
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-vacaciones" class="table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Empleado</th>
+                                <th>Días Solicitados</th>
+                                <th>Periodo</th>
+                                <th>Estado</th>
+                                <th>Fecha de Solicitud</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="permisos-section" class="table-section hidden">
+                <div class="section-controls">
+                    
+                    <input type="date" class="date-filter-start" data-table-id="tabla-permisos" placeholder="Fecha inicio">
+                    <input type="date" class="date-filter-end" data-table-id="tabla-permisos" placeholder="Fecha fin">
+                    
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-permisos" class="table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Empleado</th>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Horario</th>
+                                <th>Razón</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="todos-section" class="table-section hidden">
+                <div class="section-controls">
+                    
+                    <input type="date" class="date-filter-start" data-table-id="tabla-todos" placeholder="Fecha inicio">
+                    <input type="date" class="date-filter-end" data-table-id="tabla-todos" placeholder="Fecha fin">
+                    
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-todos" class="table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>ID</th>
+                                <th>Empleado</th>
+                                <th>Categoría</th>
+                                <th>Detalles</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+ 
         <div id="detailModal" class="modal">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
@@ -95,7 +174,7 @@
                     <span id="modal-badge" class="badge"></span>
                 </div>
                 <div class="modal-body" id="modal-body">
-                    <!-- Contenido dinámico -->
+                     Contenido dinámico 
                 </div>
                 <div class="modal-footer">
                     <button id="modal-close-btn" class="modal-btn">Cerrar</button>
