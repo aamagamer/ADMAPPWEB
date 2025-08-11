@@ -1429,7 +1429,7 @@ def obtener_solicitudes_aprobadas_rechazadas():
                 u.Nombres, u.Paterno, u.Materno
             FROM Vacaciones v
             JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
-            WHERE v.EstadoSolicitud_idSolicitud IN (1, 2)
+            WHERE v.Estado is null
         '''
         cursor.execute(query_vacaciones)
         vacaciones = [
@@ -1457,7 +1457,7 @@ def obtener_solicitudes_aprobadas_rechazadas():
             FROM Permiso p
             LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
             JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
-            WHERE p.EstadoSolicitud_idSolicitud IN (1, 2)
+            WHERE p.Estado is null
         '''
         cursor.execute(query_permisos)
         permisos = [
@@ -1502,27 +1502,20 @@ def dar_de_baja_solicitud():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Obtener ID del estado 'Enterado'
-        cursor.execute("SELECT idSolicitud FROM EstadoSolicitud WHERE Estado = 'Enterado'")
-        row = cursor.fetchone()
-        if not row:
-            return jsonify({"error": "No se encontró el estado 'Enterado'"}), 500
-        estado_enterado_id = row.idSolicitud
-
-        # Ejecutar update según tipo
+        # Ejecutar update directo según tipo
         if tipo == "Permiso":
             cursor.execute("""
                 UPDATE Permiso
-                SET EstadoSolicitud_idSolicitud = ?
+                SET estado = 'Enterado'
                 WHERE idPermiso = ?
-            """, (estado_enterado_id, id_solicitud))
+            """, (id_solicitud,))
 
         elif tipo == "Vacaciones":
             cursor.execute("""
                 UPDATE Vacaciones
-                SET EstadoSolicitud_idSolicitud = ?
+                SET estado = 'Enterado'
                 WHERE idVacaciones = ?
-            """, (estado_enterado_id, id_solicitud))
+            """, (id_solicitud,))
 
         conn.commit()
         return jsonify({"mensaje": "Solicitud dada de baja correctamente"})
@@ -1534,6 +1527,7 @@ def dar_de_baja_solicitud():
     finally:
         if conn:
             conn.close()
+
 
 
 @app.route('/api/usuarios/buscar', methods=['GET'])
