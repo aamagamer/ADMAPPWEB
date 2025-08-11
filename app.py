@@ -10,6 +10,7 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from apscheduler.schedulers.background import BackgroundScheduler
 from functools import wraps
+from decimal import Decimal
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
@@ -2443,8 +2444,23 @@ def get_permisos_historial():
         INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
         INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
     """)
+    
     columns = [column[0] for column in cursor.description]
-    permisos = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    permisos = []
+    
+    for row in cursor.fetchall():
+        row_dict = {}
+        for col_name, value in zip(columns, row):
+            if isinstance(value, (date, datetime)):
+                row_dict[col_name] = value.isoformat()  # Ej: '2025-08-11T15:30:00'
+            elif isinstance(value, time):
+                row_dict[col_name] = value.strftime("%H:%M:%S")
+            elif isinstance(value, Decimal):
+                row_dict[col_name] = float(value)
+            else:
+                row_dict[col_name] = value
+        permisos.append(row_dict)
+
     conn.close()
     return jsonify(permisos)
 

@@ -10,6 +10,55 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .filtro-fechas {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filtro-fechas label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .filtro-fecha {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-filtrar, .btn-limpiar {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-filtrar {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-limpiar {
+            background-color: #f44336;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .btn-filtrar:hover {
+            background-color: #45a049;
+        }
+
+        .btn-limpiar:hover {
+            background-color: #d32f2f;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -33,6 +82,16 @@
         <!-- Contenido de las pestañas -->
         <div id="reportes" class="tab-content active">
             <h2>Reportes Registrados</h2>
+            <div class="filtro-fechas">
+                <label for="fecha-inicio-reportes">Desde:</label>
+                <input type="date" id="fecha-inicio-reportes" class="filtro-fecha">
+                
+                <label for="fecha-fin-reportes">Hasta:</label>
+                <input type="date" id="fecha-fin-reportes" class="filtro-fecha">
+                
+                <button onclick="filtrarPorFechas('reportes')" class="btn-filtrar">Filtrar</button>
+                <button onclick="limpiarFiltroFechas('reportes')" class="btn-limpiar">Limpiar</button>
+            </div>
             <div class="table-container">
                 <table id="reportes-table" class="display nowrap" style="width:100%">
                     <thead>
@@ -51,6 +110,16 @@
 
         <div id="vacaciones" class="tab-content">
             <h2>Solicitudes de Vacaciones</h2>
+            <div class="filtro-fechas">
+                <label for="fecha-inicio-vacaciones">Desde:</label>
+                <input type="date" id="fecha-inicio-vacaciones" class="filtro-fecha">
+                
+                <label for="fecha-fin-vacaciones">Hasta:</label>
+                <input type="date" id="fecha-fin-vacaciones" class="filtro-fecha">
+                
+                <button onclick="filtrarPorFechas('vacaciones')" class="btn-filtrar">Filtrar</button>
+                <button onclick="limpiarFiltroFechas('vacaciones')" class="btn-limpiar">Limpiar</button>
+            </div>
             <div class="table-container">
                 <table id="vacaciones-table" class="display nowrap" style="width:100%">
                     <thead>
@@ -70,6 +139,16 @@
 
         <div id="permisos" class="tab-content">
             <h2>Solicitudes de Permisos</h2>
+            <div class="filtro-fechas">
+                <label for="fecha-inicio-permisos">Desde:</label>
+                <input type="date" id="fecha-inicio-permisos" class="filtro-fecha">
+                
+                <label for="fecha-fin-permisos">Hasta:</label>
+                <input type="date" id="fecha-fin-permisos" class="filtro-fecha">
+                
+                <button onclick="filtrarPorFechas('permisos')" class="btn-filtrar">Filtrar</button>
+                <button onclick="limpiarFiltroFechas('permisos')" class="btn-limpiar">Limpiar</button>
+            </div>
             <div class="table-container">
                 <table id="permisos-table" class="display nowrap" style="width:100%">
                     <thead>
@@ -98,6 +177,321 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="js/historial.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar las tablas
+    initReportesTable();
+    initVacacionesTable();
+    initPermisosTable();
+    
+    // Cargar datos iniciales
+    loadReportes();
+});
+
+// Función mejorada para parsear fechas correctamente
+function parsearFecha(fechaString) {
+    if (!fechaString) return null;
+    
+    // Si es formato dd/mm/yyyy (como lo renderiza DataTables)
+    if (fechaString.includes('/')) {
+        const [dia, mes, año] = fechaString.split('/');
+        return new Date(año, mes - 1, dia);
+    }
+    
+    // Si es formato yyyy-mm-dd (como lo del input)
+    if (fechaString.includes('-')) {
+        return new Date(fechaString + 'T00:00:00');
+    }
+    
+    // Si es un objeto Date
+    if (fechaString instanceof Date) {
+        return fechaString;
+    }
+    
+    // Intentar parsearlo directamente
+    const fecha = new Date(fechaString);
+    return isNaN(fecha.getTime()) ? null : fecha;
+}
+
+// Función mejorada para comparar solo fechas (sin hora)
+function compararFechas(fecha1, fecha2) {
+    if (!fecha1 || !fecha2) return false;
+    
+    const f1 = new Date(fecha1.getFullYear(), fecha1.getMonth(), fecha1.getDate());
+    const f2 = new Date(fecha2.getFullYear(), fecha2.getMonth(), fecha2.getDate());
+    
+    return f1.getTime() === f2.getTime();
+}
+
+function openTab(tabId) {
+    // Ocultar todos los contenidos de pestañas
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Desactivar todos los botones de pestañas
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Mostrar el contenido de la pestaña seleccionada
+    document.getElementById(tabId).classList.add('active');
+    
+    // Activar el botón de la pestaña seleccionada
+    event.currentTarget.classList.add('active');
+    
+    // Cargar datos si es necesario
+    if (tabId === 'reportes' && !window.reportesLoaded) {
+        loadReportes();
+    } else if (tabId === 'vacaciones' && !window.vacacionesLoaded) {
+        loadVacaciones();
+    } else if (tabId === 'permisos' && !window.permisosLoaded) {
+        loadPermisos();
+    }
+}
+
+// Función mejorada para filtrar por fechas
+function filtrarPorFechas(tabla) {
+    let fechaInicio, fechaFin, table;
+    
+    switch(tabla) {
+        case 'reportes':
+            fechaInicio = document.getElementById('fecha-inicio-reportes').value;
+            fechaFin = document.getElementById('fecha-fin-reportes').value;
+            table = window.reportesTable;
+            break;
+        case 'vacaciones':
+            fechaInicio = document.getElementById('fecha-inicio-vacaciones').value;
+            fechaFin = document.getElementById('fecha-fin-vacaciones').value;
+            table = window.vacacionesTable;
+            break;
+        case 'permisos':
+            fechaInicio = document.getElementById('fecha-inicio-permisos').value;
+            fechaFin = document.getElementById('fecha-fin-permisos').value;
+            table = window.permisosTable;
+            break;
+    }
+    
+    if (!fechaInicio && !fechaFin) {
+        alert('Por favor, selecciona al menos una fecha');
+        return;
+    }
+    
+    // Redibujar la tabla para aplicar filtros
+    table.draw();
+}
+
+// Función para limpiar el filtro de fechas
+function limpiarFiltroFechas(tabla) {
+    switch(tabla) {
+        case 'reportes':
+            document.getElementById('fecha-inicio-reportes').value = '';
+            document.getElementById('fecha-fin-reportes').value = '';
+            window.reportesTable.draw();
+            break;
+        case 'vacaciones':
+            document.getElementById('fecha-inicio-vacaciones').value = '';
+            document.getElementById('fecha-fin-vacaciones').value = '';
+            window.vacacionesTable.draw();
+            break;
+        case 'permisos':
+            document.getElementById('fecha-inicio-permisos').value = '';
+            document.getElementById('fecha-fin-permisos').value = '';
+            window.permisosTable.draw();
+            break;
+    }
+}
+
+function initReportesTable() {
+    window.reportesTable = $('#reportes-table').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf'
+        ],
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        columns: [
+            { data: 'idReporte' },
+            { 
+                data: null,
+                render: function(data) {
+                    return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+                }
+            },
+            { data: 'Observaciones' },
+            { data: 'TipoAsunto' },
+            { 
+                data: 'FechaReporte',
+                render: function(data) {
+                    return new Date(data).toLocaleDateString('es-ES');
+                },
+                type: 'date'
+            }
+        ]
+    });
+}
+
+function initVacacionesTable() {
+    window.vacacionesTable = $('#vacaciones-table').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf'
+        ],
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        columns: [
+            { data: 'idVacaciones' },
+            { 
+                data: null,
+                render: function(data) {
+                    return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+                }
+            },
+            { data: 'EstadoSolicitud' },
+            { data: 'DiasSolicitados' },
+            { 
+                data: 'FechaSalida',
+                render: function(data) {
+                    return new Date(data).toLocaleDateString('es-ES');
+                },
+                type: 'date'
+            },
+            { 
+                data: 'FechaRegreso',
+                render: function(data) {
+                    return new Date(data).toLocaleDateString('es-ES');
+                },
+                type: 'date'
+            }
+        ]
+    });
+}
+
+function initPermisosTable() {
+    window.permisosTable = $('#permisos-table').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf'
+        ],
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        columns: [
+            { data: 'idPermiso' },
+            { 
+                data: null,
+                render: function(data) {
+                    return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+                }
+            },
+            { data: 'EstadoSolicitud' },
+            { 
+                data: 'DiaSolicitado',
+                render: function(data) {
+                    return new Date(data).toLocaleDateString('es-ES');
+                },
+                type: 'date'
+            },
+            { 
+                data: null,
+                render: function(data) {
+                    return `${data.HoraInicio} - ${data.HoraFin}`;
+                }
+            },
+            { data: 'Razon' },
+            { data: 'TipoCompensacion' }
+        ]
+    });
+}
+
+// FILTRO GLOBAL ÚNICO - Se ejecuta después de inicializar todas las tablas
+$(document).ready(function() {
+    // Limpiar filtros existentes para evitar duplicados
+    $.fn.dataTable.ext.search.length = 0;
+    
+    // Agregar un solo filtro global que maneje todas las tablas
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        const tableId = settings.nTable.id;
+        
+        // Determinar qué inputs de fecha usar según la tabla
+        let fechaInicio, fechaFin, columnaFecha;
+        
+        if (tableId === 'reportes-table') {
+            fechaInicio = document.getElementById('fecha-inicio-reportes').value;
+            fechaFin = document.getElementById('fecha-fin-reportes').value;
+            columnaFecha = 4; // Columna de FechaReporte
+        } else if (tableId === 'vacaciones-table') {
+            fechaInicio = document.getElementById('fecha-inicio-vacaciones').value;
+            fechaFin = document.getElementById('fecha-fin-vacaciones').value;
+            columnaFecha = 4; // Columna de FechaSalida
+        } else if (tableId === 'permisos-table') {
+            fechaInicio = document.getElementById('fecha-inicio-permisos').value;
+            fechaFin = document.getElementById('fecha-fin-permisos').value;
+            columnaFecha = 3; // Columna de DiaSolicitado
+        } else {
+            return true; // Si no es una tabla conocida, mostrar todo
+        }
+        
+        // Si no hay fechas de filtro, mostrar todo
+        if (!fechaInicio && !fechaFin) {
+            return true;
+        }
+        
+        // Obtener la fecha de la fila actual
+        const fechaFila = parsearFecha(data[columnaFecha]);
+        if (!fechaFila) return false;
+        
+        // Parsear fechas de filtro
+        const inicio = fechaInicio ? parsearFecha(fechaInicio) : null;
+        const fin = fechaFin ? parsearFecha(fechaFin) : null;
+        
+        // Aplicar filtro
+        if (inicio && fin) {
+            return fechaFila >= inicio && fechaFila <= fin;
+        } else if (inicio) {
+            return fechaFila >= inicio;
+        } else if (fin) {
+            return fechaFila <= fin;
+        }
+        
+        return true;
+    });
+});
+
+function loadReportes() {
+    fetch('/api/reportes-historial')
+        .then(response => response.json())
+        .then(data => {
+            window.reportesTable.clear().rows.add(data).draw();
+            window.reportesLoaded = true;
+        })
+        .catch(error => console.error('Error al cargar reportes:', error));
+}
+
+function loadVacaciones() {
+    fetch('/api/vacaciones-historial')
+        .then(response => response.json())
+        .then(data => {
+            window.vacacionesTable.clear().rows.add(data).draw();
+            window.vacacionesLoaded = true;
+        })
+        .catch(error => console.error('Error al cargar vacaciones:', error));
+}
+
+function loadPermisos() {
+    fetch('/api/permisos-historial')
+        .then(response => response.json())
+        .then(data => {
+            window.permisosTable.clear().rows.add(data).draw();
+            window.permisosLoaded = true;
+        })
+        .catch(error => console.error('Error al cargar permisos:', error));
+}
+    </script>
 </body>
 </html>
