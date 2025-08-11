@@ -2273,46 +2273,66 @@ def empleados_por_mes(mes):
         if cursor: cursor.close()
         if conn: conn.close()
 
+import signal
+from contextlib import contextmanager
 
+# Función de timeout
+class TimeoutError(Exception):
+    pass
 
+def timeout_handler(signum, frame):
+    raise TimeoutError("Query timeout")
 
-@app.route('/api/datos-generales', methods=['GET'])
-def obtener_datos_generales():
+@contextmanager
+def query_timeout(seconds):
+    # Configurar el timeout
+    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
+
+@app.route('/api/reportes')
+def get_reportes():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-
-        def fetch_all_dict(query):
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            if not cursor.description:
-                return []
-            cols = [column[0] for column in cursor.description]
-            data = []
-            for row in rows:
-                row_dict = {}
-                for col_name, value in zip(cols, row):
-                    if value is None:
-                        row_dict[col_name] = ""  # String vacío para valores NULL
-                    elif isinstance(value, (date, datetime)):
-                        row_dict[col_name] = value.isoformat()
-                    elif isinstance(value, time):
-                        row_dict[col_name] = value.strftime("%H:%M:%S")
-                    else:
-                        row_dict[col_name] = value
-                data.append(row_dict)
-            return data
-
-        # Consulta de reportes (sin la columna Estado)
-        reportes = fetch_all_dict("""
+        
+        cursor.execute("""
             SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
                    r.Observaciones, a.TipoAsunto, r.FechaReporte
             FROM Reporte r
             INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
             INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
         """)
+        
+        reportes = []
+        for row in cursor.fetchall():
+            reportes.append({
+                'id': row[0],
+                'empleado': f"{row[1]} {row[2]} {row[3]}",
+                'observaciones': row[4] or '',
+                'tipo_asunto': row[5] or '',
+                'fecha': row[6].isoformat() if row[6] else ''
+            })
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'success': True, 'data': reportes})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
-        vacaciones = fetch_all_dict("""
+@app.route('/api/vacaciones')
+def get_vacaciones():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
             SELECT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
                    e.Estado AS EstadoSolicitud, v.DiasSolicitados,
                    v.FechaSalida, v.FechaRegreso
@@ -2320,8 +2340,33 @@ def obtener_datos_generales():
             INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
             INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
         """)
+        
+        vacaciones = []
+        for row in cursor.fetchall():
+            vacaciones.append({
+                'id': row[0],
+                'empleado': f"{row[1]} {row[2]} {row[3]}",
+                'estado': row[4] or '',
+                'dias_solicitados': row[5] or 0,
+                'fecha_salida': row[6].isoformat() if row[6] else '',
+                'fecha_regreso': row[7].isoformat() if row[7] else ''
+            })
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'success': True, 'data': vacaciones})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
-        permisos = fetch_all_dict("""
+@app.route('/api/permisos')
+def get_permisos():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
             SELECT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
                    e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
                    p.Razon, c.TipoCompensacion
@@ -2330,21 +2375,78 @@ def obtener_datos_generales():
             INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
             INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
         """)
-
+        
+        permisos = []
+        for row in cursor.fetchall():
+            permisos.append({
+                'id': row[0],
+                'empleado': f"{row[1]} {row[2]} {row[3]}",
+                'estado': row[4] or '',
+                'dia_solicitado': row[5].isoformat() if row[5] else '',
+                'hora_inicio': row[6].strftime('%H:%M') if row[6] else '',
+                'hora_fin': row[7].strftime('%H:%M') if row[7] else '',
+                'razon': row[8] or '',
+                'tipo_compensacion': row[9] or ''
+            })
+        
+        cursor.close()
         conn.close()
-
-        return jsonify({
-            "reportes": reportes,
-            "vacaciones": vacaciones,
-            "permisos": permisos
-        })
-
+        
+        return jsonify({'success': True, 'data': permisos})
+        
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/reportes-historial')
+def get_reportes_historial():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
+               r.Observaciones, a.TipoAsunto, r.FechaReporte
+        FROM Reporte r
+        INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
+        INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
+    """)
+    columns = [column[0] for column in cursor.description]
+    reportes = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(reportes)
 
+@app.route('/api/vacaciones-historial')
+def get_vacaciones_historial():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
+               e.Estado AS EstadoSolicitud, v.DiasSolicitados,
+               v.FechaSalida, v.FechaRegreso
+        FROM Vacaciones v
+        INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
+        INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
+    """)
+    columns = [column[0] for column in cursor.description]
+    vacaciones = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(vacaciones)
+
+@app.route('/api/permisos-historial')
+def get_permisos_historial():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
+               e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
+               p.Razon, c.TipoCompensacion
+        FROM Permiso p
+        INNER JOIN Usuario u ON u.idUsuario = p.Usuario_idUsuario
+        INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
+        INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
+    """)
+    columns = [column[0] for column in cursor.description]
+    permisos = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(permisos)
 
 
 @app.route('/api/exportar-reportes-vista', methods=['POST'])

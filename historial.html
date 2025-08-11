@@ -9,16 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/historial.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
@@ -32,151 +23,81 @@
     </header>
 
     <div class="main-container">
-        <div class="welcome-section">
-            <h2 class="welcome-message">Historial de actividades</h2>
-            <p class="welcome-submessage">Visualiza y gestiona todos tus registros históricos</p>
-        </div>
-        <div class="control-panel">
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="reportes">
-                    <i class="fas fa-file-alt"></i> Reportes
-                </button>
-                <button class="filter-btn" data-filter="vacaciones">
-                    <i class="fas fa-umbrella-beach"></i> Vacaciones
-                </button>
-                <button class="filter-btn" data-filter="permisos">
-                    <i class="fas fa-clock"></i> Permisos
-                </button>
-                <button class="filter-btn" data-filter="todos">
-                    <i class="fas fa-table"></i> Todos
-                </button>
-            </div>
+        <!-- Tabs/Pestañas -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('reportes')">Reportes</button>
+            <button class="tab-button" onclick="openTab('vacaciones')">Vacaciones</button>
+            <button class="tab-button" onclick="openTab('permisos')">Permisos</button>
         </div>
 
-        <div id="tables-container"> 
-            <div id="reportes-section" class="table-section active">
-                <div class="section-controls">
-                    
-                    
-                   
-                </div>
-                <div class="table-responsive">
-                    <table id="tabla-reportes" class="table-hover" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Empleado</th>
-                                <th>Categoría</th>
-                                <th>Detalles</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
-            <div id="vacaciones-section" class="table-section hidden">
-                <div class="section-controls">
-                   
-                 
-                   
-                </div>
-                <div class="table-responsive">
-                    <table id="tabla-vacaciones" class="table-hover" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Empleado</th>
-                                <th>Días Solicitados</th>
-                                <th>Periodo</th>
-                                <th>Estado</th>
-                                <th>Fecha de Solicitud</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
-            <div id="permisos-section" class="table-section hidden">
-                <div class="section-controls">
-                    
-                 
-                    
-                </div>
-                <div class="table-responsive">
-                    <table id="tabla-permisos" class="table-hover" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Empleado</th>
-                                <th>Tipo</th>
-                                <th>Fecha</th>
-                                <th>Horario</th>
-                                <th>Razón</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
-            <div id="todos-section" class="table-section hidden">
-                <div class="section-controls">
-                    
-                 
-                    
-                </div>
-                <div class="table-responsive">
-                    <table id="tabla-todos" class="table-hover" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>ID</th>
-                                <th>Empleado</th>
-                                <th>Categoría</th>
-                                <th>Detalles</th>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Contenido de las pestañas -->
+        <div id="reportes" class="tab-content active">
+            <h2>Reportes Registrados</h2>
+            <div class="table-container">
+                <table id="reportes-table" class="display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Observaciones</th>
+                            <th>Tipo Asunto</th>
+                            <th>Fecha Reporte</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
- 
-        <div id="detailModal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <div class="modal-header">
-                    <h3 id="modal-title">Detalles del Registro</h3>
-                    <span id="modal-badge" class="badge"></span>
-                </div>
-                <div class="modal-body" id="modal-body">
-                     Contenido dinámico 
-                </div>
-                <div class="modal-footer">
-                    <button id="modal-close-btn" class="modal-btn">Cerrar</button>
-                </div>
+
+        <div id="vacaciones" class="tab-content">
+            <h2>Solicitudes de Vacaciones</h2>
+            <div class="table-container">
+                <table id="vacaciones-table" class="display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Días Solicitados</th>
+                            <th>Fecha Salida</th>
+                            <th>Fecha Regreso</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="permisos" class="tab-content">
+            <h2>Solicitudes de Permisos</h2>
+            <div class="table-container">
+                <table id="permisos-table" class="display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Día Solicitado</th>
+                            <th>Horario</th>
+                            <th>Razón</th>
+                            <th>Tipo Compensación</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="js/historial.js"></script>
 </body>
 </html>
