@@ -58,6 +58,66 @@
         .btn-limpiar:hover {
             background-color: #d32f2f;
         }
+
+        /* Estilos para los botones de exportación (Excel, PDF, etc.) */
+.dt-buttons {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dt-button {
+    padding: 8px 16px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dt-button:hover {
+    background-color: #1a2a3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos específicos para cada tipo de botón */
+.dt-button.buttons-excel {
+    background-color: #1d6f42;
+}
+
+.dt-button.buttons-pdf {
+    background-color: #d32f2f;
+}
+
+.dt-button.buttons-copy {
+    background-color: #666;
+}
+
+.dt-button.buttons-print {
+    background-color: #ff9800;
+}
+
+.dt-button.buttons-csv {
+    background-color: #2196f3;
+}
+
+/* Estilo para los íconos en los botones */
+.dt-button i {
+    font-size: 16px;
+}
+
+/* Efecto al hacer clic */
+.dt-button:active {
+    transform: translateY(0);
+}
     </style>
 </head>
 <body>
