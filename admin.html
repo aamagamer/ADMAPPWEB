@@ -34,10 +34,10 @@
     </div>
   </header>
 
-
+ <!-- Saludo nombre empleado llenado dinamicamente -->
   <div class="welcome-section">
     <div class="welcome-message">
-      ¡Hola <span id="employee-name">Juan Pérez</span>!
+      ¡Hola <span id="employee-name"></span>!
     </div>
     <p>¿Qué deseas hacer hoy?</p>
   </div>
@@ -84,6 +84,7 @@
       transition: border-color 0.3s ease;
     "
   >
+   <!-- Filtros de actividad de empleado -->
     <option value="activos">Activos</option>
     <option value="inactivos">Inactivos</option>
     <option value="todos">Todos</option>
@@ -109,7 +110,7 @@
     <option value="">Todas las áreas</option>
     <!-- Las opciones se llenarán dinámicamente -->
   </select>
-
+ <!-- Input de busqueda -->
   <input
     type="text"
     id="busquedaEmpleado"
@@ -137,7 +138,7 @@
     <i class="bi bi-search"></i>
   </button>
 </div>
-
+ <!-- Acciones -->
       <table class="employee-table">
         <thead>
           <tr>
@@ -151,7 +152,7 @@
       </table>
     </div>
 
-    <!-- Botón dropdown movido más arriba -->
+    <!-- Botón dropdown con todas las opciones -->
     <div class="options-container">
       <div class="dropdown-container">
         <button class="dropdown-button" onclick="toggleDropdown()">
@@ -343,7 +344,7 @@
       </div>
     </div>
 
-    <!-- Modal de datos generales (usa las mismas clases e ID de estilo) -->
+    <!-- Modal de datos generales  -->
 <div id="modal-generales" class="modal hidden">
   <div class="modal-content">
     <span class="close" onclick="cerrarModalGenerales()">&times;</span>
@@ -1148,13 +1149,8 @@
 </div>
 
 
-    <div id="modal-exito" class="modal-exito hidden">
-      <div class="modal-contenido-exito">
-        <p>Actualización correcta</p>
-        <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
-      </div>
-    </div>
-
+    
+ <!-- Modal para dar de baja empleado -->
     <div id="modal-baja-empleado" class="modal hidden">
       <div class="modal-content">
         <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>

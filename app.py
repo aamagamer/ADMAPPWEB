@@ -36,7 +36,7 @@ def get_connection():
         'SERVER=localhost;'
         'DATABASE=ADM;'
         'UID=ADM;'
-        'PWD=ADMuser2025;'
+        'PWD=ADM2025;'
         'Trusted_Connection=no;'
         'Encrypt=no;'
         'Connection Timeout=10;'

@@ -191,7 +191,7 @@ function enviarSolicitud() {
     .then((data) => {
       elementos.confirmModal.style.display = "none";
       if (data.mensaje) {
-        window.location.href = determinarPaginaRedireccion();
+        //window.location.href = determinarPaginaRedireccion();
       } else {
         mostrarAlarma("Error al registrar el permiso: " + (data.error || "desconocido"));
       }
