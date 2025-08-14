@@ -5,6 +5,8 @@ from datetime import datetime, date, time
 from flask import Flask, session, redirect, url_for
 from flask import send_file
 import pandas as pd
+from dotenv import load_dotenv
+import os
 from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
@@ -17,6 +19,23 @@ CORS(app)
 
 app.secret_key = 'clave_secreta_segura'
 
+load_dotenv()
+
+
+
+
+def get_connection():
+    return pyodbc.connect(
+        f"DRIVER={os.getenv('DB_DRIVER')};"
+        f"SERVER={os.getenv('DB_SERVER')};"
+        f"DATABASE={os.getenv('DB_NAME')};"
+        f"UID={os.getenv('DB_USER')};"
+        f"PWD={os.getenv('DB_PASSWORD')};"
+        f"Trusted_Connection={os.getenv('DB_TRUSTED_CONNECTION')};"
+        f"Encrypt={os.getenv('DB_ENCRYPT')};"
+        f"Connection Timeout={os.getenv('DB_TIMEOUT')};"
+    )
+
 
 def requiere_rol(rol_permitido):
     def decorador(f):
@@ -27,20 +46,6 @@ def requiere_rol(rol_permitido):
             return f(*args, **kwargs)
         return funcion_envuelta
     return decorador
-
-
-
-def get_connection():
-    return pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=localhost;'
-        'DATABASE=ADM;'
-        'UID=ADM;'
-        'PWD=ADM2025;'
-        'Trusted_Connection=no;'
-        'Encrypt=no;'
-        'Connection Timeout=10;'
-    )
 
 def calcular_dias_vacaciones(fecha_ingreso_str):
     hoy = datetime.now().date()
