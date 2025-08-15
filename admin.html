@@ -21,6 +21,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 </head>
 <body>
   <header>
@@ -1616,41 +1617,63 @@ const Empleados = {
 
   // Actualizar tabla de empleados
   actualizarTabla(empleados) {
-    empleadosVisibles = empleados
-    const tbody = document.getElementById("empleados-body")
-    tbody.innerHTML = ""
+  empleadosVisibles = empleados;
+  const tbody = document.getElementById("empleados-body");
+  tbody.innerHTML = "";
 
-    if (empleados.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`
-      return
+  if (empleados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`;
+    return;
+  }
+
+  empleados.forEach((emp) => {
+    const row = document.createElement("tr");
+    // Agregar clase si está inactivo para estilizar la fila
+    if (emp.estado === "Inactivo") {
+      row.classList.add("inactive-employee");
     }
 
-    empleados.forEach((emp) => {
-      const row = document.createElement("tr")
-      row.innerHTML = `
-        <td>${emp.id}</td>
-        <td>
-          <button onclick="Empleados.verGenerales(${emp.id})" style="all: unset; cursor: pointer;">
-            ${emp.nombre}
-          </button>
-        </td>
-        <td>${emp.puesto}</td>
-        <td>
-          <button class="action-btn" onclick="Empleados.ver(${emp.id})">
-            <i class="bi bi-eye"></i>
-          </button>
-          <button class="action-btn" onclick="Empleados.editar(${emp.id})">
-            <i class="bi bi-pencil"></i>
-          </button>
-          <button class="action-btn" onclick="Empleados.abrirModalBaja(${emp.id})">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      `
-      tbody.appendChild(row)
-    })
-  },
+    // Crear botones de acción
+    let actionButtons = `
+      <button class="action-btn" onclick="Empleados.ver(${emp.id})">
+        <i class="bi bi-eye"></i>
+      </button>
+      <button class="action-btn" onclick="Empleados.editar(${emp.id})">
+        <i class="bi bi-pencil"></i>
+      </button>
+    `;
 
+    // Si está inactivo, agregar botón de reactivación
+    if (emp.estado === "Inactivo") {
+      actionButtons += `
+        <button class="action-btn reactivate-btn" onclick="Empleados.reactivar(${emp.id})">
+          <i class="bi bi-person-plus"></i> 
+        </button>
+      `;
+    } else {
+      // Si está activo, mostrar botón de baja
+      actionButtons += `
+        <button class="action-btn" onclick="Empleados.abrirModalBaja(${emp.id})">
+          <i class="bi bi-trash"></i>
+        </button>
+      `;
+    }
+
+    row.innerHTML = `
+      <td>${emp.id}</td>
+      <td>
+        <button onclick="Empleados.verGenerales(${emp.id})" style="all: unset; cursor: pointer;">
+          ${emp.nombre}
+        </button>
+      </td>
+      <td>${emp.puesto}</td>
+      <td class="action-buttons">
+        ${actionButtons}
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+},
   // Ver empleado completo
   async ver(id) {
     Utils.toggleBodyScroll(true)
