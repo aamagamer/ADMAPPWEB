@@ -610,11 +610,11 @@
 
           <!-- Campo Sueldo Mensual -->
           <div class="form-group">
-            <label for="sueldoMensual">Sueldo Mensual:</label>
+            <label for="Mensual">Sueldo Mensual:</label>
             <input
               type="number"
-              id="sueldoMensual"
-              name="sueldoMensual"
+              id="Mensual"
+              name="Mensual"
               step="0.01"
               required
             />
@@ -870,6 +870,18 @@
               type="number"
               id="edit-bonoSemanal"
               name="BonoSemanal"
+              step="0.01"
+              required
+            />
+          </div>
+
+          <!-- Sueldo Mensual -->
+          <div class="form-group">
+            <label for="edit-Mensual">Sueldo Mensual:</label>
+            <input
+              type="number"
+              id="edit-Mensual"
+              name="Mensual"
               step="0.01"
               required
             />
@@ -1240,6 +1252,7 @@ const camposExportacion = [
   { id: "SueldoDiario", nombre: "Sueldo Diario" },
   { id: "SueldoSemanal", nombre: "Sueldo Semanal" },
   { id: "BonoSemanal", nombre: "Bono Semanal" },
+  { id: "Mensual", nombre: "Sueldo Mensual" },
   { id: "Vacaciones", nombre: "Vacaciones" },
   { id: "DiasDisponibles", nombre: "Dias Disponibles" },
 ]
@@ -1663,6 +1676,7 @@ const Empleados = {
         ${Modales.renderField("Sueldo Diario", data.SueldoDiario)}
         ${Modales.renderField("Sueldo Semanal", data.SueldoSemanal)}
         ${Modales.renderField("Bono Semanal", data.BonoSemanal)}
+        ${Modales.renderField("Sueldo Mensual", data.Mensual)}
         ${Modales.renderField("Vacaciones", data.Vacaciones)}
         ${Modales.renderField("Vacaciones disponibles", data.DiasDisponibles)}
       `
@@ -1749,6 +1763,7 @@ const Empleados = {
         "edit-sueldoDiario": data.SueldoDiario || "",
         "edit-sueldoSemanal": data.SueldoSemanal || "",
         "edit-bonoSemanal": data.BonoSemanal || "",
+        "edit-Mensual": data.Mensual || "",
         "edit-fechaBaja": Utils.formatoFechaParaInput(data.FechaBaja),
         "edit-comentarioSalida": data.ComentarioSalida || "",
         "edit-fechaIngreso": Utils.formatoFechaParaInput(data.FechaIngreso),
@@ -2134,6 +2149,7 @@ const ExportarExcel = {
         "SueldoDiario",
         "SueldoSemanal",
         "BonoSemanal",
+        "Mensual",
       ],
       vacaciones: [
         "idUsuario",
@@ -2633,6 +2649,7 @@ function setupFormListeners() {
         SueldoDiario: Number(document.getElementById("edit-sueldoDiario").value),
         SueldoSemanal: Number(document.getElementById("edit-sueldoSemanal").value),
         BonoSemanal: Number(document.getElementById("edit-bonoSemanal").value),
+        Mensual: Number(document.getElementById("edit-Mensual").value),
         fechaBaja: document.getElementById("edit-fechaBaja").value || null,
         comentarioSalida: document.getElementById("edit-comentarioSalida").value || null,
         Vacaciones: Number(document.getElementById("edit-vacaciones").value) || 0,

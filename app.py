@@ -639,7 +639,7 @@ def actualizar_empleado(id):
                 FechaNacimiento = ?, Direccion = ?, CodigoPostal = ?, Correo = ?, NSS = ?, Telefono = ?,
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
                 TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
-                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Vacaciones = ?, DiasDisponibles = ?
+                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Mensual = ?, Vacaciones = ?, DiasDisponibles = ?
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
@@ -663,6 +663,7 @@ def actualizar_empleado(id):
             float(data['SueldoDiario']),
             float(data['SueldoSemanal']),
             float(data['BonoSemanal']),
+            float(data['Mensual']),
             int(data['Vacaciones']),
             int(data['diasDisponibles']),
             id
@@ -704,11 +705,11 @@ def agregar_empleado():
                 FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
                 FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
                 TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida,
-                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Vacaciones,
+                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Mensual, Vacaciones,
                 DiasDisponibles
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
-                    ?, 'Activo', ?, ?, ?, ?, ?)
+                    ?, 'Activo', ?, ?, ?, ?, ?, ?)
         """, (
             int(data['idUsuario']),
             data['rol_id'],
@@ -732,6 +733,7 @@ def agregar_empleado():
             float(data['SueldoDiario']),
             float(data['SueldoSemanal']),
             float(data['BonoSemanal']),
+            float(data['Mensual']),
             int(data['Vacaciones']),
             int(data['diasDisponibles'])
         ))
