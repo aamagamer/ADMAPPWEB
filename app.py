@@ -1120,6 +1120,36 @@ def obtener_permisos_por_areas(ids):
         if conn:
             conn.close()
 
+@app.route('/api/solicitud/<tipo>/<id>/usuario', methods=['GET'])
+def obtener_usuario_por_solicitud(tipo, id):
+    conn = None
+    cursor = None
+    
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        if tipo == 'vacacion':
+            cursor.execute("SELECT Usuario_idUsuario FROM Vacaciones WHERE idVacaciones = ?", (id,))
+        elif tipo == 'permiso':
+            cursor.execute("SELECT Usuario_idUsuario FROM Permiso WHERE idPermiso = ?", (id,))
+        else:
+            return jsonify({"error": "Tipo de solicitud no válido"}), 400
+            
+        result = cursor.fetchone()
+        if result:
+            return jsonify({"idUsuario": result[0]})
+        else:
+            return jsonify({"error": "Solicitud no encontrada"}), 404
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 
 @app.route('/api/solicitarPermiso', methods=['POST'])
