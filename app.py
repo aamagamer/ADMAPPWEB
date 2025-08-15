@@ -2104,7 +2104,7 @@ def graficos_distribucion():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Distribución por Rol
+    # --- Distribución por Rol ---
     cursor.execute("""
         SELECT r.TipoRol, COUNT(*) as total
         FROM Usuario u
@@ -2115,7 +2115,7 @@ def graficos_distribucion():
     roles = cursor.fetchall()
     data_roles = [{"label": r[0], "count": r[1]} for r in roles]
 
-    # Distribución por Área (usuarios activos)
+    # --- Distribución por Área ---
     cursor.execute("""
         SELECT a.NombreArea, COUNT(*) as total
         FROM Usuario_Area ua
@@ -2127,167 +2127,122 @@ def graficos_distribucion():
     areas = cursor.fetchall()
     data_areas = [{"label": a[0], "count": a[1]} for a in areas]
 
-    # Reportes por Área (usando área principal)
+    # --- Reportes por Área (área principal) ---
     cursor.execute("""
         ;WITH AreaPrincipalPorUsuario AS (
-            SELECT 
-                ua.idUsuario,
-                MIN(ua.idArea) AS idAreaPrincipal
+            SELECT ua.idUsuario, MIN(ua.idArea) AS idAreaPrincipal
             FROM Usuario_Area ua
             GROUP BY ua.idUsuario
         )
-        SELECT 
-            a.NombreArea,
-            COUNT(r.idReporte) AS TotalReportes
-        FROM 
-            Reporte r
-        JOIN 
-            Usuario u ON r.Usuario_idUsuario = u.idUsuario
-        JOIN 
-            AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
-        JOIN 
-            Area a ON apu.idAreaPrincipal = a.idArea
-        GROUP BY 
-            a.NombreArea
-        ORDER BY 
-            TotalReportes DESC;
+        SELECT a.NombreArea, COUNT(r.idReporte) AS TotalReportes
+        FROM Reporte r
+        JOIN Usuario u ON r.Usuario_idUsuario = u.idUsuario
+        JOIN AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN Area a ON apu.idAreaPrincipal = a.idArea
+        GROUP BY a.NombreArea
+        ORDER BY TotalReportes DESC;
     """)
     reportes = cursor.fetchall()
     data_reportes = [{"label": r[0], "count": r[1]} for r in reportes]
 
-    # Vacaciones por Área (usando área principal)
+    # --- Vacaciones por Área ---
     cursor.execute("""
         ;WITH AreaPrincipalPorUsuario AS (
-            SELECT 
-                ua.idUsuario,
-                MIN(ua.idArea) AS idAreaPrincipal
+            SELECT ua.idUsuario, MIN(ua.idArea) AS idAreaPrincipal
             FROM Usuario_Area ua
             GROUP BY ua.idUsuario
         )
-        SELECT 
-            a.NombreArea,
-            COUNT(v.idVacaciones) AS TotalVacaciones
-        FROM 
-            Vacaciones v
-        JOIN 
-            Usuario u ON v.Usuario_idUsuario = u.idUsuario
-        JOIN 
-            AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
-        JOIN 
-            Area a ON apu.idAreaPrincipal = a.idArea
-        GROUP BY 
-            a.NombreArea
-        ORDER BY 
-            TotalVacaciones DESC;
+        SELECT a.NombreArea, COUNT(v.idVacaciones) AS TotalVacaciones
+        FROM Vacaciones v
+        JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+        JOIN AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN Area a ON apu.idAreaPrincipal = a.idArea
+        GROUP BY a.NombreArea
+        ORDER BY TotalVacaciones DESC;
     """)
     vacaciones = cursor.fetchall()
     data_vacaciones = [{"label": v[0], "count": v[1]} for v in vacaciones]
 
-    # Permisos por Área (usando área principal)
+    # --- Permisos por Área ---
     cursor.execute("""
         ;WITH AreaPrincipalPorUsuario AS (
-            SELECT 
-                ua.idUsuario,
-                MIN(ua.idArea) AS idAreaPrincipal
+            SELECT ua.idUsuario, MIN(ua.idArea) AS idAreaPrincipal
             FROM Usuario_Area ua
             GROUP BY ua.idUsuario
         )
-        SELECT 
-            a.NombreArea,
-            COUNT(p.idPermiso) AS TotalPermisos
-        FROM 
-            Permiso p
-        JOIN 
-            Usuario u ON p.Usuario_idUsuario = u.idUsuario
-        JOIN 
-            AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
-        JOIN 
-            Area a ON apu.idAreaPrincipal = a.idArea
-        GROUP BY 
-            a.NombreArea
-        ORDER BY 
-            TotalPermisos DESC;
+        SELECT a.NombreArea, COUNT(p.idPermiso) AS TotalPermisos
+        FROM Permiso p
+        JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+        JOIN AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN Area a ON apu.idAreaPrincipal = a.idArea
+        GROUP BY a.NombreArea
+        ORDER BY TotalPermisos DESC;
     """)
     permisos = cursor.fetchall()
     data_permisos = [{"label": p[0], "count": p[1]} for p in permisos]
 
-    # Ausentismo por Área (usando área principal, año actual)
+    # --- Ausentismo por Área (año actual) ---
     cursor.execute("""
-    ;WITH AreaPrincipalPorUsuario AS (
-        SELECT 
-            ua.idUsuario,
-            MIN(ua.idArea) AS idAreaPrincipal
-        FROM Usuario_Area ua
-        GROUP BY ua.idUsuario
-    )
-    SELECT 
-        a.NombreArea,
-        COUNT(r.idReporte) AS TotalAusentismo
-    FROM 
-        Reporte r
-    JOIN 
-        Asunto s ON r.Asunto_idAsunto = s.idAsunto
-    JOIN 
-        Usuario u ON r.Usuario_idUsuario = u.idUsuario
-    JOIN 
-        AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
-    JOIN 
-        Area a ON apu.idAreaPrincipal = a.idArea
-    WHERE 
-        s.TipoAsunto = 'Ausentismo' AND
-        YEAR(r.FechaReporte) = YEAR(GETDATE())
-    GROUP BY 
-        a.NombreArea
-    ORDER BY 
-        TotalAusentismo DESC;
+        ;WITH AreaPrincipalPorUsuario AS (
+            SELECT ua.idUsuario, MIN(ua.idArea) AS idAreaPrincipal
+            FROM Usuario_Area ua
+            GROUP BY ua.idUsuario
+        )
+        SELECT a.NombreArea, COUNT(r.idReporte) AS TotalAusentismo
+        FROM Reporte r
+        JOIN Asunto s ON r.Asunto_idAsunto = s.idAsunto
+        JOIN Usuario u ON r.Usuario_idUsuario = u.idUsuario
+        JOIN AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN Area a ON apu.idAreaPrincipal = a.idArea
+        WHERE s.TipoAsunto = 'Ausentismo' AND YEAR(r.FechaReporte) = YEAR(GETDATE())
+        GROUP BY a.NombreArea
+        ORDER BY TotalAusentismo DESC;
     """)
     ausentismo = cursor.fetchall()
     data_ausentismo = [{"label": r[0], "count": r[1]} for r in ausentismo]
 
-# Retardos por Área (usando área principal, año actual)
+    # --- Retardos por Área (año actual) ---
     cursor.execute("""
-    ;WITH AreaPrincipalPorUsuario AS (
-        SELECT 
-            ua.idUsuario,
-            MIN(ua.idArea) AS idAreaPrincipal
-        FROM Usuario_Area ua
-        GROUP BY ua.idUsuario
-    )
-    SELECT 
-        a.NombreArea,
-        COUNT(r.idReporte) AS TotalRetardos
-    FROM 
-        Reporte r
-    JOIN 
-        Asunto s ON r.Asunto_idAsunto = s.idAsunto
-    JOIN 
-        Usuario u ON r.Usuario_idUsuario = u.idUsuario
-    JOIN 
-        AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
-    JOIN 
-        Area a ON apu.idAreaPrincipal = a.idArea
-    WHERE 
-        s.TipoAsunto = 'Retardo' AND
-        YEAR(r.FechaReporte) = YEAR(GETDATE())
-    GROUP BY 
-        a.NombreArea
-    ORDER BY 
-        TotalRetardos DESC;
-""")
+        ;WITH AreaPrincipalPorUsuario AS (
+            SELECT ua.idUsuario, MIN(ua.idArea) AS idAreaPrincipal
+            FROM Usuario_Area ua
+            GROUP BY ua.idUsuario
+        )
+        SELECT a.NombreArea, COUNT(r.idReporte) AS TotalRetardos
+        FROM Reporte r
+        JOIN Asunto s ON r.Asunto_idAsunto = s.idAsunto
+        JOIN Usuario u ON r.Usuario_idUsuario = u.idUsuario
+        JOIN AreaPrincipalPorUsuario apu ON u.idUsuario = apu.idUsuario
+        JOIN Area a ON apu.idAreaPrincipal = a.idArea
+        WHERE s.TipoAsunto = 'Retardo' AND YEAR(r.FechaReporte) = YEAR(GETDATE())
+        GROUP BY a.NombreArea
+        ORDER BY TotalRetardos DESC;
+    """)
     retardos = cursor.fetchall()
     data_retardos = [{"label": r[0], "count": r[1]} for r in retardos]
 
+    # --- Distribución por Razón de Baja ---
+    cursor.execute("""
+        SELECT rb.RazonBaja, COUNT(u.idUsuario) AS TotalUsuarios
+        FROM RazonesBaja rb
+        INNER JOIN Usuario u ON rb.idRazonBaja = u.idRazonBaja
+        GROUP BY rb.RazonBaja
+    """)
+    razones_baja = cursor.fetchall()
+    data_razones_baja = [{"label": r[0], "count": r[1]} for r in razones_baja]
 
-    # Retornar todo junto
+    # --- Retornar todo junto ---
     return jsonify({
-    "roles": data_roles,
-    "areas": data_areas,
-    "reportes_por_area": data_reportes,
-    "vacaciones_por_area": data_vacaciones,
-    "permisos_por_area": data_permisos,
-    "ausentismo_por_area": data_ausentismo,
-    "retardos_por_area": data_retardos   # <-- AQUÍ CORREGIDO
-})
+        "roles": data_roles,
+        "areas": data_areas,
+        "reportes_por_area": data_reportes,
+        "vacaciones_por_area": data_vacaciones,
+        "permisos_por_area": data_permisos,
+        "ausentismo_por_area": data_ausentismo,
+        "retardos_por_area": data_retardos,
+        "razones_baja": data_razones_baja
+    })
+
 
 @app.route('/graficos')
 def vista_graficos():
