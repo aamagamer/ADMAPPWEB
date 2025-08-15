@@ -608,6 +608,18 @@
             />
           </div>
 
+          <!-- Campo Sueldo Mensual -->
+          <div class="form-group">
+            <label for="sueldoMensual">Sueldo Mensual:</label>
+            <input
+              type="number"
+              id="sueldoMensual"
+              name="sueldoMensual"
+              step="0.01"
+              required
+            />
+          </div>
+
           <!-- Campo Vacaciones Disponibles -->
           <div class="form-group">
             <label for="vacacionesDisponibles">Vacaciones Disponibles:</label>
@@ -2574,7 +2586,13 @@ function setupFormListeners() {
         })
       } catch (error) {
         console.error("Error al insertar:", error)
-        alert("Hubo un error al guardar el empleado: " + error.message)
+        Swal.fire({
+          icon: "error",
+          title: "Error al dar de alta",
+          text: "Verifica que el id del usuario no esté duplicado",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "Aceptar",
+        })
       }
     })
   }
