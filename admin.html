@@ -157,6 +157,11 @@
       <div class="dropdown-container">
         <button class="dropdown-button" onclick="toggleDropdown()">
           <span>Menú</span>
+          <span
+            id="dropdown-notificacion-solicitudes"
+            class="notification-badge"
+            style="display: none"
+            >0</span>
           <i class="bi bi-chevron-down dropdown-arrow"></i>
         </button>
         <div class="dropdown-content" id="dropdownContent">
@@ -168,12 +173,6 @@
             <div class="dropdown-item-content">
               <div class="dropdown-item-title">
                 Solicitudes
-                <span
-                  id="dropdown-notificacion-solicitudes"
-                  class="notification-badge"
-                  style="display: none"
-                  >0</span
-                >
               </div>
               <div class="dropdown-item-description">
                 Evalúa las solicitudes de tus empleados
@@ -1174,51 +1173,58 @@
 
 
     
- <!-- Modal para dar de baja empleado -->
-    <div id="modal-baja-empleado" class="modal hidden">
-      <div class="modal-content">
-        <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
-        <h2>Dar de Baja Empleado</h2>
+<div id="modal-baja-empleado" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
+    <h2>Dar de Baja Empleado</h2>
 
-        <div style="margin-bottom: 15px">
-          <p>
-            Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
-          </p>
-          <p>ID: <strong id="id-empleado-baja"></strong></p>
-        </div>
-
-        <form id="form-baja-empleado">
-          <input type="hidden" id="baja-idUsuario" />
-
-          <div class="form-group">
-            <label for="baja-fecha">Fecha de Baja:</label>
-            <input type="date" id="baja-fecha" name="fechaBaja" required />
-          </div>
-
-          <div class="form-group">
-            <label for="baja-comentario">Motivo de la baja:</label>
-            <textarea
-              id="baja-comentario"
-              name="comentarioSalida"
-              rows="4"
-              required
-              class="estilo-textarea"
-            ></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalBajaEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-danger">Confirmar Baja</button>
-          </div>
-        </form>
-      </div>
+    <div style="margin-bottom: 15px">
+      <p>
+        Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
+      </p>
+      <p>ID: <strong id="id-empleado-baja"></strong></p>
     </div>
+
+    <form id="form-baja-empleado">
+      <input type="hidden" id="baja-idUsuario" />
+
+      <div class="form-group">
+        <label for="baja-fecha">Fecha de Baja:</label>
+        <input type="date" id="baja-fecha" name="fechaBaja" required />
+      </div>
+
+      <!-- Combobox para RazonBaja -->
+      <div class="form-group">
+        <label for="baja-razon">Razón de Baja:</label>
+        <select id="baja-razon" name="idRazonBaja" required>
+          <option value="">Seleccione una razón</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="baja-comentario">Comentarios sobre la baja:</label>
+        <textarea
+          id="baja-comentario"
+          name="comentarioSalida"
+          rows="4"
+          required
+          class="estilo-textarea"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalBajaEmpleado()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-danger">Confirmar Baja</button>
+      </div>
+    </form>
+  </div>
+</div>
    <script>
 // ===== VARIABLES GLOBALES =====
 let empleadosVisibles = []
@@ -1462,6 +1468,8 @@ const API = {
     }
   },
 
+  
+
   // Cargar nombre de usuario
   async cargarNombreUsuario(idUsuario) {
     try {
@@ -1488,6 +1496,8 @@ const API = {
       document.getElementById("employee-name").textContent = "Administrador"
     }
   },
+
+  
 
   // Cargar áreas
   async cargarAreas() {
@@ -1831,20 +1841,47 @@ const Empleados = {
   },
 
   // Abrir modal de baja
-  async abrirModalBaja(idUsuario) {
-    Utils.toggleBodyScroll(true)
-    try {
-      const empleado = await API.cargarEmpleado(idUsuario)
-      document.getElementById("nombre-empleado-baja").textContent =
-        `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`
-      document.getElementById("id-empleado-baja").textContent = idUsuario
-      document.getElementById("baja-idUsuario").value = idUsuario
-      Modales.toggle("modal-baja-empleado", true)
-    } catch (err) {
-      console.error("Error al cargar empleado:", err)
-      alert("No se pudo abrir el modal de baja.")
-    }
-  },
+ abrirModalBaja(idUsuario) {
+  Utils.toggleBodyScroll(true);
+
+  // Cargar datos del empleado
+  API.cargarEmpleado(idUsuario).then(empleado => {
+    document.getElementById("nombre-empleado-baja").textContent =
+      `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`;
+    document.getElementById("id-empleado-baja").textContent = idUsuario;
+    document.getElementById("baja-idUsuario").value = idUsuario;
+
+    // Cargar razones de baja
+    const select = document.getElementById("baja-razon");
+    fetch("/api/razones-baja")
+      .then(response => {
+        if (!response.ok) throw new Error("Error al obtener razones de baja");
+        return response.json();
+      })
+      .then(data => {
+        // Limpiar opciones existentes
+        select.innerHTML = '<option value="">Seleccione una razón</option>';
+        data.forEach(razon => {
+          const option = document.createElement("option");
+          option.value = razon.idRazonBaja;
+          option.textContent = razon.RazonBaja;
+          select.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error("Error al cargar razones de baja:", error);
+        select.innerHTML = '<option value="">No se pudieron cargar razones</option>';
+      });
+
+    // Abrir modal
+    Modales.toggle("modal-baja-empleado", true);
+
+  }).catch(err => {
+    console.error("Error al cargar empleado:", err);
+    alert("No se pudo abrir el modal de baja.");
+  });
+}
+,
 
   // Cargar empleados por mes
   async cargarPorMes(mes) {
@@ -2693,60 +2730,62 @@ function setupFormListeners() {
 
 function setupOtherForms() {
   // Formulario de baja de empleado
-  const formBajaEmpleado = document.getElementById("form-baja-empleado")
-  if (formBajaEmpleado) {
-    formBajaEmpleado.addEventListener("submit", async function (e) {
-      e.preventDefault()
+const formBajaEmpleado = document.getElementById("form-baja-empleado");
+if (formBajaEmpleado) {
+  formBajaEmpleado.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-      const idUsuario = document.getElementById("baja-idUsuario").value
-      const fechaBaja = document.getElementById("baja-fecha").value
-      const comentarioSalida = document.getElementById("baja-comentario").value
+    const idUsuario = document.getElementById("baja-idUsuario").value;
+    const fechaBaja = document.getElementById("baja-fecha").value;
+    const comentarioSalida = document.getElementById("baja-comentario").value;
+    const idRazonBaja = document.getElementById("baja-razon").value; // <-- NUEVO
 
-      if (!fechaBaja || !comentarioSalida) {
-        alert("Todos los campos son obligatorios")
-        return
-      }
+    if (!fechaBaja || !comentarioSalida || !idRazonBaja) {
+      alert("Todos los campos son obligatorios");
+      return;
+    }
 
-      const body = { fechaBaja, comentarioSalida }
-      const submitBtn = this.querySelector('button[type="submit"]')
-      const originalText = submitBtn.textContent
-      submitBtn.disabled = true
-      submitBtn.textContent = "Procesando..."
+    const body = { fechaBaja, comentarioSalida, idRazonBaja }; // <-- incluyes el campo
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Procesando...";
 
+    try {
+      const response = await fetch(`/api/empleado/baja/${idUsuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      let data = null;
       try {
-        const response = await fetch(`/api/empleado/baja/${idUsuario}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        })
+        data = await response.json();
+      } catch (_) {}
 
-        let data = null
-        try {
-          data = await response.json()
-        } catch (_) {}
-
-        if (!response.ok || !data) {
-          throw new Error(data?.error || "Error al dar de baja al empleado")
-        }
-
-        Swal.fire({
-          icon: "success",
-          title: "Empleado dado de baja correctamente",
-          confirmButtonColor: "#3085d6",
-          confirmButtonText: "Aceptar",
-        }).then(() => {
-          Modales.toggle("modal-baja-empleado", false)
-          location.reload()
-        })
-      } catch (err) {
-        console.error("Error al dar de baja:", err)
-        alert("Hubo un error al procesar la baja: " + err.message)
-      } finally {
-        submitBtn.disabled = false
-        submitBtn.textContent = originalText
+      if (!response.ok || !data) {
+        throw new Error(data?.error || "Error al dar de baja al empleado");
       }
-    })
-  }
+
+      Swal.fire({
+        icon: "success",
+        title: "Empleado dado de baja correctamente",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+      }).then(() => {
+        Modales.toggle("modal-baja-empleado", false);
+        location.reload();
+      });
+    } catch (err) {
+      console.error("Error al dar de baja:", err);
+      alert("Hubo un error al procesar la baja: " + err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+}
+
 
   // Formulario de área
   const areaForm = document.getElementById("area-form")
@@ -2850,6 +2889,26 @@ function setupModalListeners() {
     })
     observer.observe(addEmployeeModal, { attributes: true })
   }
+
+  // Función para cargar razones de baja en el select
+function cargarRazonesBaja() {
+  const select = document.getElementById("baja-razon");
+  
+  fetch('/api/razones-baja')
+    .then(response => response.json())
+    .then(data => {
+      // Limpiar opciones existentes (excepto la primera)
+      select.innerHTML = '<option value="">Seleccione una razón</option>';
+      
+      data.forEach(razon => {
+        const option = document.createElement("option");
+        option.value = razon.idRazonBaja;
+        option.textContent = razon.RazonBaja;
+        select.appendChild(option);
+      });
+    })
+    .catch(error => console.error("Error al cargar razones de baja:", error));
+}
 
   // Event listener para recalcular vacaciones en formulario de alta
   const fechaIngresoInput = document.getElementById("fechaIngreso")

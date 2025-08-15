@@ -776,10 +776,15 @@ def agregar_empleado():
 
 @app.route('/api/empleado/baja/<int:id>', methods=['PUT'])
 def baja_empleado(id):
+    conn = None
     try:
         data = request.json
         fecha_baja = data.get("fechaBaja")
         comentario = data.get("comentarioSalida")
+        id_razon_baja = data.get("idRazonBaja")  # <-- NUEVO
+
+        if not fecha_baja or not comentario or not id_razon_baja:
+            return jsonify({"error": "Todos los campos son obligatorios"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
@@ -792,9 +797,10 @@ def baja_empleado(id):
             UPDATE Usuario
             SET Estado = 'Inactivo',
                 FechaBaja = ?,
-                ComentarioSalida = ?
+                ComentarioSalida = ?,
+                idRazonBaja = ?  -- <-- NUEVO
             WHERE idUsuario = ?
-        """, (fecha_baja, comentario, id))
+        """, (fecha_baja, comentario, id_razon_baja, id))
 
         conn.commit()
         return jsonify({"mensaje": "Empleado dado de baja correctamente"}), 200
@@ -804,7 +810,20 @@ def baja_empleado(id):
         return jsonify({"error": str(e)}), 500
 
     finally:
-        conn.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/razones-baja', methods=['GET'])
+def obtener_razones_baja():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT idRazonBaja, RazonBaja FROM RazonesBaja")
+    
+    razones = [{"idRazonBaja": row[0], "RazonBaja": row[1]} for row in cursor.fetchall()]
+    
+    conn.close()
+    return jsonify(razones)
+
 
 
 
