@@ -1066,6 +1066,40 @@ input.invalid {
   border-color: #2c3e50 !important;
 }
 
+/* Estilos para la validación de campos obligatorios */
+.campo-error {
+  border: 2px solid #dc3545 !important;
+  background-color: #fff5f5 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.campo-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.mensaje-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: none;
+  font-weight: 500;
+}
+
+/* Estilos para inputs válidos después de corrección */
+.campo-valido {
+  border: 2px solid #28a745 !important;
+  background-color: #f8fff9 !important;
+}
+
+/* Animación suave para transiciones */
+input,
+select,
+textarea {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+
   @keyframes fadeIn {
     from {
       transform: translateY(-20px);
