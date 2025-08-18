@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generar Acta Administrativa</title>
+
+    <link rel="icon" href="Media/favicon.ico" />
+
+    <!-- Select2 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/acta.css" />
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="js/acta.js" defer></script>
+    <script src="js/utils.js"></script>
+    <link rel="icon" href="Media/favicon.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <a href="#" class="menu-button" onclick="goBack(); return false;">
+        <i class="bi bi-arrow-left"></i>
+        Regresar
+      </a>
+      <img src="Media/logo.png" alt="Logo" class="logo" />
+      <h1>Actas Administrativas</h1>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div class="acta-container">
+      <h2 class="page-title">Generar Acta Administrativa</h2>
+
+      <form id="acta-form">
+        <div class="form-group autocomplete-container">
+          <label for="employee-input">Empleado</label>
+          <input
+            type="text"
+            id="employee-input"
+            class="form-control"
+            autocomplete="off"
+            placeholder="Nombre del empleado..."
+            required
+          />
+          <div id="employee-dropdown" class="autocomplete-dropdown"></div>
+        </div>
+
+        <div class="form-group">
+  <label for="subject">Tipo de Acta</label>
+  <select id="subject" name="subject" class="form-control" required>
+    <option value="">Seleccione el tipo de acta</option>
+  </select>
+</div>
+
+
+
+        <div class="form-group">
+          <label for="fecha-acta">Fecha del acta</label>
+          <input
+            type="date"
+            id="fecha-acta"
+            name="fecha-acta"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="observations">Descripción de los hechos</label>
+          <textarea
+            id="observations"
+            name="observations"
+            class="form-control"
+            rows="5"
+            placeholder="Describa los hechos que motivan el acta administrativa..."
+            required
+          ></textarea>
+        </div>
+
+        
+
+        <div id="modal-confirmacion" class="modal">
+          <div class="modal-content">
+            <h3>Confirmar Acta Administrativa</h3>
+            <div
+              id="resumen-acta"
+              style="white-space: pre-wrap; margin: 15px 0"
+            ></div>
+            <div class="modal-buttons">
+              <button id="btn-cancelar" class="modal-btn cancel-btn" type="button">
+                Cancelar
+              </button>
+              <button id="btn-confirmar" class="modal-btn confirm-btn" type="button">
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="submit-button">Generar Acta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

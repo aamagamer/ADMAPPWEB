@@ -1535,6 +1535,37 @@ def obtener_asuntos():
     return jsonify(asuntos)
 
 
+@app.route('/api/actas', methods=['POST'])
+def crear_acta():
+    try:
+        data = request.json
+        id_usuario = data.get('idUsuario')
+        id_asunto = data.get('idAsunto')
+        fecha_acta = data.get('FechaActa')
+        comentario = data.get('Comentario')
+
+        # Validación básica
+        if not id_usuario or not id_asunto or not fecha_acta:
+            return jsonify({"error": "Faltan datos obligatorios"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO ActaAdministrativa (idUsuario, idAsunto, FechaActa, Comentario)
+            VALUES (?, ?, ?, ?)
+        """, (id_usuario, id_asunto, fecha_acta, comentario))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "Acta administrativa creada correctamente"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/solicitudes-aprobadas-rechazadas', methods=['GET'])
 def obtener_solicitudes_aprobadas_rechazadas():
     conn = None
