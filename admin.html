@@ -1582,6 +1582,8 @@ const Modales = {
 
 // ===== EMPLEADOS =====
 const Empleados = {
+
+  
   // Aplicar filtros
   async aplicarFiltros() {
     const estado = document.getElementById("filtro-estado").value
@@ -1902,6 +1904,47 @@ const Empleados = {
   }).catch(err => {
     console.error("Error al cargar empleado:", err);
     alert("No se pudo abrir el modal de baja.");
+  });
+}
+,
+
+// Dentro del objeto Empleados en admin.html
+reactivar(idUsuario) {
+  Swal.fire({
+    title: "¿Seguro que quieres reactivar este empleado?",
+    text: "El usuario volverá a estar activo.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, reactivar",
+    cancelButtonText: "Cancelar"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/api/usuario/activar/${idUsuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" }
+      })
+        .then(response => {
+          if (!response.ok) throw new Error("Error al reactivar el usuario");
+          return response.json();
+        })
+        .then(data => {
+          Swal.fire({
+            title: "¡Reactivado!",
+            text: "Recuerda verificar los datos del usuario, como su fecha de ingreso y demás datos personales.",
+            icon: "success",
+            confirmButtonText: "OK"
+          }).then(() => {
+            // 🔄 Refrescar la tabla de empleados
+            Empleados.aplicarFiltros();
+          });
+        })
+        .catch(error => {
+          console.error("Error en reactivación:", error);
+          Swal.fire("Error", "No se pudo reactivar el usuario.", "error");
+        });
+    }
   });
 }
 ,
@@ -2912,6 +2955,8 @@ function setupModalListeners() {
     })
     observer.observe(addEmployeeModal, { attributes: true })
   }
+
+  
 
   // Función para cargar razones de baja en el select
 function cargarRazonesBaja() {

@@ -813,6 +813,39 @@ def baja_empleado(id):
         if conn:
             conn.close()
 
+@app.route('/api/usuario/activar/<int:idUsuario>', methods=['PUT'])
+def activar_usuario(idUsuario):
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Usuario
+            SET Estado = 'Activo'
+            WHERE idUsuario = ?
+        """, (idUsuario,))
+        conn.commit()
+
+        # Verificamos si realmente se actualizó alguna fila
+        if cursor.rowcount == 0:
+            return jsonify({'error': f'No se encontró usuario con id {idUsuario}'}), 404
+
+        return jsonify({'mensaje': f'Usuario {idUsuario} activado correctamente'}), 200
+
+    except Exception as e:
+        print(f'❌ ERROR EN /api/usuario/activar/{idUsuario}: {e}')
+        return jsonify({'error': 'Error al activar el usuario'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 @app.route('/api/razones-baja', methods=['GET'])
 def obtener_razones_baja():
     conn = get_connection()
