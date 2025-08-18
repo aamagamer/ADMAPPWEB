@@ -135,7 +135,7 @@ const Utils = {
 
 // ===== VALIDACIONES =====
 const Validaciones = {
-  regexCP: /^\d{5   }$/,
+  regexCP: /^\d{5}$/,
   regexTelefono: /^(?:\d\s*){10}$/,
   regexCURP: /^[A-Z0-9]{18}$/i,
   regexRFC: /^[A-Z0-9]{13}$/i,
