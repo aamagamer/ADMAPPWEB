@@ -857,6 +857,38 @@ def obtener_razones_baja():
     conn.close()
     return jsonify(razones)
 
+@app.route('/api/usuario/<int:idUsuario>/reportes/count', methods=['GET'])
+def contar_reportes_usuario(idUsuario):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM Reporte 
+            WHERE Usuario_idUsuario = ?
+        """, (idUsuario,))
+        
+        total = cursor.fetchone()[0]
+
+        return jsonify({
+            "idUsuario": idUsuario,
+            "totalReportes": total
+        }), 200
+
+    except Exception as e:
+        print(f'❌ ERROR EN /api/usuario/{idUsuario}/reportes/count: {e}')
+        return jsonify({'error': 'Error al obtener el conteo de reportes'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 
 
 

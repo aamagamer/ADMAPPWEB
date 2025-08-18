@@ -135,7 +135,7 @@ const Utils = {
 
 // ===== VALIDACIONES =====
 const Validaciones = {
-  regexCP: /^\d{5}$/,
+  regexCP: /^\d{5   }$/,
   regexTelefono: /^(?:\d\s*){10}$/,
   regexCURP: /^[A-Z0-9]{18}$/i,
   regexRFC: /^[A-Z0-9]{13}$/i,
@@ -621,37 +621,49 @@ const Empleados = {
 
   // Ver datos generales del empleado
   async verGenerales(id) {
-    Utils.toggleBodyScroll(true)
-    try {
-      const data = await API.cargarEmpleado(id)
-      const modalBody = document.getElementById("modal-generales-body")
+  Utils.toggleBodyScroll(true)
+  try {
+    // 1. Cargar los datos del empleado
+    const data = await API.cargarEmpleado(id)
 
-      const areasTexto =
-        data.Areas && data.Areas.length > 0 ? data.Areas.map((area) => area.NombreArea).join(", ") : "Sin información"
+    // 2. Pedir la cantidad de reportes al nuevo endpoint
+    const respReportes = await fetch(`/api/usuario/${id}/reportes/count`)
+    const reportesJson = await respReportes.json()
+    const totalReportes = reportesJson.totalReportes ?? 0
 
-      modalBody.innerHTML = `
-        ${Modales.renderField("ID", data.idUsuario)}
-        ${Modales.renderField("Rol", data.TipoRol)}
-        ${Modales.renderField("Áreas", areasTexto)}
-        ${Modales.renderField("Nombre", data.Nombres)}
-        ${Modales.renderField("Paterno", data.Paterno)}
-        ${Modales.renderField("Materno", data.Materno)}
-        ${Modales.renderField("Fecha nacimiento", data.FechaNacimiento)}
-        ${Modales.renderField("Dirección", data.Direccion)}
-        ${Modales.renderField("Código postal", data.CodigoPostal)}
-        ${Modales.renderField("Correo electrónico", data.Correo)}
-        ${Modales.renderField("Teléfono", data.Telefono)}
-        ${Modales.renderField("Fecha ingreso", data.FechaIngreso)}
-        ${Modales.renderField("CURP", data.Curp)}
-        ${Modales.renderField("Puesto", data.Puesto)}
-      `
+    const modalBody = document.getElementById("modal-generales-body")
 
-      Modales.toggle("modal-generales", true)
-    } catch (error) {
-      console.error("Error:", error)
-      alert("Error al cargar los datos generales del empleado")
-    }
-  },
+    const areasTexto =
+      data.Areas && data.Areas.length > 0
+        ? data.Areas.map((area) => area.NombreArea).join(", ")
+        : "Sin información"
+
+    // 3. Renderizar el modal con el nuevo campo
+    modalBody.innerHTML = `
+      ${Modales.renderField("ID", data.idUsuario)}
+      ${Modales.renderField("Rol", data.TipoRol)}
+      ${Modales.renderField("Áreas", areasTexto)}
+      ${Modales.renderField("Nombre", data.Nombres)}
+      ${Modales.renderField("Paterno", data.Paterno)}
+      ${Modales.renderField("Materno", data.Materno)}
+      ${Modales.renderField("Fecha nacimiento", data.FechaNacimiento)}
+      ${Modales.renderField("Dirección", data.Direccion)}
+      ${Modales.renderField("Código postal", data.CodigoPostal)}
+      ${Modales.renderField("Correo electrónico", data.Correo)}
+      ${Modales.renderField("Teléfono", data.Telefono)}
+      ${Modales.renderField("Fecha ingreso", data.FechaIngreso)}
+      ${Modales.renderField("CURP", data.Curp)}
+      ${Modales.renderField("Puesto", data.Puesto)}
+      ${Modales.renderField("Cantidad de reportes", totalReportes)}
+    `
+
+    Modales.toggle("modal-generales", true)
+  } catch (error) {
+    console.error("Error:", error)
+    alert("Error al cargar los datos generales del empleado")
+  }
+}
+,
 
   // Editar empleado
   async editar(id) {
