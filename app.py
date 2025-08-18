@@ -1754,6 +1754,38 @@ def obtener_reportes_usuarios():
         cursor.close()
         conn.close()
 
+@app.route('/api/actas', methods=['GET'])
+def obtener_actas():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 
+                u.nombres, 
+                u.materno, 
+                u.paterno, 
+                a.TipoAsunto, 
+                act.FechaActa, 
+                act.Comentario
+            FROM ActaAdministrativa act
+            INNER JOIN Usuario u ON act.idUsuario = u.idUsuario
+            INNER JOIN Asunto a ON act.idAsunto = a.idAsunto
+        """)
+
+        columns = [column[0] for column in cursor.description]
+        actas = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        return jsonify(actas), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
 
 @app.route('/api/reportes/<int:id_reporte>/enterado', methods=['PUT'])
 def marcar_reporte_enterado(id_reporte):
