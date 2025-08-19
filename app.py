@@ -2107,6 +2107,8 @@ def obtener_incapacidades():
 
         query = """
             SELECT 
+                i.idIncapacidad,           
+                u.idUsuario,               
                 ti.tipoIncapacidad AS TipoDeIncapacidad,
                 u.Nombres,
                 u.Paterno,
@@ -2117,6 +2119,7 @@ def obtener_incapacidades():
             FROM Incapacidad i
             JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
             JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+            WHERE i.Estado IS NULL
         """
 
         cursor.execute(query)
@@ -2125,6 +2128,8 @@ def obtener_incapacidades():
         incapacidades = []
         for row in rows:
             incapacidades.append({
+                "idIncapacidad": row.idIncapacidad,    
+                "idUsuario": row.idUsuario,             
                 "tipo": row.TipoDeIncapacidad,
                 "nombres": row.Nombres,
                 "paterno": row.Paterno,
@@ -2148,6 +2153,43 @@ def obtener_incapacidades():
             cursor.close()
         if conn:
             conn.close()
+
+@app.route('/api/incapacidades/<int:idIncapacidad>/enterado', methods=['PUT'])
+def marcar_incapacidad_enterado(idIncapacidad):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Actualizar por ID específico de incapacidad
+        query = """
+            UPDATE Incapacidad
+            SET Estado = 'Enterado'
+            WHERE idIncapacidad = ?
+              AND Estado IS NULL
+        """
+        cursor.execute(query, (idIncapacidad,))
+        conn.commit()
+
+        if cursor.rowcount > 0:
+            return jsonify({"mensaje": "Incapacidad marcada como enterada"}), 200
+        else:
+            return jsonify({"mensaje": "No se encontró incapacidad pendiente con ese ID"}), 404
+
+    except Exception as e:
+        print("Error al actualizar incapacidad:", str(e))
+        return jsonify({
+            "error": "Error interno al actualizar la incapacidad",
+            "details": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 @app.route('/api/usuario/<int:idUsuario>/rol', methods=['GET'])
 def obtener_rol_usuario(idUsuario):
