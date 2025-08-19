@@ -157,14 +157,11 @@
     <div class="options-container">
       <div class="dropdown-container">
         <button class="dropdown-button" onclick="toggleDropdown()">
-          <span>Menú</span>
-          <span
-            id="dropdown-notificacion-solicitudes"
-            class="notification-badge"
-            style="display: none"
-            >0</span>
-          <i class="bi bi-chevron-down dropdown-arrow"></i>
-        </button>
+  <span>Menú</span>
+  <span id="menu-notificacion" class="notification-badge" style="display: none">0</span>
+  <i class="bi bi-chevron-down dropdown-arrow"></i>
+</button>
+
         <div class="dropdown-content" id="dropdownContent">
           <div
             class="dropdown-item"
@@ -174,6 +171,11 @@
             <div class="dropdown-item-content">
               <div class="dropdown-item-title">
                 Solicitudes
+                <span
+            id="dropdown-notificacion-solicitudes"
+            class="notification-badge"
+            style="display: none"
+            >0</span>
               </div>
               <div class="dropdown-item-description">
                 Evalúa las solicitudes de tus empleados
@@ -267,18 +269,22 @@
             </div>
           </div>
 
-          <div
-            class="dropdown-item"
-            onclick="navigateToOption('verReportes.html')"
-          >
-            <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
-            <div class="dropdown-item-content">
-              <div class="dropdown-item-title">Ver Reportes</div>
-              <div class="dropdown-item-description">
-                Visualiza los reportes generados
-              </div>
-            </div>
-          </div>
+          <div class="dropdown-item" onclick="navigateToOption('verReportes.html')">
+  <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
+  <div class="dropdown-item-content">
+    <div class="dropdown-item-title">
+      Ver Reportes
+      <span 
+        id="dropdown-notificacion-reportes"
+        class="notification-badge"
+        style="display: none">0</span>
+    </div>
+    <div class="dropdown-item-description">
+      Visualiza los reportes generados
+    </div>
+  </div>
+</div>
+
 
            <div
             class="dropdown-item"
@@ -288,7 +294,7 @@
             <div class="dropdown-item-content">
               <div class="dropdown-item-title">Generar Acta Administrativa</div>
               <div class="dropdown-item-description">
-                Da de alta actas administrativas hacia empleados.
+                Da de alta actas administrativas a tus empleados
               </div>
             </div>
           </div>

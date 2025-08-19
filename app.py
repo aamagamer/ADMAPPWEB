@@ -1911,6 +1911,24 @@ def total_solicitudes_por_rol(idUsuario):
         if conn:
             conn.close()
 
+@app.route('/api/reportesPendientes', methods=['GET'])
+def obtener_reportes_pendientes():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM Reporte WHERE Estado IS NULL")
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        # Devolvemos el conteo en un objeto JSON
+        return jsonify({"pendientes": row[0]})
+
+    except Exception as e:
+        print(f"Error al obtener reportes pendientes: {e}")
+        return jsonify({"pendientes": 0}), 500
+
+
 
 
 @app.route('/vacaciones_por_ley', methods=['POST'])

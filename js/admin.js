@@ -2,6 +2,8 @@
 let empleadosVisibles = []
 let camposSeleccionados = []
 let empleadosSeleccionados = []
+let totalSolicitudesPendientes = 0
+let totalReportesPendientes = 0
 
 // Declaraciones globales para librerías externas
 // Estas deben estar incluidas en el HTML como scripts
@@ -340,36 +342,69 @@ const Dropdown = {
   },
 }
 
+
+
 // ===== API CALLS =====
 const API = {
   // Cargar notificaciones
   async cargarNotificaciones() {
-    try {
-      const idUsuario = localStorage.getItem("idUsuario")
-      if (!idUsuario) return
+  try {
+    const idUsuario = localStorage.getItem("idUsuario")
+    if (!idUsuario) return
 
-      const response = await fetch(`/api/totalSolicitudes/${idUsuario}`)
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`)
+    const response = await fetch(`/api/totalSolicitudes/${idUsuario}`)
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`)
 
-      const data = await response.json()
+    const data = await response.json()
+    totalSolicitudesPendientes = data.total || 0
 
-      // Actualizar badges
-      const badges = ["notificacion-solicitudes", "dropdown-notificacion-solicitudes"]
-      badges.forEach((badgeId) => {
-        const badge = document.getElementById(badgeId)
-        if (badge) {
-          if (data.total > 0) {
-            badge.textContent = data.total
-            badge.style.display = badgeId.includes("dropdown") ? "inline-flex" : "inline-block"
-          } else {
-            badge.style.display = "none"
-          }
+    // Actualizar badges de solicitudes
+    const badges = ["notificacion-solicitudes", "dropdown-notificacion-solicitudes"]
+    badges.forEach((badgeId) => {
+      const badge = document.getElementById(badgeId)
+      if (badge) {
+        if (totalSolicitudesPendientes > 0) {
+          badge.textContent = totalSolicitudesPendientes
+          badge.style.display = badgeId.includes("dropdown") ? "inline-flex" : "inline-block"
+        } else {
+          badge.style.display = "none"
         }
-      })
-    } catch (error) {
-      console.error("Error al cargar notificaciones:", error)
-    }
-  },
+      }
+    })
+
+    actualizarBadgeMenu()
+  } catch (error) {
+    console.error("Error al cargar notificaciones:", error)
+  }
+},
+
+async cargarNotificacionesReportes() {
+  try {
+    const response = await fetch(`/api/reportesPendientes`)
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`)
+
+    const data = await response.json()
+    totalReportesPendientes = data.pendientes || 0
+
+    // Actualizar badges de reportes
+    const badges = ["notificacion-reportes", "dropdown-notificacion-reportes"]
+    badges.forEach((badgeId) => {
+      const badge = document.getElementById(badgeId)
+      if (badge) {
+        if (totalReportesPendientes > 0) {
+          badge.textContent = totalReportesPendientes
+          badge.style.display = badgeId.includes("dropdown") ? "inline-flex" : "inline-block"
+        } else {
+          badge.style.display = "none"
+        }
+      }
+    })
+
+    actualizarBadgeMenu()
+  } catch (error) {
+    console.error("Error al cargar notificaciones de reportes:", error)
+  }
+},
 
   // Cargar nombre de usuario
   async cargarNombreUsuario(idUsuario) {
@@ -476,6 +511,19 @@ const Modales = {
     const texto = value === null || value === undefined || value === "" || value === "null" ? "Sin información" : value
     return `<p><strong>${label}:</strong> ${texto}</p>`
   },
+}
+
+function actualizarBadgeMenu() {
+  const badgeMenu = document.getElementById("menu-notificacion")
+  if (!badgeMenu) return
+
+  const total = totalSolicitudesPendientes + totalReportesPendientes
+  if (total > 0) {
+    badgeMenu.textContent = total
+    badgeMenu.style.display = "inline-flex"
+  } else {
+    badgeMenu.style.display = "none"
+  }
 }
 
 // ===== EMPLEADOS =====
@@ -1527,17 +1575,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Inicializar componentes
   Dropdown.init()
+  
 
   // Cargar datos iniciales
   await Promise.all([
     API.cargarNotificaciones(),
     API.cargarNombreUsuario(idUsuario),
     API.cargarAreas(),
+    API.cargarNotificacionesReportes(),
     Empleados.aplicarFiltros(),
   ])
 
+ 
+
   // Configurar intervalos
-  setInterval(API.cargarNotificaciones, 1200000)
+  setInterval(API.cargarNotificaciones, 300000)
+  setInterval(API.cargarNotificacionesReportes, 300000)
 
   // Event listeners para formularios
   setupFormListeners()
