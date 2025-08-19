@@ -164,7 +164,8 @@ function enviarSolicitud() {
     horaFin: document.getElementById("hora-fin"),
     actividades: document.getElementById("actividades"),
     confirmModal: document.getElementById("confirm-modal"),
-    tipoCompensacion: document.getElementById("tipo-compensacion")
+    tipoCompensacion: document.getElementById("tipo-compensacion"),
+    formulario: document.querySelector("form") // Añadimos el formulario a los elementos
   };
 
   const idUsuario = localStorage.getItem("idUsuario");
@@ -191,6 +192,8 @@ function enviarSolicitud() {
     .then((data) => {
       elementos.confirmModal.style.display = "none";
       if (data.mensaje) {
+        // Resetear el formulario después de enviar exitosamente
+        elementos.formulario.reset();
         //window.location.href = determinarPaginaRedireccion();
       } else {
         mostrarAlarma("Error al registrar el permiso: " + (data.error || "desconocido"));
@@ -202,6 +205,7 @@ function enviarSolicitud() {
       mostrarAlarma("Error de red al enviar la solicitud.");
     });
 }
+
 
 function cargarCompensaciones() {
   fetch("/api/compensaciones")

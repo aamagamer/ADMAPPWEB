@@ -2212,6 +2212,49 @@ def obtener_rol_usuario(idUsuario):
         if conn:
             conn.close()
 
+@app.route('/api/usuario/<int:idUsuario>/estado', methods=['GET'])
+def obtener_estado_usuario(idUsuario):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT 
+                CASE 
+                    WHEN Estado = 'Activo' THEN CAST(1 AS BIT)
+                    WHEN Estado = 'Inactivo' THEN CAST(0 AS BIT)
+                END AS EsActivo,
+                FechaBaja,
+                ComentarioSalida,
+                CASE 
+                    WHEN FechaBaja IS NOT NULL AND ComentarioSalida IS NOT NULL THEN CAST(1 AS BIT)
+                    ELSE CAST(0 AS BIT)
+                END AS EsBaja
+            FROM Usuario
+            WHERE idUsuario = ?
+        """
+        cursor.execute(query, idUsuario)
+        row = cursor.fetchone()
+
+        if row:
+            return jsonify({
+                "esActivo": int(row[0]),
+                "fechaBaja": row[1],
+                "comentarioSalida": row[2],
+                "esBaja": int(row[3])
+            })
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+    except Exception as e:
+        print("Error al obtener estado:", e)
+        return jsonify({"error": "Error del servidor"}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+
 
 
 @app.route('/api/incapacidadesExcel', methods=['GET'])

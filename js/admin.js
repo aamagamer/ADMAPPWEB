@@ -406,6 +406,8 @@ async cargarNotificacionesReportes() {
   }
 },
 
+
+
   // Cargar nombre de usuario
   async cargarNombreUsuario(idUsuario) {
     try {
@@ -1374,149 +1376,161 @@ const ExportarExcel = {
   },
 
   // Exportar a Excel
-  async exportar() {
-    const camposSeleccionados = Array.from(
-      document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked'),
-    ).map((cb) => cb.value)
+async exportar() {
+  const camposSeleccionados = Array.from(
+    document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked'),
+  ).map((cb) => cb.value)
 
-    const checkboxes = document.querySelectorAll('#export-employees-container input[type="checkbox"]:checked')
-    const empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value)
+  const checkboxes = document.querySelectorAll('#export-employees-container input[type="checkbox"]:checked')
+  const empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value)
 
-    if (empleadosSeleccionados.length === 0 || camposSeleccionados.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Selección incompleta",
-        text: "Por favor selecciona al menos un empleado y al menos un campo para exportar",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Aceptar",
-      })
-      return
-    }
+  if (empleadosSeleccionados.length === 0 || camposSeleccionados.length === 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "Selección incompleta",
+      text: "Por favor selecciona al menos un empleado y al menos un campo para exportar",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Aceptar",
+    })
+    return
+  }
 
-    if (!ExcelJS) {
-      Swal.fire({
-        icon: "error",
-        title: "Librería no disponible",
-        text: "La librería ExcelJS no está cargada. Por favor, incluye el script de ExcelJS en tu HTML.",
-        confirmButtonColor: "#d33",
-        confirmButtonText: "Aceptar",
-      })
-      return
-    }
+  if (!ExcelJS) {
+    Swal.fire({
+      icon: "error",
+      title: "Librería no disponible",
+      text: "La librería ExcelJS no está cargada. Por favor, incluye el script de ExcelJS en tu HTML.",
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Aceptar",
+    })
+    return
+  }
 
-    const exportBtn = document.querySelector("#paso-empleados .btn-primary")
-    const originalText = exportBtn.textContent
-    exportBtn.textContent = "Generando..."
-    exportBtn.disabled = true
+  const exportBtn = document.querySelector("#paso-empleados .btn-primary")
+  const originalText = exportBtn.textContent
+  exportBtn.textContent = "Generando..."
+  exportBtn.disabled = true
 
-    try {
-      const promises = empleadosSeleccionados.map((id) => fetch(`/api/empleado/${id}`).then((res) => res.json()))
+  try {
+    // Pedir info de empleados + estado en paralelo
+    const promises = empleadosSeleccionados.map(async (id) => {
+      const [empleadoRes, estadoRes] = await Promise.all([
+        fetch(`/api/empleado/${id}`),
+        fetch(`/api/usuario/${id}/estado`),
+      ])
 
-      const empleadosCompletos = await Promise.all(promises)
+      const empleado = await empleadoRes.json()
+      const estado = await estadoRes.json()
 
-      const datosExcel = empleadosCompletos.map((empleado) => {
-        const fila = {}
-        camposSeleccionados.forEach((campo) => {
-          if (campo === "Areas" && Array.isArray(empleado.Areas)) {
-            fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ")
-          } else {
-            fila[campo] = empleado[campo] !== undefined ? empleado[campo] : ""
-          }
-        })
-        return fila
-      })
+      return { ...empleado, EstadoUsuario: estado }
+    })
 
-      // Crear workbook con ExcelJS
-      const workbook = new ExcelJS.Workbook()
-      const worksheet = workbook.addWorksheet("Empleados")
+    const empleadosCompletos = await Promise.all(promises)
 
-      // Definir columnas
-      worksheet.columns = camposSeleccionados.map((campo) => ({
-        header: campo,
-        key: campo,
-        width: Math.max(campo.length + 2, 10),
-      }))
-
-      // Agregar datos
-      datosExcel.forEach((empleado) => {
-        worksheet.addRow(empleado)
-      })
-
-      // Aplicar estilos al encabezado (AMARILLO)
-      const headerRow = worksheet.getRow(1)
-      headerRow.eachCell((cell) => {
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFFFFF00" },
+    const datosExcel = empleadosCompletos.map((empleado) => {
+      const fila = {}
+      camposSeleccionados.forEach((campo) => {
+        if (campo === "Areas" && Array.isArray(empleado.Areas)) {
+          fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ")
+        } else {
+          fila[campo] = empleado[campo] !== undefined ? empleado[campo] : ""
         }
-        cell.font = { bold: true, size: 10, name: "Arial" }
-        cell.alignment = { horizontal: "center", vertical: "middle" }
       })
+      // incluir estado para lógica de color
+      fila._esActivo = empleado.EstadoUsuario.esActivo
+      return fila
+    })
 
-      // Aplicar estilos a filas de datos
-      for (let i = 2; i <= worksheet.rowCount; i++) {
-        const row = worksheet.getRow(i)
-        const empleado = datosExcel[i - 2]
+    // Crear workbook con ExcelJS
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet("Empleados")
 
-        const tieneFechaBaja = empleado["FechaBaja"] && empleado["FechaBaja"].toString().trim() !== ""
-        const tieneComentarioBaja =
-          empleado["ComentarioSalida"] && empleado["ComentarioSalida"].toString().trim() !== ""
-        const esFilaRoja = tieneFechaBaja && tieneComentarioBaja
+    // Definir columnas
+    worksheet.columns = camposSeleccionados.map((campo) => ({
+      header: campo,
+      key: campo,
+      width: Math.max(campo.length + 2, 10),
+    }))
 
-        row.eachCell((cell) => {
-          if (esFilaRoja) {
-            cell.fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "FFFF0000" },
-            }
-            cell.font = { color: { argb: "FFFFFFFF" }, size: 10, name: "Arial" }
-          } else {
-            cell.font = { size: 10, name: "Arial" }
-          }
-          cell.alignment = { vertical: "middle" }
-        })
+    // Agregar datos
+    datosExcel.forEach((empleado) => {
+      worksheet.addRow(empleado)
+    })
+
+    // Estilos encabezado (amarillo)
+    const headerRow = worksheet.getRow(1)
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFFFFF00" },
       }
+      cell.font = { bold: true, size: 10, name: "Arial" }
+      cell.alignment = { horizontal: "center", vertical: "middle" }
+    })
 
-      // Ajustar ancho de columnas
-      worksheet.columns.forEach((column, index) => {
-        const campo = camposSeleccionados[index]
-        let maxLength = campo.length
+    // Estilos a filas de datos (rojo si inactivo)
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i)
+      const empleado = datosExcel[i - 2]
 
-        datosExcel.forEach((row) => {
-          const cellValue = row[campo] ? row[campo].toString() : ""
-          if (cellValue.length > maxLength) {
-            maxLength = cellValue.length
+      const esActivo = empleado._esActivo === 1
+
+      row.eachCell((cell) => {
+        if (!esActivo) {
+          // INACTIVO → rojo
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFF0000" },
           }
-        })
-
-        column.width = Math.min(maxLength + 2, 50)
+          cell.font = { color: { argb: "FFFFFFFF" }, size: 10, name: "Arial" }
+        } else {
+          // Activo → normal
+          cell.font = { size: 10, name: "Arial" }
+        }
+        cell.alignment = { vertical: "middle" }
       })
-
-      // Generar y descargar archivo
-      const buffer = await workbook.xlsx.writeBuffer()
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      })
-
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `empleados_exportados_${new Date().toISOString().split("T")[0]}.xlsx`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Error al exportar a Excel:", error)
-      alert("Ocurrió un error al generar el archivo Excel: " + error.message)
-    } finally {
-      exportBtn.textContent = originalText
-      exportBtn.disabled = false
-      this.cerrar()
     }
-  },
+
+    // Ajustar ancho de columnas
+    worksheet.columns.forEach((column, index) => {
+      const campo = camposSeleccionados[index]
+      let maxLength = campo.length
+
+      datosExcel.forEach((row) => {
+        const cellValue = row[campo] ? row[campo].toString() : ""
+        if (cellValue.length > maxLength) {
+          maxLength = cellValue.length
+        }
+      })
+
+      column.width = Math.min(maxLength + 2, 50)
+    })
+
+    // Descargar archivo
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `empleados_exportados_${new Date().toISOString().split("T")[0]}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error("Error al exportar a Excel:", error)
+    alert("Ocurrió un error al generar el archivo Excel: " + error.message)
+  } finally {
+    exportBtn.textContent = originalText
+    exportBtn.disabled = false
+  }
+}
+,
 
   // Cerrar modal
   cerrar() {
