@@ -29,6 +29,7 @@
             <button class="tab-button" onclick="openTab('vacaciones')">Vacaciones</button>
             <button class="tab-button" onclick="openTab('permisos')">Permisos</button>
             <button class="tab-button" onclick="openTab('actas')">Actas Administrativas</button>
+            <button class="tab-button" onclick="openTab('incapacidades')">Incapacidades</button>
         </div>
 
         <!-- Contenido de las pestañas -->
@@ -146,6 +147,37 @@
                 </table>
             </div>
         </div>
+
+        <!-- NUEVA PESTAÑA: INCAPACIDADES -->
+        <div id="incapacidades" class="tab-content">
+            <h2>Historial de Incapacidades</h2>
+            <div class="filtro-fechas">
+                <label for="fecha-inicio-incapacidades">Desde:</label>
+                <input type="date" id="fecha-inicio-incapacidades" class="filtro-fecha">
+                
+                <label for="fecha-fin-incapacidades">Hasta:</label>
+                <input type="date" id="fecha-fin-incapacidades" class="filtro-fecha">
+                
+                <button onclick="filtrarPorFechas('incapacidades')" class="btn-filtrar">Filtrar</button>
+                <button onclick="limpiarFiltroFechas('incapacidades')" class="btn-limpiar">Limpiar</button>
+            </div>
+            <div class="table-container">
+                <table id="incapacidades-table" class="display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Tipo de Incapacidad</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Final</th>
+                            <th>Días</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -164,6 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initVacacionesTable();
     initPermisosTable();
     initActasTable(); // NUEVA INICIALIZACIÓN
+    initIncapacidadesTable(); // NUEVA INICIALIZACIÓN
     
     // Cargar datos iniciales
     loadReportes();
@@ -230,6 +263,8 @@ function openTab(tabId) {
         loadPermisos();
     } else if (tabId === 'actas' && !window.actasLoaded) { // NUEVA CONDICIÓN
         loadActas();
+    } else if (tabId === 'incapacidades' && !window.incapacidadesLoaded) { // NUEVA CONDICIÓN
+        loadIncapacidades();
     }
 }
 
@@ -257,6 +292,11 @@ function filtrarPorFechas(tabla) {
             fechaInicio = document.getElementById('fecha-inicio-actas').value;
             fechaFin = document.getElementById('fecha-fin-actas').value;
             table = window.actasTable;
+            break;
+        case 'incapacidades': // NUEVO CASO
+            fechaInicio = document.getElementById('fecha-inicio-incapacidades').value;
+            fechaFin = document.getElementById('fecha-fin-incapacidades').value;
+            table = window.incapacidadesTable;
             break;
     }
     
@@ -291,6 +331,11 @@ function limpiarFiltroFechas(tabla) {
             document.getElementById('fecha-inicio-actas').value = '';
             document.getElementById('fecha-fin-actas').value = '';
             window.actasTable.draw();
+            break;
+        case 'incapacidades': // NUEVO CASO
+            document.getElementById('fecha-inicio-incapacidades').value = '';
+            document.getElementById('fecha-fin-incapacidades').value = '';
+            window.incapacidadesTable.draw();
             break;
     }
 }
@@ -442,6 +487,65 @@ function initActasTable() {
     });
 }
 
+// NUEVA FUNCIÓN: Inicializar tabla de Incapacidades
+function initIncapacidadesTable() {
+    window.incapacidadesTable = $('#incapacidades-table').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf'
+        ],
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        columns: [
+            { data: 'idIncapacidad' },
+            { 
+                data: null,
+                render: function(data) {
+                    return `${data.nombres} ${data.paterno} ${data.materno}`;
+                }
+            },
+            { data: 'tipo' },
+            { 
+                data: 'fechaInicio',
+                render: function(data) {
+                    return data ? new Date(data).toLocaleDateString('es-ES') : '';
+                },
+                type: 'date'
+            },
+            { 
+                data: 'fechaFinal',
+                render: function(data) {
+                    return data ? new Date(data).toLocaleDateString('es-ES') : '';
+                },
+                type: 'date'
+            },
+            {
+                data: null,
+                render: function(data) {
+                    if (data.fechaInicio && data.fechaFinal) {
+                        const inicio = new Date(data.fechaInicio);
+                        const final = new Date(data.fechaFinal);
+                        const diferencia = Math.ceil((final - inicio) / (1000 * 60 * 60 * 24)) + 1;
+                        return diferencia + ' días';
+                    }
+                    return '';
+                }
+            },
+            { 
+                data: 'observaciones',
+                render: function(data) {
+                    if (data && data.length > 50) {
+                        return data.substring(0, 50) + '...';
+                    }
+                    return data || '';
+                }
+            }
+        ]
+    });
+}
+
 // FILTRO GLOBAL ÚNICO - Se ejecuta después de inicializar todas las tablas
 $(document).ready(function() {
     // Limpiar filtros existentes para evitar duplicados
@@ -470,6 +574,10 @@ $(document).ready(function() {
             fechaInicio = document.getElementById('fecha-inicio-actas').value;
             fechaFin = document.getElementById('fecha-fin-actas').value;
             columnaFecha = 2; // Columna de FechaActa
+        } else if (tableId === 'incapacidades-table') { // NUEVA CONDICIÓN
+            fechaInicio = document.getElementById('fecha-inicio-incapacidades').value;
+            fechaFin = document.getElementById('fecha-fin-incapacidades').value;
+            columnaFecha = 3; // Columna de Fecha Inicio
         } else {
             return true; // Si no es una tabla conocida, mostrar todo
         }
@@ -539,6 +647,17 @@ function loadActas() {
             window.actasLoaded = true;
         })
         .catch(error => console.error('Error al cargar actas:', error));
+}
+
+// NUEVA FUNCIÓN: Cargar datos de Incapacidades
+function loadIncapacidades() {
+    fetch('/api/incapacidades-historial')
+        .then(response => response.json())
+        .then(data => {
+            window.incapacidadesTable.clear().rows.add(data).draw();
+            window.incapacidadesLoaded = true;
+        })
+        .catch(error => console.error('Error al cargar incapacidades:', error));
 }
     </script>
 </body>

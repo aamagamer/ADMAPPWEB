@@ -199,17 +199,7 @@ async function cargarIncapacidades() {
 
 async function exportarExcelDesdeVista() {
   try {
-    // Mostrar loading
-    Swal.fire({
-      title: "Generando archivo...",
-      text: "Por favor espera mientras se genera el archivo Excel",
-      icon: "info",
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      willOpen: () => {
-        Swal.showLoading();
-      }
-    });
+    
 
     const response = await fetch('/api/incapacidadesExcel');
     
@@ -231,14 +221,7 @@ async function exportarExcelDesdeVista() {
     a.remove();
     window.URL.revokeObjectURL(url);
 
-    // Mostrar éxito
-    Swal.fire({
-      title: "¡Descarga exitosa!",
-      text: "El archivo Excel se ha descargado correctamente",
-      icon: "success",
-      timer: 2000,
-      showConfirmButton: false
-    });
+    
 
   } catch (error) {
     console.error("Error al exportar Excel:", error);

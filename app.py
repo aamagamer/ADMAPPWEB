@@ -2663,6 +2663,62 @@ def get_permisos_historial():
     conn.close()
     return jsonify(permisos)
 
+@app.route('/api/incapacidades-historial', methods=['GET'])
+def obtener_incapacidades_historial():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT 
+                i.idIncapacidad,           
+                u.idUsuario,               
+                ti.tipoIncapacidad AS TipoDeIncapacidad,
+                u.Nombres,
+                u.Paterno,
+                u.Materno,
+                i.fechaInicio,
+                i.fechaFinal,
+                i.Observaciones
+            FROM Incapacidad i
+            JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
+            JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+        """
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        incapacidades = []
+        for row in rows:
+            incapacidades.append({
+                "idIncapacidad": row.idIncapacidad,    
+                "idUsuario": row.idUsuario,             
+                "tipo": row.TipoDeIncapacidad,
+                "nombres": row.Nombres,
+                "paterno": row.Paterno,
+                "materno": row.Materno,
+                "fechaInicio": row.fechaInicio.strftime('%Y-%m-%d') if row.fechaInicio else None,
+                "fechaFinal": row.fechaFinal.strftime('%Y-%m-%d') if row.fechaFinal else None,
+                "observaciones": row.Observaciones
+            })
+
+        return jsonify(incapacidades), 200
+
+    except Exception as e:
+        print("Error al obtener incapacidades:", str(e))
+        return jsonify({
+            "error": "Error interno al obtener las incapacidades",
+            "details": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
 def exportar_reportes_visibles():
