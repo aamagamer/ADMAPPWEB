@@ -143,31 +143,41 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Agregar eventos para marcar como enterado
-    document.querySelectorAll(".delete-reporte-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const tarjeta = btn.closest(".reporte-card");
-        const id = tarjeta.getAttribute("data-id");
+    // Agregar eventos para marcar como enterado
+document.querySelectorAll(".delete-reporte-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tarjeta = btn.closest(".reporte-card");
+    const id = tarjeta.getAttribute("data-id");
 
-        if (!confirm("¿Marcar este reporte como enterado?")) return;
+    Swal.fire({
+      title: "¿Marcar este reporte como enterado?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, marcar",
+      cancelButtonText: "Cancelar"
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-        fetch(`/api/reportes/${id}/enterado`, {
-          method: "PUT"
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.mensaje) {
+      fetch(`/api/reportes/${id}/enterado`, { method: "PUT" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.mensaje) {
+            Swal.fire("Reporte actualizado", data.mensaje, "success").then(() => {
               tarjeta.remove();
-            } else {
-              alert("Error al actualizar: " + (data.error || "desconocido"));
-            }
-          })
-          .catch(err => {
-            console.error("Error al actualizar:", err);
-            alert("No se pudo marcar el reporte.");
-          });
-      });
+            });
+          } else {
+            Swal.fire("Error", data.error || "desconocido", "error");
+          }
+        })
+        .catch(err => {
+          console.error("Error al actualizar:", err);
+          Swal.fire("Error", "No se pudo marcar el reporte.", "error");
+        });
     });
+  });
+});
   }
+
 
   // Función unificada para aplicar todos los filtros
   function aplicarFiltros() {
