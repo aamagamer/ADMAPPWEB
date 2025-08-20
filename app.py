@@ -42,7 +42,7 @@ def requiere_rol(rol_permitido):
         @wraps(f)
         def funcion_envuelta(*args, **kwargs):
             if 'id_usuario' not in session or session.get('rol') != rol_permitido:
-                return redirect(url_for('index'))  # Puedes cambiar a 'login' o 'no_autorizado'
+                return redirect(url_for('index'))  
             return f(*args, **kwargs)
         return funcion_envuelta
     return decorador
@@ -602,6 +602,7 @@ def obtener_empleado(id):
                 usuario[key] = value.strftime("%Y-%m-%d")  # o "%d/%m/%Y" si prefieres ese formato
 
         # Consulta de áreas
+
         cursor.execute("""
             SELECT a.idArea, a.NombreArea
             FROM Usuario_Area ua
@@ -640,7 +641,8 @@ def actualizar_empleado(id):
                 FechaNacimiento = ?, Direccion = ?, CodigoPostal = ?, Correo = ?, NSS = ?, Telefono = ?,
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
                 TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
-                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Mensual = ?, Vacaciones = ?, DiasDisponibles = ?
+                SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Mensual = ?, Vacaciones = ?, DiasDisponibles = ?,
+                Acceso_idAcceso = ?, NumeroAcceso = ?
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
@@ -667,6 +669,8 @@ def actualizar_empleado(id):
             float(data['Mensual']),
             int(data['Vacaciones']),
             int(data['diasDisponibles']),
+            data['Acceso_idAcceso'],
+            data['NumeroAcceso'],
             id
         ))
 
@@ -2902,9 +2906,3 @@ def serve_file(filename):
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
-@app.after_request
-def no_cache(response):
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    return response
