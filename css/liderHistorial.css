@@ -1,0 +1,271 @@
+:root {
+  --primary: #2c3e50;
+  --secondary: #666;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --danger: #f44336;
+  --info: #2196f3;
+  --light: #f5f5f5;
+  --dark: #212121;
+}
+
+/* Reset y estilos generales */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-decoration: none;
+}
+
+body {
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, var(--primary) 0%, #1a2a3a 100%);
+  color: white;
+  padding: 60px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.logo {
+  height: 60px;
+  margin-bottom: 15px;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 10px;
+}
+
+/* Botón Regresar */
+.back-button {
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.back-button i {
+  font-size: 18px;
+}
+
+/* Contenedor principal */
+.main-container {
+  max-width: 1400px;
+  margin: 30px auto 50px;
+  padding: 0 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+/* Tabs/Pestañas */
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--secondary);
+  transition: all 0.3s;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: var(--primary);
+}
+
+.tab-button.active {
+  color: var(--primary);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.filtro-fechas {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filtro-fechas label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.filtro-fecha {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn-filtrar, .btn-limpiar {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-filtrar {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-limpiar {
+    background-color: #f44336;
+    color: white;
+    margin-left: 5px;
+}
+
+.btn-filtrar:hover {
+    background-color: #45a049;
+}
+
+.btn-limpiar:hover {
+    background-color: #d32f2f;
+}
+
+/* Tablas */
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table.dataTable {
+  margin-bottom: 0 !important;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .back-button {
+    left: 20px;
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+  
+  .header-container {
+    padding: 0 15px;
+  }
+  
+  .logo {
+    height: 50px;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab-button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+}
