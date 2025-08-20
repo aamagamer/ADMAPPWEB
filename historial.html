@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ADM - Historial Inteligente</title>
-    <link rel="stylesheet" href="css/historial.css" />
+    <link rel="stylesheet" href="css/liderHistorial.css" />
     <link rel="icon" href="Media/favicon.ico" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
@@ -191,16 +191,35 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el idUsuario desde localStorage
+    window.currentUserId = getCurrentUserId();
+    
+    if (!window.currentUserId) {
+        mostrarError('No se encontró información de usuario. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+    
     // Inicializar las tablas
     initReportesTable();
     initVacacionesTable();
     initPermisosTable();
-    initActasTable(); // NUEVA INICIALIZACIÓN
-    initIncapacidadesTable(); // NUEVA INICIALIZACIÓN
+    initActasTable();
+    initIncapacidadesTable();
     
     // Cargar datos iniciales
     loadReportes();
 });
+
+// Función para obtener el ID del usuario desde localStorage
+function getCurrentUserId() {
+    return localStorage.getItem('idUsuario');
+}
+
+// Función para mostrar errores al usuario
+function mostrarError(mensaje) {
+    console.error(mensaje);
+    alert(mensaje); // Puedes reemplazar por tu sistema de notificaciones
+}
 
 // Función mejorada para parsear fechas correctamente
 function parsearFecha(fechaString) {
@@ -261,9 +280,9 @@ function openTab(tabId) {
         loadVacaciones();
     } else if (tabId === 'permisos' && !window.permisosLoaded) {
         loadPermisos();
-    } else if (tabId === 'actas' && !window.actasLoaded) { // NUEVA CONDICIÓN
+    } else if (tabId === 'actas' && !window.actasLoaded) {
         loadActas();
-    } else if (tabId === 'incapacidades' && !window.incapacidadesLoaded) { // NUEVA CONDICIÓN
+    } else if (tabId === 'incapacidades' && !window.incapacidadesLoaded) {
         loadIncapacidades();
     }
 }
@@ -288,12 +307,12 @@ function filtrarPorFechas(tabla) {
             fechaFin = document.getElementById('fecha-fin-permisos').value;
             table = window.permisosTable;
             break;
-        case 'actas': // NUEVO CASO
+        case 'actas':
             fechaInicio = document.getElementById('fecha-inicio-actas').value;
             fechaFin = document.getElementById('fecha-fin-actas').value;
             table = window.actasTable;
             break;
-        case 'incapacidades': // NUEVO CASO
+        case 'incapacidades':
             fechaInicio = document.getElementById('fecha-inicio-incapacidades').value;
             fechaFin = document.getElementById('fecha-fin-incapacidades').value;
             table = window.incapacidadesTable;
@@ -327,12 +346,12 @@ function limpiarFiltroFechas(tabla) {
             document.getElementById('fecha-fin-permisos').value = '';
             window.permisosTable.draw();
             break;
-        case 'actas': // NUEVO CASO
+        case 'actas':
             document.getElementById('fecha-inicio-actas').value = '';
             document.getElementById('fecha-fin-actas').value = '';
             window.actasTable.draw();
             break;
-        case 'incapacidades': // NUEVO CASO
+        case 'incapacidades':
             document.getElementById('fecha-inicio-incapacidades').value = '';
             document.getElementById('fecha-fin-incapacidades').value = '';
             window.incapacidadesTable.draw();
@@ -447,7 +466,6 @@ function initPermisosTable() {
     });
 }
 
-// NUEVA FUNCIÓN: Inicializar tabla de Actas
 function initActasTable() {
     window.actasTable = $('#actas-table').DataTable({
         dom: 'Bfrtip',
@@ -487,7 +505,6 @@ function initActasTable() {
     });
 }
 
-// NUEVA FUNCIÓN: Inicializar tabla de Incapacidades
 function initIncapacidadesTable() {
     window.incapacidadesTable = $('#incapacidades-table').DataTable({
         dom: 'Bfrtip',
@@ -570,11 +587,11 @@ $(document).ready(function() {
             fechaInicio = document.getElementById('fecha-inicio-permisos').value;
             fechaFin = document.getElementById('fecha-fin-permisos').value;
             columnaFecha = 3; // Columna de DiaSolicitado
-        } else if (tableId === 'actas-table') { // NUEVA CONDICIÓN
+        } else if (tableId === 'actas-table') {
             fechaInicio = document.getElementById('fecha-inicio-actas').value;
             fechaFin = document.getElementById('fecha-fin-actas').value;
             columnaFecha = 2; // Columna de FechaActa
-        } else if (tableId === 'incapacidades-table') { // NUEVA CONDICIÓN
+        } else if (tableId === 'incapacidades-table') {
             fechaInicio = document.getElementById('fecha-inicio-incapacidades').value;
             fechaFin = document.getElementById('fecha-fin-incapacidades').value;
             columnaFecha = 3; // Columna de Fecha Inicio
@@ -608,56 +625,145 @@ $(document).ready(function() {
     });
 });
 
+// Funciones de carga de datos con autenticación
 function loadReportes() {
-    fetch('/api/reportes-historial')
-        .then(response => response.json())
+    const userId = window.currentUserId;
+    if (!userId) {
+        mostrarError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+
+    fetch(`/api/reportes-historial?idUsuario=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.error) {
+                mostrarError(data.error);
+                return;
+            }
             window.reportesTable.clear().rows.add(data).draw();
             window.reportesLoaded = true;
         })
-        .catch(error => console.error('Error al cargar reportes:', error));
+        .catch(error => {
+            console.error('Error al cargar reportes:', error);
+            mostrarError('Error al cargar los reportes: ' + error.message);
+        });
 }
 
 function loadVacaciones() {
-    fetch('/api/vacaciones-historial')
-        .then(response => response.json())
+    const userId = window.currentUserId;
+    if (!userId) {
+        mostrarError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+
+    fetch(`/api/vacaciones-historial?idUsuario=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.error) {
+                mostrarError(data.error);
+                return;
+            }
             window.vacacionesTable.clear().rows.add(data).draw();
             window.vacacionesLoaded = true;
         })
-        .catch(error => console.error('Error al cargar vacaciones:', error));
+        .catch(error => {
+            console.error('Error al cargar vacaciones:', error);
+            mostrarError('Error al cargar las vacaciones: ' + error.message);
+        });
 }
 
 function loadPermisos() {
-    fetch('/api/permisos-historial')
-        .then(response => response.json())
+    const userId = window.currentUserId;
+    if (!userId) {
+        mostrarError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+
+    fetch(`/api/permisos-historial?idUsuario=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.error) {
+                mostrarError(data.error);
+                return;
+            }
             window.permisosTable.clear().rows.add(data).draw();
             window.permisosLoaded = true;
         })
-        .catch(error => console.error('Error al cargar permisos:', error));
+        .catch(error => {
+            console.error('Error al cargar permisos:', error);
+            mostrarError('Error al cargar los permisos: ' + error.message);
+        });
 }
 
-// NUEVA FUNCIÓN: Cargar datos de Actas
 function loadActas() {
-    fetch('/api/actas')
-        .then(response => response.json())
+    const userId = window.currentUserId;
+    if (!userId) {
+        mostrarError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+
+    fetch(`/api/actas?idUsuario=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.error) {
+                mostrarError(data.error);
+                return;
+            }
             window.actasTable.clear().rows.add(data).draw();
             window.actasLoaded = true;
         })
-        .catch(error => console.error('Error al cargar actas:', error));
+        .catch(error => {
+            console.error('Error al cargar actas:', error);
+            mostrarError('Error al cargar las actas: ' + error.message);
+        });
 }
 
-// NUEVA FUNCIÓN: Cargar datos de Incapacidades
 function loadIncapacidades() {
-    fetch('/api/incapacidades-historial')
-        .then(response => response.json())
+    const userId = window.currentUserId;
+    if (!userId) {
+        mostrarError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+
+    fetch(`/api/incapacidades-historial?idUsuario=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.error) {
+                mostrarError(data.error);
+                return;
+            }
             window.incapacidadesTable.clear().rows.add(data).draw();
             window.incapacidadesLoaded = true;
         })
-        .catch(error => console.error('Error al cargar incapacidades:', error));
+        .catch(error => {
+            console.error('Error al cargar incapacidades:', error);
+            mostrarError('Error al cargar las incapacidades: ' + error.message);
+        });
 }
     </script>
 </body>

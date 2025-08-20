@@ -1826,21 +1826,82 @@ def obtener_reportes_usuarios():
 @app.route('/api/actas', methods=['GET'])
 def obtener_actas():
     try:
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
+
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT 
-                u.nombres, 
-                u.materno, 
-                u.paterno, 
-                a.TipoAsunto, 
-                act.FechaActa, 
-                act.Comentario
-            FROM ActaAdministrativa act
-            INNER JOIN Usuario u ON act.idUsuario = u.idUsuario
-            INNER JOIN Asunto a ON act.idAsunto = a.idAsunto
-        """)
+        # Obtener el rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = rol_row[0]
+
+        if tipo_rol in [2, 3]:  # Admin o RH - Ver todas
+            query = """
+                SELECT 
+                    u.nombres, 
+                    u.materno, 
+                    u.paterno, 
+                    a.TipoAsunto, 
+                    act.FechaActa, 
+                    act.Comentario
+                FROM ActaAdministrativa act
+                INNER JOIN Usuario u ON act.idUsuario = u.idUsuario
+                INNER JOIN Asunto a ON act.idAsunto = a.idAsunto
+            """
+            cursor.execute(query)
+            
+        elif tipo_rol == 4:  # Líder - Ver solo de su área
+            cursor.execute("""
+                SELECT DISTINCT ua.idArea 
+                FROM Usuario_Area ua 
+                WHERE ua.idUsuario = ?
+            """, (id_usuario,))
+            areas = cursor.fetchall()
+            
+            if not areas:
+                return jsonify([]), 200
+            
+            area_ids = [str(area[0]) for area in areas]
+            placeholders = ",".join("?" for _ in area_ids)
+            
+            query = f"""
+                SELECT DISTINCT
+                    u.nombres, 
+                    u.materno, 
+                    u.paterno, 
+                    a.TipoAsunto, 
+                    act.FechaActa, 
+                    act.Comentario
+                FROM ActaAdministrativa act
+                INNER JOIN Usuario u ON act.idUsuario = u.idUsuario
+                INNER JOIN Asunto a ON act.idAsunto = a.idAsunto
+                INNER JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                WHERE ua.idArea IN ({placeholders})
+                  AND u.Rol_idRol = 1
+            """
+            cursor.execute(query, area_ids)
+            
+        else:  # Empleado - Ver solo sus propias actas
+            query = """
+                SELECT 
+                    u.nombres, 
+                    u.materno, 
+                    u.paterno, 
+                    a.TipoAsunto, 
+                    act.FechaActa, 
+                    act.Comentario
+                FROM ActaAdministrativa act
+                INNER JOIN Usuario u ON act.idUsuario = u.idUsuario
+                INNER JOIN Asunto a ON act.idAsunto = a.idAsunto
+                WHERE u.idUsuario = ?
+            """
+            cursor.execute(query, (id_usuario,))
 
         columns = [column[0] for column in cursor.description]
         actas = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -1849,10 +1910,11 @@ def obtener_actas():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 
@@ -2711,95 +2773,350 @@ def get_permisos():
 
 @app.route('/api/reportes-historial')
 def get_reportes_historial():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
-               r.Observaciones, a.TipoAsunto, r.FechaReporte
-        FROM Reporte r
-        INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
-        INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
-    """)
-    columns = [column[0] for column in cursor.description]
-    reportes = [dict(zip(columns, row)) for row in cursor.fetchall()]
-    conn.close()
-    return jsonify(reportes)
-
-@app.route('/api/vacaciones-historial')
-def get_vacaciones_historial():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
-               e.Estado AS EstadoSolicitud, v.DiasSolicitados,
-               v.FechaSalida, v.FechaRegreso
-        FROM Vacaciones v
-        INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
-        INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
-    """)
-    columns = [column[0] for column in cursor.description]
-    vacaciones = [dict(zip(columns, row)) for row in cursor.fetchall()]
-    conn.close()
-    return jsonify(vacaciones)
-
-@app.route('/api/permisos-historial')
-def get_permisos_historial():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
-               e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
-               p.Razon, c.TipoCompensacion
-        FROM Permiso p
-        INNER JOIN Usuario u ON u.idUsuario = p.Usuario_idUsuario
-        INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
-        INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
-    """)
-    
-    columns = [column[0] for column in cursor.description]
-    permisos = []
-    
-    for row in cursor.fetchall():
-        row_dict = {}
-        for col_name, value in zip(columns, row):
-            if isinstance(value, (date, datetime)):
-                row_dict[col_name] = value.isoformat()  # Ej: '2025-08-11T15:30:00'
-            elif isinstance(value, time):
-                row_dict[col_name] = value.strftime("%H:%M:%S")
-            elif isinstance(value, Decimal):
-                row_dict[col_name] = float(value)
-            else:
-                row_dict[col_name] = value
-        permisos.append(row_dict)
-
-    conn.close()
-    return jsonify(permisos)
-
-@app.route('/api/incapacidades-historial', methods=['GET'])
-def obtener_incapacidades_historial():
-    conn = None
-    cursor = None
     try:
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
+
         conn = get_connection()
         cursor = conn.cursor()
 
-        query = """
-            SELECT 
-                i.idIncapacidad,           
-                u.idUsuario,               
-                ti.tipoIncapacidad AS TipoDeIncapacidad,
-                u.Nombres,
-                u.Paterno,
-                u.Materno,
-                i.fechaInicio,
-                i.fechaFinal,
-                i.Observaciones
-            FROM Incapacidad i
-            JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
-            JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
-        """
+        # Obtener el rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
 
-        cursor.execute(query)
+        tipo_rol = rol_row[0]
+
+        if tipo_rol in [2, 3]:  # Admin o RH - Ver todos
+            query = """
+                SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
+                       r.Observaciones, a.TipoAsunto, r.FechaReporte
+                FROM Reporte r
+                INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
+                INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
+            """
+            cursor.execute(query)
+            
+        elif tipo_rol == 4:  # Líder - Ver solo de su área
+            # Obtener áreas del líder
+            cursor.execute("""
+                SELECT DISTINCT ua.idArea 
+                FROM Usuario_Area ua 
+                WHERE ua.idUsuario = ?
+            """, (id_usuario,))
+            areas = cursor.fetchall()
+            
+            if not areas:
+                return jsonify([]), 200
+            
+            area_ids = [str(area[0]) for area in areas]
+            placeholders = ",".join("?" for _ in area_ids)
+            
+            query = f"""
+                SELECT DISTINCT r.idReporte, u.Nombres, u.Paterno, u.Materno,
+                       r.Observaciones, a.TipoAsunto, r.FechaReporte
+                FROM Reporte r
+                INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
+                INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
+                INNER JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                WHERE ua.idArea IN ({placeholders})
+                  AND u.Rol_idRol = 1
+            """
+            cursor.execute(query, area_ids)
+            
+        else:  # Empleado - Ver solo sus propios reportes
+            query = """
+                SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
+                       r.Observaciones, a.TipoAsunto, r.FechaReporte
+                FROM Reporte r
+                INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
+                INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
+                WHERE u.idUsuario = ?
+            """
+            cursor.execute(query, (id_usuario,))
+
+        columns = [column[0] for column in cursor.description]
+        reportes = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
+        return jsonify(reportes), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/vacaciones-historial')
+def get_vacaciones_historial():
+    try:
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener el rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = rol_row[0]
+
+        if tipo_rol in [2, 3]:  # Admin o RH - Ver todos
+            query = """
+                SELECT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
+                       e.Estado AS EstadoSolicitud, v.DiasSolicitados,
+                       v.FechaSalida, v.FechaRegreso
+                FROM Vacaciones v
+                INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
+                INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
+            """
+            cursor.execute(query)
+            
+        elif tipo_rol == 4:  # Líder - Ver solo de su área
+            cursor.execute("""
+                SELECT DISTINCT ua.idArea 
+                FROM Usuario_Area ua 
+                WHERE ua.idUsuario = ?
+            """, (id_usuario,))
+            areas = cursor.fetchall()
+            
+            if not areas:
+                return jsonify([]), 200
+            
+            area_ids = [str(area[0]) for area in areas]
+            placeholders = ",".join("?" for _ in area_ids)
+            
+            query = f"""
+                SELECT DISTINCT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
+                       e.Estado AS EstadoSolicitud, v.DiasSolicitados,
+                       v.FechaSalida, v.FechaRegreso
+                FROM Vacaciones v
+                INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
+                INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
+                INNER JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                WHERE ua.idArea IN ({placeholders})
+                  AND u.Rol_idRol = 1
+            """
+            cursor.execute(query, area_ids)
+            
+        else:  # Empleado - Ver solo sus propias vacaciones
+            query = """
+                SELECT v.idVacaciones, u.Nombres, u.Paterno, u.Materno,
+                       e.Estado AS EstadoSolicitud, v.DiasSolicitados,
+                       v.FechaSalida, v.FechaRegreso
+                FROM Vacaciones v
+                INNER JOIN Usuario u ON u.idUsuario = v.Usuario_idUsuario
+                INNER JOIN EstadoSolicitud e ON e.idSolicitud = v.EstadoSolicitud_idSolicitud
+                WHERE u.idUsuario = ?
+            """
+            cursor.execute(query, (id_usuario,))
+
+        columns = [column[0] for column in cursor.description]
+        vacaciones = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
+        return jsonify(vacaciones), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/permisos-historial')
+def get_permisos_historial():
+    try:
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener el rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = rol_row[0]
+
+        if tipo_rol in [2, 3]:  # Admin o RH - Ver todos
+            query = """
+                SELECT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
+                       e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
+                       p.Razon, c.TipoCompensacion
+                FROM Permiso p
+                INNER JOIN Usuario u ON u.idUsuario = p.Usuario_idUsuario
+                INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
+                INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
+            """
+            cursor.execute(query)
+            
+        elif tipo_rol == 4:  # Líder - Ver solo de su área
+            cursor.execute("""
+                SELECT DISTINCT ua.idArea 
+                FROM Usuario_Area ua 
+                WHERE ua.idUsuario = ?
+            """, (id_usuario,))
+            areas = cursor.fetchall()
+            
+            if not areas:
+                return jsonify([]), 200
+            
+            area_ids = [str(area[0]) for area in areas]
+            placeholders = ",".join("?" for _ in area_ids)
+            
+            query = f"""
+                SELECT DISTINCT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
+                       e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
+                       p.Razon, ISNULL(c.TipoCompensacion, 'Sin compensación') AS TipoCompensacion
+                FROM Permiso p
+                INNER JOIN Usuario u ON u.idUsuario = p.Usuario_idUsuario
+                LEFT JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
+                INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
+                INNER JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                WHERE ua.idArea IN ({placeholders})
+                  AND u.Rol_idRol = 1
+            """
+            cursor.execute(query, area_ids)
+            
+        else:  # Empleado - Ver solo sus propios permisos
+            query = """
+                SELECT p.idPermiso, u.Nombres, u.Paterno, u.Materno,
+                       e.Estado AS EstadoSolicitud, p.DiaSolicitado, p.HoraInicio, p.HoraFin,
+                       p.Razon, c.TipoCompensacion
+                FROM Permiso p
+                INNER JOIN Usuario u ON u.idUsuario = p.Usuario_idUsuario
+                INNER JOIN Compensacion c ON c.idCompensacion = p.Compensacion_idCompensacion
+                INNER JOIN EstadoSolicitud e ON e.idSolicitud = p.EstadoSolicitud_idSolicitud
+                WHERE u.idUsuario = ?
+            """
+            cursor.execute(query, (id_usuario,))
+
+        columns = [column[0] for column in cursor.description]
+        permisos = []
+        
+        for row in cursor.fetchall():
+            row_dict = {}
+            for col_name, value in zip(columns, row):
+                if isinstance(value, (date, datetime)):
+                    row_dict[col_name] = value.isoformat()
+                elif isinstance(value, time):
+                    row_dict[col_name] = value.strftime("%H:%M:%S")
+                elif isinstance(value, Decimal):
+                    row_dict[col_name] = float(value)
+                else:
+                    row_dict[col_name] = value
+            permisos.append(row_dict)
+
+        return jsonify(permisos), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/incapacidades-historial', methods=['GET'])
+def obtener_incapacidades_historial():
+    try:
+        id_usuario = request.args.get('idUsuario')
+        if not id_usuario:
+            return jsonify({"error": "Se requiere el idUsuario"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener el rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        tipo_rol = rol_row[0]
+
+        if tipo_rol in [2, 3]:  # Admin o RH - Ver todas
+            query = """
+                SELECT 
+                    i.idIncapacidad,           
+                    u.idUsuario,               
+                    ti.tipoIncapacidad AS TipoDeIncapacidad,
+                    u.Nombres,
+                    u.Paterno,
+                    u.Materno,
+                    i.fechaInicio,
+                    i.fechaFinal,
+                    i.Observaciones
+                FROM Incapacidad i
+                JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
+                JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+            """
+            cursor.execute(query)
+            
+        elif tipo_rol == 4:  # Líder - Ver solo de su área
+            cursor.execute("""
+                SELECT DISTINCT ua.idArea 
+                FROM Usuario_Area ua 
+                WHERE ua.idUsuario = ?
+            """, (id_usuario,))
+            areas = cursor.fetchall()
+            
+            if not areas:
+                return jsonify([]), 200
+            
+            area_ids = [str(area[0]) for area in areas]
+            placeholders = ",".join("?" for _ in area_ids)
+            
+            query = f"""
+                SELECT DISTINCT
+                    i.idIncapacidad,           
+                    u.idUsuario,               
+                    ti.tipoIncapacidad AS TipoDeIncapacidad,
+                    u.Nombres,
+                    u.Paterno,
+                    u.Materno,
+                    i.fechaInicio,
+                    i.fechaFinal,
+                    i.Observaciones
+                FROM Incapacidad i
+                JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
+                JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+                INNER JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+                WHERE ua.idArea IN ({placeholders})
+                  AND u.Rol_idRol = 1
+            """
+            cursor.execute(query, area_ids)
+            
+        else:  # Empleado - Ver solo sus propias incapacidades
+            query = """
+                SELECT 
+                    i.idIncapacidad,           
+                    u.idUsuario,               
+                    ti.tipoIncapacidad AS TipoDeIncapacidad,
+                    u.Nombres,
+                    u.Paterno,
+                    u.Materno,
+                    i.fechaInicio,
+                    i.fechaFinal,
+                    i.Observaciones
+                FROM Incapacidad i
+                JOIN Usuario u ON u.idUsuario = i.Usuario_idUsuario
+                JOIN TipoIncapacidad ti ON ti.idTipoIncapacidad = i.TipoIncapacidad_idTipoIncapacidad
+                WHERE u.idUsuario = ?
+            """
+            cursor.execute(query, (id_usuario,))
+
         rows = cursor.fetchall()
 
         incapacidades = []
