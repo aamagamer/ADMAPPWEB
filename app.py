@@ -1208,31 +1208,43 @@ def obtener_permisos_por_areas(ids):
 def obtener_usuario_por_solicitud(tipo, id):
     conn = None
     cursor = None
-    
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
+
         if tipo == 'vacacion':
-            cursor.execute("SELECT Usuario_idUsuario FROM Vacaciones WHERE idVacaciones = ?", (id,))
+            cursor.execute("""
+                SELECT u.idUsuario, u.Nombres, u.Telefono
+                FROM Vacaciones v
+                JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+                WHERE v.idVacaciones = ?
+            """, (id,))
         elif tipo == 'permiso':
-            cursor.execute("SELECT Usuario_idUsuario FROM Permiso WHERE idPermiso = ?", (id,))
+            cursor.execute("""
+                SELECT u.idUsuario, u.Nombres, u.Telefono
+                FROM Permiso p
+                JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+                WHERE p.idPermiso = ?
+            """, (id,))
         else:
             return jsonify({"error": "Tipo de solicitud no válido"}), 400
-            
+
         result = cursor.fetchone()
         if result:
-            return jsonify({"idUsuario": result[0]})
+            return jsonify({
+                "idUsuario": result[0],
+                "nombre": result[1],
+                "telefono": result[2]
+            })
         else:
             return jsonify({"error": "Solicitud no encontrada"}), 404
-            
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
+
 
 
 
