@@ -582,9 +582,10 @@ def obtener_empleado(id):
 
         # Consulta principal del usuario
         cursor.execute("""
-            SELECT u.*, r.TipoRol
+            SELECT u.*, r.TipoRol, a.NombreAcceso
             FROM Usuario u
             LEFT JOIN Rol r ON u.Rol_idRol = r.idRol
+            LEFT JOIN Acceso a on u.Acceso_idAcceso = a.idAcceso
             WHERE u.idUsuario = ?
         """, id)
 

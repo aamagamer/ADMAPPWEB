@@ -51,6 +51,8 @@ const camposExportacion = [
   { id: "Mensual", nombre: "Sueldo Mensual" },
   { id: "Vacaciones", nombre: "Vacaciones" },
   { id: "DiasDisponibles", nombre: "Dias Disponibles" },
+  { id: "NombreAcceso", nombre: "Empresa que tiene acceso" },
+  { id: "NumeroAcceso", nombre: "Número de Acceso" },
 ]
 
 // ===== UTILIDADES =====
@@ -748,6 +750,8 @@ const Empleados = {
         ${Modales.renderField("Sueldo Mensual", data.Mensual)}
         ${Modales.renderField("Vacaciones", data.Vacaciones)}
         ${Modales.renderField("Vacaciones disponibles", data.DiasDisponibles)}
+        ${Modales.renderField("Empresa con Acceso", data.NombreAcceso)}
+        ${Modales.renderField("Número de Acceso", data.NumeroAcceso)}
       `
 
       Modales.toggle("modal", true)
@@ -793,6 +797,8 @@ const Empleados = {
       ${Modales.renderField("CURP", data.Curp)}
       ${Modales.renderField("Puesto", data.Puesto)}
       ${Modales.renderField("Cantidad de reportes", totalReportes)}
+      ${Modales.renderField("Empresa con Acceso", data.NombreAcceso)}
+      ${Modales.renderField("Número de Acceso", data.NumeroAcceso)}
     `
 
     Modales.toggle("modal-generales", true)
