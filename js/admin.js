@@ -173,6 +173,8 @@ const Validaciones = {
   { id: "bonoSemanal", nombre: "Bono Semanal", obligatorio: true },
   { id: "Mensual", nombre: "Sueldo Mensual", obligatorio: true },
   { id: "diasDisponibles", nombre: "Vacaciones Disponibles", obligatorio: true },
+  { id: "Empresa", nombre: "Empresa Acceso", obligatorio: false },
+  { id: "Acceso", nombre: "Numero de Acceso", obligatorio: false  },
 ]
 
     // Limpiar estilos previos
@@ -406,6 +408,92 @@ async cargarNotificacionesReportes() {
   }
 },
 
+  // Cargar empresas/accesos
+  async cargarEmpresas() {
+    try {
+      const response = await fetch('/api/acceso')
+      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`)
+      
+      const accesos = await response.json()
+      
+      const selectEmpresa = document.getElementById('Empresa')
+      if (!selectEmpresa) {
+        console.warn('No se encontró el select con id "Empresa"')
+        return
+      }
+      
+      // Limpiar el select
+      selectEmpresa.innerHTML = ''
+      
+      // Agregar opción por defecto
+      const optionDefault = document.createElement('option')
+      optionDefault.value = ''
+      optionDefault.textContent = 'Seleccione una empresa...'
+      selectEmpresa.appendChild(optionDefault)
+      
+      // Agregar las opciones de empresas
+      accesos.forEach(acceso => {
+        const option = document.createElement('option')
+        option.value = acceso.idAcceso
+        option.textContent = acceso.NombreAcceso
+        selectEmpresa.appendChild(option)
+      })
+      
+      console.log('✅ Empresas cargadas correctamente')
+      
+    } catch (error) {
+      console.error('❌ Error al cargar empresas:', error)
+      
+      const selectEmpresa = document.getElementById('Empresa')
+      if (selectEmpresa) {
+        selectEmpresa.innerHTML = '<option value="">Error al cargar empresas</option>'
+      }
+    }
+  },
+
+  // Cargar empresas para edición (si necesitas una versión específica para el modal de editar)
+  async cargarEmpresasParaEditar(empresaSeleccionada = null) {
+    try {
+      const response = await fetch('/api/acceso')
+      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`)
+      
+      const accesos = await response.json()
+      
+      const selectEmpresa = document.getElementById('edit-Empresa')
+      if (!selectEmpresa) {
+        console.warn('No se encontró el select con id "edit-Empresa"')
+        return
+      }
+      
+      // Limpiar el select
+      selectEmpresa.innerHTML = ''
+      
+      // Agregar opción por defecto
+      const optionDefault = document.createElement('option')
+      optionDefault.value = ''
+      optionDefault.textContent = 'Seleccione una empresa...'
+      selectEmpresa.appendChild(optionDefault)
+      
+      // Agregar las opciones de empresas
+      accesos.forEach(acceso => {
+        const option = document.createElement('option')
+        option.value = acceso.idAcceso
+        option.textContent = acceso.NombreAcceso
+        option.selected = empresaSeleccionada === acceso.idAcceso
+        selectEmpresa.appendChild(option)
+      })
+      
+      console.log('✅ Empresas para edición cargadas correctamente')
+      
+    } catch (error) {
+      console.error('❌ Error al cargar empresas para edición:', error)
+      
+      const selectEmpresa = document.getElementById('edit-Empresa')
+      if (selectEmpresa) {
+        selectEmpresa.innerHTML = '<option value="">Error al cargar empresas</option>'
+      }
+    }
+  },
 
 
   // Cargar nombre de usuario
@@ -1598,6 +1686,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     API.cargarAreas(),
     API.cargarNotificacionesReportes(),
     Empleados.aplicarFiltros(),
+    API.cargarEmpresas(),
   ])
 
  
@@ -1657,13 +1746,29 @@ function setupFormListeners() {
       delete empleadoData.tipoRol
       empleadoData.Vacaciones = diasVacaciones
 
-      // Convertir a números
+      // ✅ NUEVO: Manejar los campos de Empresa y Acceso
+      // Si no se seleccionó empresa, enviar null
+      if (!empleadoData.Empresa || empleadoData.Empresa === '') {
+        empleadoData.Empresa = null
+      } else {
+        empleadoData.Empresa = Number(empleadoData.Empresa) // Convertir a número si existe
+      }
+      
+      // Si no hay número de acceso, enviar cadena vacía o null
+      if (!empleadoData.Acceso || empleadoData.Acceso.trim() === '') {
+        empleadoData.Acceso = null // o "" dependiendo de tu DB
+      }
+
+      // Convertir otros campos a números
       empleadoData.idUsuario = Number(empleadoData.idUsuario)
       empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario)
       empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal)
       empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal)
+      empleadoData.Mensual = Number(empleadoData.Mensual) // ✅ AGREGADO
       empleadoData.Vacaciones = Number(empleadoData.Vacaciones)
       empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles)
+
+      console.log('📤 Datos que se enviarán:', empleadoData) // Para debug
 
       try {
         const response = await fetch("/api/empleado", {
@@ -1674,6 +1779,7 @@ function setupFormListeners() {
 
         if (!response.ok) {
           const data = await response.json()
+          console.error('❌ Error del servidor:', data)
           throw new Error(data.error || "Error al guardar el empleado")
         }
 
@@ -1686,20 +1792,23 @@ function setupFormListeners() {
           confirmButtonText: "Aceptar",
         }).then(() => {
           Modales.toggle("add-employee-modal", false)
+          // Limpiar formulario
+          document.getElementById("employee-form").reset()
           location.reload()
         })
       } catch (error) {
-        console.error("Error al insertar:", error)
+        console.error("❌ Error al insertar:", error)
         Swal.fire({
           icon: "error",
           title: "Error al dar de alta",
-          text: "Verifica que el id del usuario no esté duplicado",
+          text: error.message || "Verifica que el id del usuario no esté duplicado",
           confirmButtonColor: "#d33",
           confirmButtonText: "Aceptar",
         })
       }
     })
   }
+
 
   // Formulario de edición de empleado
   const editEmployeeForm = document.getElementById("edit-employee-form")

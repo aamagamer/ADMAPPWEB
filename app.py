@@ -693,29 +693,53 @@ def actualizar_empleado(id):
 def agregar_empleado():
     data = request.get_json()
     try:
-        # Validaciones...
+        # Validaciones básicas
+        required_fields = ['idUsuario', 'rol_id', 'nombres', 'paterno', 'fechaNacimiento', 
+                          'direccion', 'codigoPostal', 'correo', 'nss', 'telefono', 
+                          'fechaIngreso', 'rfc', 'curp', 'puesto', 'nombreContactoEmergencia',
+                          'telefonoEmergencia', 'parentesco', 'contraseña']
+        
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"error": f"Campo requerido: {field}"}), 400
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Insertar en Usuario (sin Area_idArea)
+        # 🔧 CORRECCIÓN: Los nombres de los parámetros deben coincidir
+        # Frontend envía: "Empresa" (ID de la empresa) y "Acceso" (número de acceso)
+        # Backend necesita: Acceso_idAcceso y NombreAcceso (o NumeroAcceso)
+        
+        # Manejar los campos opcionales de empresa/acceso
+        acceso_id = None
+        numero_acceso = None
+        
+        # Si se proporcionó una empresa
+        if data.get('Empresa') and data['Empresa'] != '':
+            acceso_id = int(data['Empresa'])  # Este es el ID de la tabla Acceso
+        
+        # Si se proporcionó número de acceso
+        if data.get('Acceso') and data['Acceso'].strip() != '':
+            numero_acceso = data['Acceso'].strip()
+
+        # Insertar en Usuario
         cursor.execute("""
             INSERT INTO Usuario (
                 idUsuario, Rol_idRol, Nombres, Paterno, Materno,
                 FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
                 FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
                 TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida,
-                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Mensual, Vacaciones,
-                DiasDisponibles
+                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Mensual, 
+                Vacaciones, DiasDisponibles, Acceso_idAcceso, NumeroAcceso
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
-                    ?, 'Activo', ?, ?, ?, ?, ?, ?)
+                    ?, 'Activo', ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             int(data['idUsuario']),
-            data['rol_id'],
+            int(data['rol_id']),
             data['nombres'],
             data['paterno'],
-            data.get('materno'),
+            data.get('materno', ''),  # Puede ser vacío
             data['fechaNacimiento'],
             data['direccion'],
             data['codigoPostal'],
@@ -730,47 +754,45 @@ def agregar_empleado():
             data['telefonoEmergencia'],
             data['parentesco'],
             data['contraseña'],
-            float(data['SueldoDiario']),
-            float(data['SueldoSemanal']),
-            float(data['BonoSemanal']),
-            float(data['Mensual']),
-            int(data['Vacaciones']),
-            int(data['diasDisponibles'])
+            float(data.get('SueldoDiario', 0)),
+            float(data.get('SueldoSemanal', 0)),
+            float(data.get('BonoSemanal', 0)),
+            float(data.get('Mensual', 0)),
+            int(data.get('Vacaciones', 0)),
+            int(data.get('diasDisponibles', 0)),
+            acceso_id,        # 🔧 Puede ser None
+            numero_acceso     # 🔧 Puede ser None
         ))
 
-        # Obtener lista de areas, ya sea IDs o nombres
+        # Manejar áreas
         area_ids = data.get('areas')
         if not area_ids or not isinstance(area_ids, list):
-            return jsonify({"error": "Debes proporcionar al menos una área (lista)"}), 400
+            return jsonify({"error": "Debes proporcionar al menos una área (lista de IDs)"}), 400
 
-        # Si son nombres, convertir a ids:
-        # Si tienes IDs directamente, comenta este bloque
-        """
-        area_ids_real = []
-        for nombre_area in area_ids:
-            cursor.execute("SELECT idArea FROM Area WHERE NombreArea = ?", (nombre_area,))
-            row = cursor.fetchone()
-            if not row:
-                return jsonify({"error": f"Área '{nombre_area}' no existe"}), 400
-            area_ids_real.append(row[0])
-        area_ids = area_ids_real
-        """
-
-        # Insertar en tabla intermedia
+        # Insertar en tabla intermedia Usuario_Area
         for id_area in area_ids:
-            cursor.execute("SELECT 1 FROM Area WHERE idArea = ?", (id_area,))
+            # Verificar que el área existe
+            cursor.execute("SELECT 1 FROM Area WHERE idArea = ?", (int(id_area),))
             if not cursor.fetchone():
                 return jsonify({"error": f"Área con ID {id_area} no existe"}), 400
+            
+            # Insertar relación
             cursor.execute("INSERT INTO Usuario_Area (idUsuario, idArea) VALUES (?, ?)",
-                           (int(data['idUsuario']), id_area))
+                           (int(data['idUsuario']), int(id_area)))
 
         conn.commit()
         return jsonify({"mensaje": "Empleado insertado correctamente"}), 201
 
+    except sqlite3.IntegrityError as e:
+        return jsonify({"error": f"Error de integridad: {str(e)}"}), 400
+    except ValueError as e:
+        return jsonify({"error": f"Error en formato de datos: {str(e)}"}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error inesperado: {str(e)}")  # Para debug
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
     finally:
-        conn.close()
+        if 'conn' in locals():
+            conn.close()
 
 
 
@@ -844,6 +866,36 @@ def activar_usuario(idUsuario):
             cursor.close()
         if conn:
             conn.close()
+
+@app.route('/api/acceso', methods=['GET'])
+def obtener_accesos():
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT idAcceso, NombreAcceso
+            FROM Acceso
+        """)
+        rows = cursor.fetchall()
+
+        accesos = [{'idAcceso': row[0], 'NombreAcceso': row[1]} for row in rows]
+
+        return jsonify(accesos), 200
+
+    except Exception as e:
+        print(f'❌ ERROR EN /api/acceso: {e}')
+        return jsonify({'error': 'Error al obtener accesos'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 
 @app.route('/api/razones-baja', methods=['GET'])
