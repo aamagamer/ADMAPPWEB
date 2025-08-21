@@ -100,4 +100,4 @@ if (!localStorage.getItem('idUsuario')) {
 }
 cargarNotificaciones();
 // Actualizar cada 30 segundos (ajusta este valor según necesites)
-setInterval(cargarNotificaciones, 1200000);
+setInterval(cargarNotificaciones, 300000);
