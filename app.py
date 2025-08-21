@@ -485,8 +485,10 @@ def actualizar_estado_solicitud():
         # Decidir nuevo estado según rol y acción
         nuevo_estado = None
 
-        if accion == "rechazar":
+        if accion == "rechazar" and tipo_rol == 2 or tipo_rol == 3:
             nuevo_estado = 1  # Rechazado
+        elif accion == "rechazar" and tipo_rol == 4:
+            nuevo_estado = 22
 
         elif accion == "aceptar":
             if tipo_rol == 4:       # Líder
@@ -566,8 +568,10 @@ def actualizar_estado_permiso():
         estado_actual = estado_actual[0]
 
         # Determinar el nuevo estado
-        if accion == "rechazar":
+        if accion == "rechazar" and tipo_rol == 2 or tipo_rol == 3:
             nuevo_estado = 1  # Rechazado
+        elif accion == "rechazar" and tipo_rol == 4:
+            nuevo_estado = 22
         elif accion == "aceptar":
             if tipo_rol == 4:       # Líder de Área
                 nuevo_estado = 19   # Pendiente RH

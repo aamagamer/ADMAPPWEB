@@ -72,8 +72,8 @@ function aplicarFiltroUnico() {
       perm = permisosData.filter(i => i.estado_id === 2);
       break;
     case "rechazadas":
-      vac = vacacionesData.filter(i => i.estado_id === 1);
-      perm = permisosData.filter(i => i.estado_id === 1);
+      vac = vacacionesData.filter(i => i.estado_id === 1 || i.estado_id === 22);
+      perm = permisosData.filter(i => i.estado_id === 1 || i.estado_id === 22);
       break;
     case "vacaciones-activas":
       vac = vacacionesData.filter(i => i.estado_id === 2 && estaActiva(i.fecha_salida, i.fecha_regreso));

@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
   } else {
     console.warn("idUsuario no encontrado en localStorage. No se puede obtener el rol del usuario o las solicitudes.")
-    // Opcionalmente, redirigir al login o mostrar un mensaje
+    
   }
 })
 
