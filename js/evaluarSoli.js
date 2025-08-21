@@ -391,239 +391,212 @@ async function generarPDFVacaciones(datos) {
             return new Date(fechaString)
         }
 
+        // Configuración de colores y estilos
         const colores = {
             azulPrincipal: [44, 30, 135],
+            azulClaro: [66, 100, 255],
             grisTexto: [52, 58, 64],
             grisClaro: [248, 249, 250],
             verdeAprobado: [40, 167, 69],
-            blancoCrema: [250, 250, 250],
+            blanco: [255, 255, 255],
             grisLineas: [206, 212, 218],
         }
 
-        const titulo = "SOLICITUD DE VACACIONES"
-        const estado = "APROBADA"
-        const nombre = datos.nombre
+        // Configuración de márgenes y dimensiones
+        const margen = 20;
+        const anchoPagina = 210;
+        const anchoContenido = anchoPagina - (margen * 2);
+        let currentY = margen;
+
+        // Fondo del documento
+        doc.setFillColor(...colores.blanco);
+        doc.rect(0, 0, anchoPagina, 297, "F");
+
+        // Encabezado con gradiente
+        doc.setFillColor(...colores.azulPrincipal);
+        doc.rect(0, 0, anchoPagina, 50, "F");
+        
+        // Título
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("SOLICITUD DE VACACIONES", anchoPagina / 2, 25, { align: "center" });
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Departamento de Recursos Humanos", anchoPagina / 2, 35, { align: "center" });
+
+        currentY = 60;
+
+        // Información del empleado
+        doc.setFillColor(...colores.grisClaro);
+        doc.roundedRect(margen, currentY, anchoContenido, 25, 3, 3, "F");
+        doc.setTextColor(...colores.azulPrincipal);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("INFORMACIÓN DEL EMPLEADO", anchoPagina / 2, currentY + 8, { align: "center" });
+
+        currentY += 20;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFontSize(11);
+        doc.text("Nombre del empleado:", margen + 20, currentY + 8);
+        doc.setFont("helvetica", "bold");
+        doc.text(datos.nombre.toUpperCase(), margen + 70, currentY + 8);
+
+        currentY += 20;
+
+        // Período de vacaciones
+        doc.setFillColor(...colores.grisClaro);
+        doc.roundedRect(margen, currentY, anchoContenido, 25, 3, 3, "F");
+        doc.setTextColor(...colores.azulPrincipal);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("PERÍODO SOLICITADO", anchoPagina / 2, currentY + 8, { align: "center" });
+
+        currentY += 20;
+
+        // Fechas
         const inicio = crearFechaSegura(datos.inicio).toLocaleDateString("es-ES", {
             day: "2-digit",
             month: "long",
             year: "numeric",
-        })
+        });
         const fin = crearFechaSegura(datos.fin).toLocaleDateString("es-ES", {
             day: "2-digit",
             month: "long",
             year: "numeric",
-        })
+        });
+
         const fechaActual = new Date().toLocaleDateString("es-ES", {
             day: "2-digit",
             month: "long",
             year: "numeric",
-        })
+        });
 
-        // Fondo del documento
-        doc.setFillColor(...colores.blancoCrema)
-        doc.rect(0, 0, 210, 297, "F")
-
-        // Header
-        doc.setFillColor(...colores.azulPrincipal)
-        doc.rect(0, 0, 210, 40, "F")
-        doc.setFillColor(...colores.grisLineas)
-        doc.rect(0, 40, 210, 1, "F")
-
-        doc.setTextColor(255, 255, 255)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(22)
-        doc.text(titulo, 105, 20, { align: "center" })
-        doc.setFontSize(11)
-        doc.setFont("helvetica", "normal")
-        doc.text("Departamento de Recursos Humanos", 105, 30, { align: "center" })
-
-        // Sección de información del empleado
-        let currentY = 55
+        // Cajas de fechas
+        const anchoCaja = (anchoContenido - 10) / 2;
         
-        // Marco principal con altura optimizada
-        const alturaMarco = 70
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1.5)
-        doc.roundedRect(20, currentY, 170, alturaMarco, 2, 2, "S")
+        // Fecha de inicio
+        doc.setDrawColor(...colores.azulPrincipal);
+        doc.setFillColor(...colores.blanco);
+        doc.roundedRect(margen, currentY, anchoCaja, 30, 3, 3, "FD");
+        doc.setTextColor(...colores.azulPrincipal);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("FECHA DE INICIO", margen + (anchoCaja / 2), currentY + 8, { align: "center" });
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(inicio, margen + (anchoCaja / 2), currentY + 18, { align: "center" });
 
-        doc.setFillColor(...colores.grisClaro)
-        doc.roundedRect(20, currentY, 170, 20, 2, 2, "F")
-        doc.rect(20, currentY + 18, 170, 2, "F")
+        // Fecha de fin
+        doc.setDrawColor(...colores.azulPrincipal);
+        doc.setFillColor(...colores.blanco);
+        doc.roundedRect(margen + anchoCaja + 10, currentY, anchoCaja, 30, 3, 3, "FD");
+        doc.setTextColor(...colores.azulPrincipal);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("FECHA DE REGRESO", margen + anchoCaja + 10 + (anchoCaja / 2), currentY + 8, { align: "center" });
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(fin, margen + anchoCaja + 10 + (anchoCaja / 2), currentY + 18, { align: "center" });
 
-        doc.setTextColor(...colores.azulPrincipal)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(14)
-        doc.text("INFORMACIÓN DEL EMPLEADO", 105, currentY + 12, { align: "center" })
+        currentY += 40;
 
-        // Información del empleado
-        currentY += 30
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(11)
-        doc.text("EMPLEADO:", 30, currentY)
+        // Estado de la solicitud
+        doc.setFillColor(...colores.verdeAprobado);
+        doc.roundedRect(margen, currentY, anchoContenido, 15, 3, 3, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("SOLICITUD APROBADA", anchoPagina / 2, currentY + 10, { align: "center" });
 
-        doc.setFillColor(...colores.blancoCrema)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.roundedRect(30, currentY + 5, 150, 12, 2, 2, "FD")
+        currentY += 20;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(10);
+        doc.text(`Aprobado el: ${fechaActual}`, anchoPagina / 2, currentY, { align: "center" });
 
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(11)
-        doc.text(nombre.toUpperCase(), 35, currentY + 12)
+        currentY += 15;
 
-        // Mover después del marco de empleado
-        currentY = 55 + alturaMarco + 15
-
-        // Período de vacaciones
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(11)
-        doc.text("PERÍODO DE VACACIONES:", 30, currentY)
-
-        const cajaAltura = 25
-        const cajaY = currentY + 8
-
-        // Caja de fecha de inicio
-        doc.setFillColor(...colores.grisClaro)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.roundedRect(30, cajaY, 65, cajaAltura, 2, 2, "FD")
-
-        doc.setFillColor(255, 255, 255)
-        doc.roundedRect(30, cajaY, 65, 8, 2, 2, "F")
-        doc.rect(30, cajaY + 6, 65, 2, "F")
-
-        doc.setTextColor(...colores.azulPrincipal)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(9)
-        doc.text("FECHA DE INICIO", 62.5, cajaY + 6, { align: "center" })
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(9)
-        doc.text(inicio, 62.5, cajaY + 17, { align: "center" })
-
-        // Caja de fecha de regreso
-        doc.setFillColor(...colores.grisClaro)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.roundedRect(115, cajaY, 65, cajaAltura, 2, 2, "FD")
-
-        doc.setFillColor(255, 255, 255)
-        doc.roundedRect(115, cajaY, 65, 8, 2, 2, "F")
-        doc.rect(115, cajaY + 6, 65, 2, "F")
-
-        doc.setTextColor(...colores.azulPrincipal)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(9)
-        doc.text("FECHA DE REGRESO", 147.5, cajaY + 6, { align: "center" })
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(9)
-        doc.text(fin, 147.5, cajaY + 17, { align: "center" })
-
-        // Actualizar posición Y después de las cajas de fecha
-        currentY = cajaY + cajaAltura + 15
-
-        // Estado APROBADO
-        doc.setFillColor(...colores.verdeAprobado)
-        doc.roundedRect(75, currentY, 60, 12, 3, 3, "F")
-
-        doc.setTextColor(255, 255, 255)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(11)
-        doc.text(estado, 105, currentY + 8, { align: "center" })
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(9)
-        doc.text(`Aprobado el ${fechaActual}`, 105, currentY + 18, { align: "center" })
-
-        currentY += 30
-
-        // Sección de declaración formal (más compacta)
-        const alturaDeclaracion = 30
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.roundedRect(20, currentY, 170, alturaDeclaracion, 2, 2, "S")
-
-        doc.setFillColor(...colores.grisClaro)
-        doc.roundedRect(20, currentY, 170, 8, 2, 2, "F")
-        doc.rect(20, currentY + 6, 170, 2, "F")
-
-        doc.setTextColor(...colores.azulPrincipal)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(9)
-        doc.text("DECLARACIÓN DEL EMPLEADO", 105, currentY + 6, { align: "center" })
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(8)
-        const declaracion = `Declaro que yo ${nombre.toUpperCase()} solicité las vacaciones aquí mencionadas y tramitadas digitalmente, de acuerdo con lo establecido en la Ley Federal del Trabajo vigente.`
-        const lineasDeclaracion = doc.splitTextToSize(declaracion, 155)
-        doc.text(lineasDeclaracion, 25, currentY + 15)
-
-        currentY += alturaDeclaracion + 15
-
-        // Sección de firma y huella (más compacta y mejor posicionada)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(0.5)
+        // Declaración
+        doc.setDrawColor(...colores.grisLineas);
+        doc.setLineWidth(0.5);
+        doc.line(margen, currentY, margen + anchoContenido, currentY);
         
-        // Firma
-        doc.line(30, currentY, 85, currentY)
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(8)
-        doc.text("FIRMA DEL EMPLEADO", 57.5, currentY + 5, { align: "center" })
+        currentY += 10;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("DECLARACIÓN:", margen, currentY);
+        
+        currentY += 7;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        const declaracion = `Yo, ${datos.nombre.toUpperCase()}, declaro que la información proporcionada es verídica y que solicité estas vacaciones de acuerdo con lo establecido en la Ley Federal del Trabajo vigente.`;
+        const lineasDeclaracion = doc.splitTextToSize(declaracion, anchoContenido);
+        doc.text(lineasDeclaracion, margen, currentY);
+        
+        currentY += (lineasDeclaracion.length * 5) + 15;
 
-        // Huella (más cerca de la firma)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.rect(125, currentY - 8, 50, 20, "S")
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(8)
-        doc.text("HUELLA DACTILAR", 150, currentY + 5, { align: "center" })
+        // Firmas
+        const anchoFirma = (anchoContenido - 20) / 2;
+        
+        // Firma del empleado
+        doc.setDrawColor(...colores.grisLineas);
+        doc.setLineWidth(0.5);
+        doc.line(margen, currentY, margen + anchoFirma, currentY);
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("Firma y huella del empleado", margen + (anchoFirma / 2), currentY + 5, { align: "center" });
+        
+        // Firma y sello de RH
+        doc.setDrawColor(...colores.grisLineas);
+        doc.line(margen + anchoFirma + 20, currentY, margen + anchoFirma + 20 + anchoFirma, currentY);
+        doc.text("Firma y sello de Recursos Humanos", margen + anchoFirma + 20 + (anchoFirma / 2), currentY + 5, { align: "center" });
 
-        currentY += 20
+        currentY += 20;
 
         // Pie de página
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(0.5)
-        doc.line(20, currentY, 190, currentY)
+        doc.setDrawColor(...colores.grisLineas);
+        doc.setLineWidth(0.5);
+        doc.line(margen, currentY, margen + anchoContenido, currentY);
+        
+        currentY += 5;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text("Este documento es una autorización oficial para el período de vacaciones solicitado.", anchoPagina / 2, currentY, { align: "center" });
+        doc.text("Cualquier modificación debe ser notificada y aprobada por el Departamento de Recursos Humanos.", anchoPagina / 2, currentY + 5, { align: "center" });
 
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "italic")
-        doc.setFontSize(7)
-        doc.text(
-            "Este documento constituye la autorización oficial para el período de vacaciones solicitado.",
-            105,
-            currentY + 4,
-            { align: "center" }
-        )
-
-        const pdfBlob = doc.output("blob")
-        const nombreArchivo = `Solicitud_Vacaciones_${nombre.replace(/\s+/g, "_")}_ID${empleadoId || empleadoIdFallback}_${new Date().toISOString().split("T")[0]}.pdf`
+        // Generar y guardar el PDF
+        const pdfBlob = doc.output("blob");
+        const nombreArchivo = `Solicitud_Vacaciones_${datos.nombre.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
 
         if (window.showSaveFilePicker) {
-            const handle = await window.showSaveFilePicker({
-                suggestedName: nombreArchivo,
-                types: [{
-                    description: "Archivo PDF",
-                    accept: { "application/pdf": [".pdf"] }
-                }],
-            })
-            const writable = await handle.createWritable()
-            await writable.write(pdfBlob)
-            await writable.close()
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: nombreArchivo,
+                    types: [{
+                        description: "Archivo PDF",
+                        accept: { "application/pdf": [".pdf"] }
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(pdfBlob);
+                await writable.close();
+            } catch (err) {
+                // Fallback para navegadores que no soportan showSaveFilePicker
+                doc.save(nombreArchivo);
+            }
         } else {
-            doc.save(nombreArchivo)
+            doc.save(nombreArchivo);
         }
     } catch (error) {
-        console.error("Error al generar PDF de vacaciones:", error)
-        alert("Error al generar el PDF. Por favor, intenta nuevamente.")
+        console.error("Error al generar PDF de vacaciones:", error);
+        alert("Error al generar el PDF. Por favor, intenta nuevamente.");
     }
 }
 
@@ -651,234 +624,206 @@ async function generarPDFPermiso(datos) {
             return new Date(fechaString)
         }
 
+        // Configuración de colores y estilos
         const colores = {
             azulPrincipal: [44, 30, 135],
+            azulClaro: [66, 100, 255],
             grisTexto: [52, 58, 64],
             grisClaro: [248, 249, 250],
             verdeAprobado: [40, 167, 69],
-            blancoCrema: [250, 250, 250],
+            blanco: [255, 255, 255],
             grisLineas: [206, 212, 218],
         }
 
-        const titulo = "SOLICITUD DE PERMISO"
-        const estado = "APROBADA"
-        const nombre = datos.nombre
+        // Configuración de márgenes y dimensiones
+        const margen = 20;
+        const anchoPagina = 210;
+        const anchoContenido = anchoPagina - (margen * 2);
+        let currentY = margen;
+
+        // Fondo del documento
+        doc.setFillColor(...colores.blanco);
+        doc.rect(0, 0, anchoPagina, 297, "F");
+
+        // Encabezado con gradiente
+        doc.setFillColor(...colores.azulPrincipal);
+        doc.rect(0, 0, anchoPagina, 50, "F");
+        
+        // Título
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("SOLICITUD DE PERMISO", anchoPagina / 2, 25, { align: "center" });
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Departamento de Recursos Humanos", anchoPagina / 2, 35, { align: "center" });
+
+        currentY = 60;
+
+        // Información del empleado
+        doc.setFillColor(...colores.grisClaro);
+        doc.roundedRect(margen, currentY, anchoContenido, 25, 3, 3, "F");
+        doc.setTextColor(...colores.azulPrincipal);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("INFORMACIÓN DEL EMPLEADO", anchoPagina / 2, currentY + 8, { align: "center" });
+
+        currentY += 20;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFontSize(11);
+        doc.text("Nombre del empleado:", margen + 5, currentY + 8);
+        doc.setFont("helvetica", "bold");
+        doc.text(datos.nombre.toUpperCase(), margen + 50, currentY + 8);
+
+        currentY += 20;
+
+        // Detalles del permiso
+        doc.setFillColor(...colores.grisClaro);
+        doc.roundedRect(margen, currentY, anchoContenido, 25, 3, 3, "F");
+        doc.setTextColor(...colores.azulPrincipal);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("DETALLES DEL PERMISO", anchoPagina / 2, currentY + 8, { align: "center" });
+
+        currentY += 20;
+
+        // Fecha del permiso
         const fechaPermiso = crearFechaSegura(datos.fecha).toLocaleDateString("es-ES", {
             day: "2-digit",
             month: "long",
             year: "numeric",
-        })
-        const horarioInicio = datos.inicio
-        const horarioFin = datos.fin
-        const razon = datos.razon
-        const compensacion = datos.compensacion
+        });
+        
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFontSize(11);
+        doc.text("Fecha:", margen + 5, currentY + 8);
+        doc.setFont("helvetica", "bold");
+        doc.text(fechaPermiso, margen + 20, currentY + 8);
+
+        // Horario
+        doc.setFont("helvetica", "normal");
+        doc.text("Horario:", margen + 100, currentY + 8);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${datos.inicio} - ${datos.fin}`, margen + 120, currentY + 8);
+
+        currentY += 15;
+
+        // Motivo
+        doc.setFont("helvetica", "normal");
+        doc.text("Motivo:", margen + 5, currentY + 8);
+        const motivoLineas = doc.splitTextToSize(datos.razon, anchoContenido - 30);
+        doc.setFont("helvetica", "bold");
+        doc.text(motivoLineas, margen + 20, currentY + 8);
+        currentY += (motivoLineas.length * 5) + 10;
+
+        // Compensación
+        doc.setFont("helvetica", "normal");
+        doc.text("Compensación:", margen + 5, currentY + 8);
+        const compensacionLineas = doc.splitTextToSize(datos.compensacion, anchoContenido - 30);
+        doc.setFont("helvetica", "bold");
+        doc.text(compensacionLineas, margen + 35, currentY + 8);
+        currentY += (compensacionLineas.length * 5) + 20;
+
+        // Estado de la solicitud
         const fechaActual = new Date().toLocaleDateString("es-ES", {
             day: "2-digit",
             month: "long",
             year: "numeric",
-        })
+        });
 
-        // Fondo del documento
-        doc.setFillColor(...colores.blancoCrema)
-        doc.rect(0, 0, 210, 297, "F")
+        doc.setFillColor(...colores.verdeAprobado);
+        doc.roundedRect(margen, currentY, anchoContenido, 15, 3, 3, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("SOLICITUD APROBADA", anchoPagina / 2, currentY + 10, { align: "center" });
 
-        // Header
-        doc.setFillColor(...colores.azulPrincipal)
-        doc.rect(0, 0, 210, 40, "F")
-        doc.setFillColor(...colores.grisLineas)
-        doc.rect(0, 40, 210, 1, "F")
+        currentY += 20;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(10);
+        doc.text(`Aprobado el: ${fechaActual}`, anchoPagina / 2, currentY, { align: "center" });
 
-        doc.setTextColor(255, 255, 255)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(22)
-        doc.text(titulo, 105, 20, { align: "center" })
-        doc.setFontSize(11)
-        doc.setFont("helvetica", "normal")
-        doc.text("Departamento de Recursos Humanos", 105, 30, { align: "center" })
+        currentY += 15;
 
-        // Sección de información del empleado
-        let currentY = 55
+        // Declaración
+        doc.setDrawColor(...colores.grisLineas);
+        doc.setLineWidth(0.5);
+        doc.line(margen, currentY, margen + anchoContenido, currentY);
         
-        // Calcular altura dinámica basada en contenido
-        const motivoLineas = doc.splitTextToSize(razon, 110)
-        const compensacionLineas = doc.splitTextToSize(compensacion, 110)
-        const alturaContenidoVariable = (motivoLineas.length * 4) + (compensacionLineas.length * 4)
-        const alturaMarco = Math.max(90, 70 + alturaContenidoVariable) // Altura más compacta
+        currentY += 10;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("DECLARACIÓN:", margen, currentY);
         
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1.5)
-        doc.roundedRect(20, currentY, 170, alturaMarco, 2, 2, "S")
-
-        doc.setFillColor(...colores.grisClaro)
-        doc.roundedRect(20, currentY, 170, 20, 2, 2, "F")
-        doc.rect(20, currentY + 18, 170, 2, "F")
-
-        doc.setTextColor(...colores.azulPrincipal)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(14)
-        doc.text("INFORMACIÓN DEL EMPLEADO Y PERMISO", 105, currentY + 12, { align: "center" })
-
-        // Información del empleado
-        currentY += 30
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(11)
-        doc.text("EMPLEADO:", 30, currentY)
-
-        doc.setFillColor(...colores.blancoCrema)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.roundedRect(30, currentY + 5, 150, 12, 2, 2, "FD")
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(11)
-        doc.text(nombre.toUpperCase(), 35, currentY + 12)
-
-        currentY += 25
-
-        // Separador
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(0.5)
-        doc.line(30, currentY, 180, currentY)
-        currentY += 10
-
-        // Detalles del permiso
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(11)
-        doc.text("DETALLES DEL PERMISO:", 30, currentY)
-        currentY += 8
-
-        // Fecha
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(10)
-        doc.text("Fecha:", 30, currentY)
-        doc.setFont("helvetica", "normal")
-        doc.text(fechaPermiso, 70, currentY)
-        currentY += 7
-
-        // Horario
-        doc.setFont("helvetica", "bold")
-        doc.text("Horario:", 30, currentY)
-        doc.setFont("helvetica", "normal")
-        doc.text(`${horarioInicio} - ${horarioFin}`, 70, currentY)
-        currentY += 7
-
-        // Motivo
-        doc.setFont("helvetica", "bold")
-        doc.text("Motivo:", 30, currentY)
-        doc.setFont("helvetica", "normal")
-        doc.text(motivoLineas, 70, currentY)
-        currentY += (motivoLineas.length * 4)
-
-        // Compensación
-        doc.setFont("helvetica", "bold")
-        doc.text("Compensación:", 30, currentY)
-        doc.setFont("helvetica", "normal")
-        doc.text(compensacionLineas, 70, currentY)
-
-        // Mover después del marco completo
-        currentY = 55 + alturaMarco + 15
-
-        // Estado APROBADO
-        doc.setFillColor(...colores.verdeAprobado)
-        doc.roundedRect(75, currentY, 60, 12, 3, 3, "F")
-
-        doc.setTextColor(255, 255, 255)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(11)
-        doc.text(estado, 105, currentY + 8, { align: "center" })
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(9)
-        doc.text(`Aprobado el ${fechaActual}`, 105, currentY + 18, { align: "center" })
-
-        currentY += 25
-
-        // Sección de declaración formal (más compacta)
-        const alturaDeclaracion = 28
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.roundedRect(20, currentY, 170, alturaDeclaracion, 2, 2, "S")
-
-        doc.setFillColor(...colores.grisClaro)
-        doc.roundedRect(20, currentY, 170, 8, 2, 2, "F")
-        doc.rect(20, currentY + 6, 170, 2, "F")
-
-        doc.setTextColor(...colores.azulPrincipal)
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(9)
-        doc.text("DECLARACIÓN DEL EMPLEADO", 105, currentY + 6, { align: "center" })
-
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(8)
-        const declaracion = `Declaro que yo ${nombre.toUpperCase()} solicité el permiso aquí mencionado y tramitado digitalmente, de acuerdo con lo establecido en la Ley Federal del Trabajo vigente.`
-        const lineasDeclaracion = doc.splitTextToSize(declaracion, 155)
-        doc.text(lineasDeclaracion, 25, currentY + 15)
-
-        currentY += alturaDeclaracion + 12
-
-        // Sección de firma y huella (más compacta y mejor posicionada)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(0.5)
+        currentY += 7;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        const declaracion = `Yo, ${datos.nombre.toUpperCase()}, declaro que la información proporcionada es verídica y que solicité este permiso de acuerdo con lo establecido en la Ley Federal del Trabajo vigente.`;
+        const lineasDeclaracion = doc.splitTextToSize(declaracion, anchoContenido);
+        doc.text(lineasDeclaracion, margen, currentY);
         
-        // Firma
-        doc.line(30, currentY, 85, currentY)
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(8)
-        doc.text("FIRMA DEL EMPLEADO", 57.5, currentY + 5, { align: "center" })
+        currentY += (lineasDeclaracion.length * 5) + 15;
 
-        // Huella (más cerca de la firma)
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(1)
-        doc.rect(125, currentY - 8, 50, 20, "S")
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "normal")
-        doc.setFontSize(8)
-        doc.text("HUELLA DACTILAR", 150, currentY + 5, { align: "center" })
+        // Firmas
+        const anchoFirma = (anchoContenido - 20) / 2;
+        
+        // Firma del empleado
+        doc.setDrawColor(...colores.grisLineas);
+        doc.setLineWidth(0.5);
+        doc.line(margen, currentY, margen + anchoFirma, currentY);
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("Firma y huella del empleado", margen + (anchoFirma / 2), currentY + 5, { align: "center" });
+        
+        // Firma y sello de RH
+        doc.setDrawColor(...colores.grisLineas);
+        doc.line(margen + anchoFirma + 20, currentY, margen + anchoFirma + 20 + anchoFirma, currentY);
+        doc.text("Firma y sello de Recursos Humanos", margen + anchoFirma + 20 + (anchoFirma / 2), currentY + 5, { align: "center" });
 
-        currentY += 20
+        currentY += 20;
 
         // Pie de página
-        doc.setDrawColor(...colores.grisLineas)
-        doc.setLineWidth(0.5)
-        doc.line(20, currentY, 190, currentY)
+        doc.setDrawColor(...colores.grisLineas);
+        doc.setLineWidth(0.5);
+        doc.line(margen, currentY, margen + anchoContenido, currentY);
+        
+        currentY += 5;
+        doc.setTextColor(...colores.grisTexto);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text("Este documento es una autorización oficial para el permiso solicitado.", anchoPagina / 2, currentY, { align: "center" });
+        doc.text("Cualquier modificación debe ser notificada y aprobada por el Departamento de Recursos Humanos.", anchoPagina / 2, currentY + 5, { align: "center" });
 
-        doc.setTextColor(...colores.grisTexto)
-        doc.setFont("helvetica", "italic")
-        doc.setFontSize(7)
-        doc.text(
-            "Este documento constituye la autorización oficial para el período de permiso solicitado.",
-            105,
-            currentY + 4,
-            { align: "center" }
-        )
-
-        const pdfBlob = doc.output("blob")
-        const nombreArchivo = `Solicitud_Permiso_${nombre.replace(/\s+/g, "_")}_ID${empleadoId || empleadoIdFallback}_${new Date().toISOString().split("T")[0]}.pdf`
+        // Generar y guardar el PDF
+        const pdfBlob = doc.output("blob");
+        const nombreArchivo = `Solicitud_Permiso_${datos.nombre.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
 
         if (window.showSaveFilePicker) {
-            const handle = await window.showSaveFilePicker({
-                suggestedName: nombreArchivo,
-                types: [{
-                    description: "Archivo PDF",
-                    accept: { "application/pdf": [".pdf"] }
-                }],
-            })
-            const writable = await handle.createWritable()
-            await writable.write(pdfBlob)
-            await writable.close()
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: nombreArchivo,
+                    types: [{
+                        description: "Archivo PDF",
+                        accept: { "application/pdf": [".pdf"] }
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(pdfBlob);
+                await writable.close();
+            } catch (err) {
+                // Fallback para navegadores que no soportan showSaveFilePicker
+                doc.save(nombreArchivo);
+            }
         } else {
-            doc.save(nombreArchivo)
+            doc.save(nombreArchivo);
         }
     } catch (error) {
-        console.error("Error al generar PDF de permiso:", error)
-        alert("Error al generar el PDF. Por favor, intenta nuevamente.")
+        console.error("Error al generar PDF de permiso:", error);
+        alert("Error al generar el PDF. Por favor, intenta nuevamente.");
     }
 }
 
