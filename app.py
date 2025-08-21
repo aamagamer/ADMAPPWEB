@@ -274,7 +274,33 @@ def insertar_area():
     finally:
         cursor.close()
         conn.close()
-       
+
+@app.route('/api/agregarAcceso', methods=['POST'])
+def insertar_acceso():
+    data = request.get_json()  # Recibimos los datos en formato JSON desde el cliente
+
+    nombreAcceso = data.get('Acceso')  # Extraemos el campo 'Acceso' del JSON
+
+    if not nombreAcceso:  # Validamos que no venga vacío
+        return jsonify({'error': 'Faltan datos'}), 400
+
+    try:
+        conn = get_connection()   # Abrimos conexión a la BD
+        cursor = conn.cursor()
+
+        # Query parametrizada para evitar inyección SQL
+        cursor.execute("INSERT INTO Acceso (NombreAcceso) VALUES (?)", (nombreAcceso,))
+        conn.commit()  # Guardamos los cambios en la BD
+
+        return jsonify({'mensaje': 'Acceso ingresado correctamente'}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 
 
 @app.route('/')
@@ -1818,7 +1844,6 @@ def obtener_reportes_usuarios():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
     finally:
         cursor.close()
         conn.close()
