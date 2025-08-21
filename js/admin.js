@@ -602,6 +602,27 @@ const API = {
     }
   },
 
+  async agregarEmpresa(nombreEmpresa) {
+    try {
+      const response = await fetch("/api/agregarAcceso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Acceso: nombreEmpresa }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al guardar la empresa");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("❌ Error al agregar empresa:", error);
+      throw error;
+    }
+  },
+
   // Cargar empleado por ID
   async cargarEmpleado(id) {
     const response = await fetch(`/api/empleado/${id}`);
@@ -1772,6 +1793,9 @@ window.navigateToOption = (url) => Dropdown.navigateToOption(url);
 window.toggleAreas = (context) => Areas.toggle(context);
 window.abrirModalAltaEmpleado = () =>
   Modales.toggle("add-employee-modal", true);
+window.abrirModalAgregarEmpresa = () => {
+  Modales.toggle("add-empresa-modal", true);
+};
 window.cerrarModalAltaEmpleado = () =>
   Modales.toggle("add-employee-modal", false);
 window.abrirModalExportarExcel = () => ExportarExcel.abrir(); // CORREGIDO
@@ -1809,6 +1833,14 @@ window.abrirModalMes = () => {
   const mesActual = new Date().getMonth() + 1;
   selectMes.value = mesActual;
   Empleados.cargarPorMes(mesActual);
+};
+window.cerrarModalAgregarEmpresa = () => {
+  Modales.toggle("add-empresa-modal", false);
+  // Limpiar formulario
+  const form = document.getElementById("empresa-form");
+  if (form) {
+    form.reset();
+  }
 };
 window.logout = () => {
   localStorage.removeItem("idUsuario");
@@ -2171,6 +2203,64 @@ function setupOtherForms() {
       } catch (error) {
         console.error("Error:", error);
         alert("Error al guardar el día festivo: " + error.message);
+      }
+    });
+  }
+
+   const empresaForm = document.getElementById("empresa-form");
+  if (empresaForm) {
+    empresaForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nombreEmpresa = document.getElementById("nombreEmpresa").value.trim();
+
+      if (!nombreEmpresa) {
+        Swal.fire({
+          icon: "warning",
+          title: "Campo requerido",
+          text: "Por favor ingresa el nombre de la empresa",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "Aceptar",
+        });
+        return;
+      }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Guardando...";
+
+      try {
+        const resultado = await API.agregarEmpresa(nombreEmpresa);
+        
+        Swal.fire({
+          icon: "success",
+          title: "Empresa agregada",
+          text: resultado.mensaje,
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "Aceptar",
+        }).then(() => {
+          // Cerrar modal y limpiar formulario
+          Modales.toggle("add-empresa-modal", false);
+          document.getElementById("empresa-form").reset();
+          
+          // Recargar las empresas en los selects
+          API.cargarEmpresas();
+          API.cargarEmpresasParaEditar();
+        });
+
+      } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error al agregar empresa",
+          text: error.message,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "Aceptar",
+        });
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
       }
     });
   }

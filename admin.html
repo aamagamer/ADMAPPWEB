@@ -228,6 +228,14 @@
             </div>
           </div>
 
+          <div class="dropdown-item" onclick="abrirModalAgregarEmpresa()">
+            <i class="bi bi-building dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Empresa</div>
+              <div class="dropdown-item-description">Agregar Empresa colaboradora</div>
+            </div>
+          </div>
+
           <div class="dropdown-item" onclick="abrirModalAgregarFestivo()">
             <i class="bi bi-calendar-plus dropdown-item-icon"></i>
             <div class="dropdown-item-content">
@@ -1094,6 +1102,37 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal para agregar Empresa -->
+<div id="add-empresa-modal" class="modal hidden">
+  <div class="modal-content add-employee-modal">
+    <span class="close" onclick="cerrarModalAgregarEmpresa()">&times;</span>
+    <h2>Agregar Empresa colaboradora</h2>
+    <form id="empresa-form" class="add-employee-form">
+      <div class="form-group">
+        <label for="nombreEmpresa">Nombre de la empresa:</label>
+        <input
+          type="text"
+          id="nombreEmpresa"
+          name="nombreEmpresa"
+          required
+          placeholder="Ej. Stellantis"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalAgregarEmpresa()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Agregar Empresa</button>
+      </div>
+    </form>
+  </div>
+</div>
 
     
     <!-- Modal para exportar a Excel (actualizado) -->
