@@ -607,6 +607,107 @@ def actualizar_estado_permiso():
         if conn:
             conn.close()
 
+@app.route('/api/aprobacionesHoy/<int:id_usuario>', methods=['GET'])
+def aprobaciones_hoy(id_usuario):
+    conn = None
+    cursor = None
+    try:
+        if not id_usuario:
+            return jsonify({"error": "Se requiere idUsuario"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Obtener rol del usuario
+        cursor.execute("SELECT Rol_idRol FROM Usuario WHERE idUsuario = ?", (id_usuario,))
+        rol_row = cursor.fetchone()
+        if not rol_row:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        tipo_rol = rol_row[0]
+
+        # --------------------
+        # Vacaciones aprobadas hoy
+        # --------------------
+        query_vacaciones = """
+            SELECT v.idVacaciones, v.FechaSalida, v.FechaRegreso,
+                   u.Nombres, u.Paterno, u.Materno
+            FROM Vacaciones v
+            JOIN Usuario u ON v.Usuario_idUsuario = u.idUsuario
+            JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+            WHERE ua.idArea IN (
+                SELECT ua2.idArea
+                FROM Usuario_Area ua2
+                WHERE ua2.idUsuario = ?
+            )
+            AND v.EstadoSolicitud_idSolicitud = 2
+            AND CAST(v.FechaEvaluacion AS DATE) = CAST(GETDATE() AS DATE)
+        """
+        cursor.execute(query_vacaciones, (id_usuario,))
+        rows_vac = cursor.fetchall()
+
+        vacaciones = [{
+            "idVacaciones": row[0],
+            "FechaSalida": row[1].strftime('%Y-%m-%d') if row[1] else "",
+            "FechaRegreso": row[2].strftime('%Y-%m-%d') if row[2] else "",
+            "Nombres": row[3] or "",
+            "Paterno": row[4] or "",
+            "Materno": row[5] or ""
+        } for row in rows_vac]
+
+        # --------------------
+        # Permisos aprobados hoy
+        # --------------------
+        query_permisos = """
+            SELECT p.idPermiso, p.DiaSolicitado, p.HoraInicio, p.HoraFin, p.Razon,
+                   ISNULL(c.TipoCompensacion,'Sin compensación') AS TipoCompensacion,
+                   u.Nombres, u.Paterno, u.Materno
+            FROM Permiso p
+            JOIN Usuario u ON p.Usuario_idUsuario = u.idUsuario
+            JOIN Usuario_Area ua ON ua.idUsuario = u.idUsuario
+            LEFT JOIN Compensacion c ON p.Compensacion_idCompensacion = c.idCompensacion
+            WHERE ua.idArea IN (
+                SELECT ua2.idArea
+                FROM Usuario_Area ua2
+                WHERE ua2.idUsuario = ?
+            )
+            AND p.EstadoSolicitud_idSolicitud = 2
+            AND CAST(p.FechaEvaluacion AS DATE) = CAST(GETDATE() AS DATE)
+        """
+        cursor.execute(query_permisos, (id_usuario,))
+        rows_perm = cursor.fetchall()
+
+        permisos = [{
+            "idPermiso": row[0],
+            "DiaSolicitado": row[1].strftime('%Y-%m-%d') if row[1] else "",
+            "HoraInicio": row[2].strftime('%H:%M') if row[2] else "",
+            "HoraFin": row[3].strftime('%H:%M') if row[3] else "",
+            "Razon": row[4] or "",
+            "TipoCompensacion": row[5] or "Sin compensación",
+            "Nombres": row[6] or "",
+            "Paterno": row[7] or "",
+            "Materno": row[8] or ""
+        } for row in rows_perm]
+
+        return jsonify({
+            "vacacionesAprobadasHoy": len(vacaciones),
+            "permisosAprobadosHoy": len(permisos),
+            "vacaciones": vacaciones,
+            "permisos": permisos
+        })
+
+    except Exception as e:
+        print("❌ ERROR EN /api/aprobacionesHoy:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+
+
 
 @app.route('/api/empleado/<int:id>', methods=['GET'])
 def obtener_empleado(id):
