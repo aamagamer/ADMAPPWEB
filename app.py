@@ -15,6 +15,7 @@ import atexit
 from functools import wraps
 from decimal import Decimal
 
+
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
@@ -504,10 +505,11 @@ def actualizar_estado_solicitud():
         else:
             return jsonify({"error": "Acción inválida"}), 400
 
-        # Actualizar estado
+        # Actualizar estado Y fecha de evaluación
         cursor.execute("""
             UPDATE Vacaciones
-            SET EstadoSolicitud_idSolicitud = ?
+            SET EstadoSolicitud_idSolicitud = ?, 
+                FechaEvaluacion = CAST(GETDATE() AS DATE)
             WHERE idVacaciones = ?
         """, (nuevo_estado, id_vacacion))
 
@@ -583,10 +585,11 @@ def actualizar_estado_permiso():
         else:
             return jsonify({"error": "Acción inválida"}), 400
 
-        # Actualizar el estado de la solicitud
+        # Actualizar el estado del permiso Y fecha de evaluación
         cursor.execute("""
             UPDATE Permiso
-            SET EstadoSolicitud_idSolicitud = ?
+            SET EstadoSolicitud_idSolicitud = ?,
+                FechaEvaluacion = CAST(GETDATE() AS DATE)
             WHERE idPermiso = ?
         """, (nuevo_estado, id_permiso))
 
