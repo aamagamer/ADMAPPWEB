@@ -11,6 +11,7 @@ from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 from functools import wraps
 from decimal import Decimal
 
@@ -3234,13 +3235,13 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     actualizar_vacaciones_automaticamente,
     trigger='cron',  # Ejecución programada
-    hour=9,          # A las 8:00 AM (ajusta la hora según necesites)
-    minute=5,
+    hour=9,         
+    minute=36,
 )
 scheduler.start()
 
 # Detener el scheduler al cerrar la aplicación
-import atexit
+
 atexit.register(lambda: scheduler.shutdown())
 
 
