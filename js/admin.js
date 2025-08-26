@@ -1289,7 +1289,16 @@ const DiasFestivos = {
 
         const item = document.createElement("div");
         item.classList.add("festivo-item");
-        item.innerHTML = `<strong>${fechaFormateada}</strong>: ${festivo.descripcion}`;
+        item.innerHTML = `
+          <div class="festivo-contenido">
+            <strong>${fechaFormateada}</strong>: ${festivo.descripcion}
+          </div>
+          <button class="btn btn-danger btn-sm eliminar-festivo" 
+                  title="Eliminar" 
+                  onclick="DiasFestivos.eliminar(${festivo.id})">
+            🗑️
+          </button>
+        `;
         lista.appendChild(item);
       });
     } catch (error) {
@@ -1298,7 +1307,51 @@ const DiasFestivos = {
         "<p>Error al cargar los días festivos. Intenta nuevamente más tarde.</p>";
     }
   },
+
+  // Eliminar un día festivo
+  async eliminar(id) {
+    const confirmacion = await Swal.fire({
+      title: "¿Eliminar día festivo?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    try {
+      const response = await fetch(`/api/diasfestivos/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Error al eliminar");
+
+      await Swal.fire({
+        title: "Eliminado",
+        text: data.mensaje,
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+      });
+
+      this.cargar(); // recargar la lista después de eliminar
+    } catch (err) {
+      console.error("Error al eliminar día festivo:", err);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo eliminar el día festivo.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  },
 };
+
+
 
 // ===== EXPORTACIÓN EXCEL (CORREGIDO) =====
 const ExportarExcel = {

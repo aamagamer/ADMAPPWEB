@@ -1085,6 +1085,27 @@ input.invalid {
   display: none;
   font-weight: 500;
 }
+.festivo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.festivo-item .eliminar-festivo {
+  background: #e74c3c;
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.festivo-item .eliminar-festivo:hover {
+  background: #c0392b;
+}
+
 
 /* Estilos para inputs válidos después de corrección */
 .campo-valido {

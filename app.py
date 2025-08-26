@@ -231,14 +231,18 @@ def obtener_dias_festivos():
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT fecha, descripcion
+            SELECT id, fecha, descripcion
             FROM DiasFestivos
             WHERE anio = ?
-        """, anio)
+        """, (anio,))
 
         rows = cursor.fetchall()
         resultado = [
-            {"fecha": row.fecha.strftime('%Y-%m-%d'), "descripcion": row.descripcion}
+            {
+                "id": row.id,
+                "fecha": row.fecha.strftime('%Y-%m-%d'),
+                "descripcion": row.descripcion
+            }
             for row in rows
         ]
 
@@ -250,6 +254,28 @@ def obtener_dias_festivos():
     finally:
         cursor.close()
         conn.close()
+
+@app.route('/api/diasfestivos/<int:id>', methods=['DELETE'])
+def eliminar_dia_festivo(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM DiasFestivos WHERE id = ?", (id,))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Día festivo no encontrado"}), 404
+
+        return jsonify({"mensaje": "Día festivo eliminado correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 
 
 
@@ -900,8 +926,8 @@ def agregar_empleado():
             float(data.get('Mensual', 0)),
             int(data.get('Vacaciones', 0)),
             int(data.get('diasDisponibles', 0)),
-            acceso_id,        # 🔧 Puede ser None
-            numero_acceso     # 🔧 Puede ser None
+            acceso_id,       
+            numero_acceso     
         ))
 
         # Manejar áreas
