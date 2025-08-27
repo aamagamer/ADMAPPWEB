@@ -202,7 +202,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
-document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
     // Obtener el idUsuario desde localStorage
     window.currentUserId = getCurrentUserId();
     
@@ -211,16 +211,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Inicializar las tablas
-    initReportesTable();
-    initVacacionesTable();
-    initPermisosTable();
-    initActasTable();
-    initIncapacidadesTable();
-    
-    // Cargar datos iniciales
-    loadReportes();
+    // Verificar si el usuario es admin antes de inicializar las tablas
+    verificarAdmin().then(esAdmin => {
+        window.esAdmin = esAdmin;
+        
+        // Inicializar las tablas con o sin botones de eliminar
+        initReportesTable();
+        initVacacionesTable();
+        initPermisosTable();
+        initActasTable();
+        initIncapacidadesTable();
+        
+        // Cargar datos iniciales
+        loadReportes();
+    });
 });
+
+// Función para verificar si el usuario es administrador
+async function verificarAdmin() {
+    try {
+        const response = await fetch(`/api/es_admin/${window.currentUserId}`);
+        const data = await response.json();
+        return data.esAdmin || false;
+    } catch (error) {
+        console.error('Error al verificar admin:', error);
+        return false;
+    }
+}
 
 // Función para obtener el ID del usuario desde localStorage
 function getCurrentUserId() {
@@ -230,7 +247,100 @@ function getCurrentUserId() {
 // Función para mostrar errores al usuario
 function mostrarError(mensaje) {
     console.error(mensaje);
-    alert(mensaje); // Puedes reemplazar por tu sistema de notificaciones
+    alert(mensaje);
+}
+
+// Función para confirmar eliminación
+function confirmarEliminacion(tipo, id, callback) {
+    if (confirm(`¿Estás seguro de que deseas eliminar este ${tipo}? Esta acción no se puede deshacer.`)) {
+        callback(id);
+    }
+}
+
+// Funciones de eliminación
+function eliminarReporte(id) {
+    fetch(`/api/reportes/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Reporte eliminado correctamente');
+                loadReportes(); // Recargar la tabla
+            } else {
+                alert('Error al eliminar el reporte: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el reporte');
+        });
+}
+
+function eliminarVacacion(id) {
+    fetch(`/api/vacaciones/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Vacación eliminada correctamente');
+                loadVacaciones();
+            } else {
+                alert('Error al eliminar la vacación: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar la vacación');
+        });
+}
+
+function eliminarPermiso(id) {
+    fetch(`/api/permisos/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Permiso eliminado correctamente');
+                loadPermisos();
+            } else {
+                alert('Error al eliminar el permiso: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el permiso');
+        });
+}
+
+function eliminarActa(id) {
+    fetch(`/api/actas/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Acta eliminada correctamente');
+                loadActas();
+            } else {
+                alert('Error al eliminar el acta: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el acta');
+        });
+}
+
+function eliminarIncapacidad(id) {
+    fetch(`/api/incapacidades/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Incapacidad eliminada correctamente');
+                loadIncapacidades();
+            } else {
+                alert('Error al eliminar la incapacidad: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar la incapacidad');
+        });
 }
 
 // Función mejorada para parsear fechas correctamente
@@ -372,206 +482,416 @@ function limpiarFiltroFechas(tabla) {
 }
 
 function initReportesTable() {
+    const columns = [
+        { data: 'idReporte' },
+        { 
+            data: null,
+            render: function(data) {
+                return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+            }
+        },
+        { data: 'Observaciones' },
+        { data: 'TipoAsunto' },
+        { 
+            data: 'FechaReporte',
+            render: function(data) {
+                return new Date(data).toLocaleDateString('es-ES');
+            },
+            type: 'date'
+        }
+    ];
+
+    // Agregar columna de acciones solo si es admin
+    if (window.esAdmin) {
+        columns.push({
+            data: null,
+            render: function(data) {
+                return `<button onclick="confirmarEliminacion('reporte', ${data.idReporte}, eliminarReporte)" 
+                        class="btn-eliminar" style="background-color:#dc3545; color:white; border:none; 
+                        padding:5px 10px; border-radius:4px; cursor:pointer;">
+                        <i class="fas fa-trash"></i> Eliminar
+                        </button>`;
+            },
+            orderable: false,
+            searchable: false,
+            className: 'no-export'
+        });
+    }
+
     window.reportesTable = $('#reportes-table').DataTable({
         dom: 'Bfrtip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf'
+            {
+                extend: 'copy',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'csv',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'excel',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'pdf',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            }
         ],
         responsive: true,
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
-        columns: [
-            { data: 'idReporte' },
-            { 
-                data: null,
-                render: function(data) {
-                    return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
-                }
-            },
-            { data: 'Observaciones' },
-            { data: 'TipoAsunto' },
-            { 
-                data: 'FechaReporte',
-                render: function(data) {
-                    return new Date(data).toLocaleDateString('es-ES');
-                },
-                type: 'date'
-            }
-        ]
+        columns: columns
     });
 }
 
 function initVacacionesTable() {
+    const columns = [
+        { data: 'idVacaciones' },
+        { 
+            data: null,
+            render: function(data) {
+                return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+            }
+        },
+        { data: 'EstadoSolicitud' },
+        { data: 'DiasSolicitados' },
+        { 
+            data: 'FechaSalida',
+            render: function(data) {
+                return new Date(data).toLocaleDateString('es-ES');
+            },
+            type: 'date'
+        },
+        { 
+            data: 'FechaRegreso',
+            render: function(data) {
+                return new Date(data).toLocaleDateString('es-ES');
+            },
+            type: 'date'
+        }
+    ];
+
+    // Agregar columna de acciones solo si es admin
+    if (window.esAdmin) {
+        columns.push({
+            data: null,
+            render: function(data) {
+                return `<button onclick="confirmarEliminacion('vacación', ${data.idVacaciones}, eliminarVacacion)" 
+                        class="btn-eliminar" style="background-color:#dc3545; color:white; border:none; 
+                        padding:5px 10px; border-radius:4px; cursor:pointer;">
+                        <i class="fas fa-trash"></i> Eliminar
+                        </button>`;
+            },
+            orderable: false,
+            searchable: false,
+            className: 'no-export'
+        });
+    }
+
     window.vacacionesTable = $('#vacaciones-table').DataTable({
         dom: 'Bfrtip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf'
+            {
+                extend: 'copy',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'csv',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'excel',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'pdf',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            }
         ],
         responsive: true,
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
-        columns: [
-            { data: 'idVacaciones' },
-            { 
-                data: null,
-                render: function(data) {
-                    return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
-                }
-            },
-            { data: 'EstadoSolicitud' },
-            { data: 'DiasSolicitados' },
-            { 
-                data: 'FechaSalida',
-                render: function(data) {
-                    return new Date(data).toLocaleDateString('es-ES');
-                },
-                type: 'date'
-            },
-            { 
-                data: 'FechaRegreso',
-                render: function(data) {
-                    return new Date(data).toLocaleDateString('es-ES');
-                },
-                type: 'date'
-            }
-        ]
+        columns: columns
     });
 }
 
 function initPermisosTable() {
+    const columns = [
+        { data: 'idPermiso' },
+        { 
+            data: null,
+            render: function(data) {
+                return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
+            }
+        },
+        { data: 'EstadoSolicitud' },
+        { 
+            data: 'DiaSolicitado',
+            render: function(data) {
+                return new Date(data).toLocaleDateString('es-ES');
+            },
+            type: 'date'
+        },
+        { 
+            data: null,
+            render: function(data) {
+                return `${data.HoraInicio} - ${data.HoraFin}`;
+            }
+        },
+        { data: 'Razon' },
+        { data: 'TipoCompensacion' }
+    ];
+
+    // Agregar columna de acciones solo si es admin
+    if (window.esAdmin) {
+        columns.push({
+            data: null,
+            render: function(data) {
+                return `<button onclick="confirmarEliminacion('permiso', ${data.idPermiso}, eliminarPermiso)" 
+                        class="btn-eliminar" style="background-color:#dc3545; color:white; border:none; 
+                        padding:5px 10px; border-radius:4px; cursor:pointer;">
+                        <i class="fas fa-trash"></i> Eliminar
+                        </button>`;
+            },
+            orderable: false,
+            searchable: false,
+            className: 'no-export'
+        });
+    }
+
     window.permisosTable = $('#permisos-table').DataTable({
         dom: 'Bfrtip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf'
+            {
+                extend: 'copy',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'csv',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'excel',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'pdf',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            }
         ],
         responsive: true,
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
-        columns: [
-            { data: 'idPermiso' },
-            { 
-                data: null,
-                render: function(data) {
-                    return `${data.Nombres} ${data.Paterno} ${data.Materno}`;
-                }
-            },
-            { data: 'EstadoSolicitud' },
-            { 
-                data: 'DiaSolicitado',
-                render: function(data) {
-                    return new Date(data).toLocaleDateString('es-ES');
-                },
-                type: 'date'
-            },
-            { 
-                data: null,
-                render: function(data) {
-                    return `${data.HoraInicio} - ${data.HoraFin}`;
-                }
-            },
-            { data: 'Razon' },
-            { data: 'TipoCompensacion' }
-        ]
+        columns: columns
     });
 }
 
 function initActasTable() {
+    const columns = [
+        { 
+            data: null,
+            render: function(data) {
+                return `${data.nombres} ${data.paterno} ${data.materno}`;
+            }
+        },
+        { data: 'TipoAsunto' },
+        { 
+            data: 'FechaActa',
+            render: function(data) {
+                return new Date(data).toLocaleDateString('es-ES');
+            },
+            type: 'date'
+        },
+        { 
+            data: 'Comentario',
+            render: function(data) {
+                // Limitar la longitud del comentario para mejor visualización
+                if (data && data.length > 50) {
+                    return data.substring(0, 50) + '...';
+                }
+                return data || '';
+            }
+        }
+    ];
+
+    // Agregar columna de acciones solo si es admin (necesitarás el ID en los datos)
+    if (window.esAdmin) {
+        columns.push({
+            data: null,
+            render: function(data) {
+                return `<button onclick="confirmarEliminacion('acta', ${data.idActa || data.id}, eliminarActa)" 
+                        class="btn-eliminar" style="background-color:#dc3545; color:white; border:none; 
+                        padding:5px 10px; border-radius:4px; cursor:pointer;">
+                        <i class="fas fa-trash"></i> Eliminar
+                        </button>`;
+            },
+            orderable: false,
+            searchable: false,
+            className: 'no-export'
+        });
+    }
+
     window.actasTable = $('#actas-table').DataTable({
         dom: 'Bfrtip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf'
+            {
+                extend: 'copy',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'csv',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'excel',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'pdf',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            }
         ],
         responsive: true,
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
-        columns: [
-            { 
-                data: null,
-                render: function(data) {
-                    return `${data.nombres} ${data.paterno} ${data.materno}`;
-                }
-            },
-            { data: 'TipoAsunto' },
-            { 
-                data: 'FechaActa',
-                render: function(data) {
-                    return new Date(data).toLocaleDateString('es-ES');
-                },
-                type: 'date'
-            },
-            { 
-                data: 'Comentario',
-                render: function(data) {
-                    // Limitar la longitud del comentario para mejor visualización
-                    if (data && data.length > 50) {
-                        return data.substring(0, 50) + '...';
-                    }
-                    return data || '';
-                }
-            }
-        ]
+        columns: columns
     });
 }
 
 function initIncapacidadesTable() {
+    const columns = [
+        { data: 'idIncapacidad' },
+        { 
+            data: null,
+            render: function(data) {
+                return `${data.nombres} ${data.paterno} ${data.materno}`;
+            }
+        },
+        { data: 'tipo' },
+        { 
+            data: 'fechaInicio',
+            render: function(data) {
+                return data ? new Date(data).toLocaleDateString('es-ES') : '';
+            },
+            type: 'date'
+        },
+        { 
+            data: 'fechaFinal',
+            render: function(data) {
+                return data ? new Date(data).toLocaleDateString('es-ES') : '';
+            },
+            type: 'date'
+        },
+        {
+            data: null,
+            render: function(data) {
+                if (data.fechaInicio && data.fechaFinal) {
+                    const inicio = new Date(data.fechaInicio);
+                    const final = new Date(data.fechaFinal);
+                    const diferencia = Math.ceil((final - inicio) / (1000 * 60 * 60 * 24)) + 1;
+                    return diferencia + ' días';
+                }
+                return '';
+            }
+        },
+        { 
+            data: 'observaciones',
+            render: function(data) {
+                if (data && data.length > 50) {
+                    return data.substring(0, 50) + '...';
+                }
+                return data || '';
+            }
+        }
+    ];
+
+    // Agregar columna de acciones solo si es admin
+    if (window.esAdmin) {
+        columns.push({
+            data: null,
+            render: function(data) {
+                return `<button onclick="confirmarEliminacion('incapacidad', ${data.idIncapacidad}, eliminarIncapacidad)" 
+                        class="btn-eliminar" style="background-color:#dc3545; color:white; border:none; 
+                        padding:5px 10px; border-radius:4px; cursor:pointer;">
+                        <i class="fas fa-trash"></i> Eliminar
+                        </button>`;
+            },
+            orderable: false,
+            searchable: false,
+            className: 'no-export'
+        });
+    }
+
     window.incapacidadesTable = $('#incapacidades-table').DataTable({
         dom: 'Bfrtip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf'
+            {
+                extend: 'copy',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'csv',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'excel',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            },
+            {
+                extend: 'pdf',
+                exportOptions: {
+                    columns: ':not(.no-export)'
+                }
+            }
         ],
         responsive: true,
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
-        columns: [
-            { data: 'idIncapacidad' },
-            { 
-                data: null,
-                render: function(data) {
-                    return `${data.nombres} ${data.paterno} ${data.materno}`;
-                }
-            },
-            { data: 'tipo' },
-            { 
-                data: 'fechaInicio',
-                render: function(data) {
-                    return data ? new Date(data).toLocaleDateString('es-ES') : '';
-                },
-                type: 'date'
-            },
-            { 
-                data: 'fechaFinal',
-                render: function(data) {
-                    return data ? new Date(data).toLocaleDateString('es-ES') : '';
-                },
-                type: 'date'
-            },
-            {
-                data: null,
-                render: function(data) {
-                    if (data.fechaInicio && data.fechaFinal) {
-                        const inicio = new Date(data.fechaInicio);
-                        const final = new Date(data.fechaFinal);
-                        const diferencia = Math.ceil((final - inicio) / (1000 * 60 * 60 * 24)) + 1;
-                        return diferencia + ' días';
-                    }
-                    return '';
-                }
-            },
-            { 
-                data: 'observaciones',
-                render: function(data) {
-                    if (data && data.length > 50) {
-                        return data.substring(0, 50) + '...';
-                    }
-                    return data || '';
-                }
-            }
-        ]
+        columns: columns
     });
 }
 
@@ -875,9 +1195,6 @@ function exportarTodo() {
         XLSX.writeFile(wb, nombreArchivo);
         console.log(`✓ Archivo exportado correctamente: ${nombreArchivo}`);
         
-        // Mostrar mensaje de éxito al usuario
-        //alert(`Exportación completada exitosamente.\n${totalHojas} hojas exportadas.\nArchivo: ${nombreArchivo}`);
-        
     } catch (error) {
         console.error("Error al generar el archivo Excel:", error);
         alert("Error al generar el archivo Excel. Revisa la consola para más detalles.");
@@ -971,7 +1288,7 @@ function cargarTodasLasPestanasYExportar() {
         alert('Error al cargar los datos. Inténtalo nuevamente.');
     });
 }
-
     </script>
+    
 </body>
 </html>

@@ -3308,6 +3308,30 @@ def obtener_incapacidades_historial():
         if conn:
             conn.close()
 
+@app.route('/api/es_admin/<int:idUsuario>', methods=['GET'])
+def es_admin(idUsuario):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 1
+            FROM Usuario u
+            INNER JOIN Rol r ON u.Rol_idRol = r.idRol
+            WHERE u.idUsuario = ? AND r.TipoRol = 'Administrador'
+        """, (idUsuario,))
+
+        resultado = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if resultado:
+            return jsonify({"esAdmin": True})
+        else:
+            return jsonify({"esAdmin": False})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/exportar-reportes-vista', methods=['POST'])
 def exportar_reportes_visibles():
