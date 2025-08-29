@@ -238,6 +238,11 @@ tr:hover {
   background-color: #f5f5f5;
 }
 
+.swal2-header {
+    border-bottom: none !important;
+}
+
+
 
 
 /* Responsive */

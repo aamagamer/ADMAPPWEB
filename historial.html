@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 <body>
     <header>
@@ -250,98 +252,123 @@ function mostrarError(mensaje) {
     alert(mensaje);
 }
 
-// Función para confirmar eliminación
+// Confirmación única con SweetAlert2
 function confirmarEliminacion(tipo, id, callback) {
-    if (confirm(`¿Estás seguro de que deseas eliminar este ${tipo}? Esta acción no se puede deshacer.`)) {
-        callback(id);
-    }
+  Swal.fire({
+    icon: 'warning',
+    html: `
+      <div style="font-size:20px;font-weight:700;margin:0 0 6px 0;">¿Eliminar ${tipo}?</div>
+      <div style="font-size:14px;opacity:.9;">Esta acción no se puede deshacer.</div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6'
+  }).then((result) => {
+    if (result.isConfirmed) callback(id);
+  });
 }
 
-// Funciones de eliminación
+// Helpers
+function swalOk(titulo, detalle) {
+  Swal.fire({
+    icon: 'success',
+    html: `
+      <div style="font-size:20px;font-weight:700;margin:0 0 6px 0;">${titulo}</div>
+      <div style="font-size:14px;opacity:.9;">${detalle}</div>
+    `,
+    timer: 1800,
+    showConfirmButton: false
+  });
+}
+
+function swalErr(titulo, detalle) {
+  Swal.fire({
+    icon: 'error',
+    html: `
+      <div style="font-size:20px;font-weight:700;margin:0 0 6px 0;">${titulo}</div>
+      <div style="font-size:14px;opacity:.9;">${detalle}</div>
+    `
+  });
+}
+
+// 🔹 Eliminar Reporte
 function eliminarReporte(id) {
-    fetch(`/api/reportes/${id}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Reporte eliminado correctamente');
-                loadReportes(); // Recargar la tabla
-            } else {
-                alert('Error al eliminar el reporte: ' + (data.error || 'Error desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar el reporte');
-        });
+  fetch(`/api/reportes/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        swalOk('Eliminado', 'Reporte eliminado correctamente');
+        loadReportes();
+      } else {
+        swalErr('Error', 'Error al eliminar el reporte: ' + (data.error || 'Error desconocido'));
+      }
+    })
+    .catch(() => swalErr('Error', 'Error al eliminar el reporte'));
 }
 
+// 🔹 Eliminar Vacación
 function eliminarVacacion(id) {
-    fetch(`/api/vacaciones/${id}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Vacación eliminada correctamente');
-                loadVacaciones();
-            } else {
-                alert('Error al eliminar la vacación: ' + (data.error || 'Error desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar la vacación');
-        });
+  fetch(`/api/vacaciones/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        swalOk('Eliminado', 'Vacación eliminada correctamente');
+        loadVacaciones();
+      } else {
+        swalErr('Error', 'Error al eliminar la vacación: ' + (data.error || 'Error desconocido'));
+      }
+    })
+    .catch(() => swalErr('Error', 'Error al eliminar la vacación'));
 }
 
+// 🔹 Eliminar Permiso
 function eliminarPermiso(id) {
-    fetch(`/api/permisos/${id}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Permiso eliminado correctamente');
-                loadPermisos();
-            } else {
-                alert('Error al eliminar el permiso: ' + (data.error || 'Error desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar el permiso');
-        });
+  fetch(`/api/permisos/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        swalOk('Eliminado', 'Permiso eliminado correctamente');
+        loadPermisos();
+      } else {
+        swalErr('Error', 'Error al eliminar el permiso: ' + (data.error || 'Error desconocido'));
+      }
+    })
+    .catch(() => swalErr('Error', 'Error al eliminar el permiso'));
 }
 
+// 🔹 Eliminar Acta
 function eliminarActa(id) {
-    fetch(`/api/actas/${id}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Acta eliminada correctamente');
-                loadActas();
-            } else {
-                alert('Error al eliminar el acta: ' + (data.error || 'Error desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar el acta');
-        });
+  fetch(`/api/actas/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        swalOk('Eliminado', 'Acta eliminada correctamente');
+        loadActas();
+      } else {
+        swalErr('Error', 'Error al eliminar el acta: ' + (data.error || 'Error desconocido'));
+      }
+    })
+    .catch(() => swalErr('Error', 'Error al eliminar el acta'));
 }
 
+// 🔹 Eliminar Incapacidad
 function eliminarIncapacidad(id) {
-    fetch(`/api/incapacidades/${id}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Incapacidad eliminada correctamente');
-                loadIncapacidades();
-            } else {
-                alert('Error al eliminar la incapacidad: ' + (data.error || 'Error desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar la incapacidad');
-        });
+  fetch(`/api/incapacidades/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        swalOk('Eliminado', 'Incapacidad eliminada correctamente');
+        loadIncapacidades();
+      } else {
+        swalErr('Error', 'Error al eliminar la incapacidad: ' + (data.error || 'Error desconocido'));
+      }
+    })
+    .catch(() => swalErr('Error', 'Error al eliminar la incapacidad'));
 }
+
+
 
 // Función mejorada para parsear fechas correctamente
 function parsearFecha(fechaString) {

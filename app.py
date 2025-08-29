@@ -3308,6 +3308,80 @@ def obtener_incapacidades_historial():
         if conn:
             conn.close()
 
+# 🔹 Eliminar Reporte
+@app.route('/api/reportes/<int:id>', methods=['DELETE'])
+def delete_reporte(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Reporte WHERE idReporte = ?", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# 🔹 Eliminar Vacaciones
+@app.route('/api/vacaciones/<int:id>', methods=['DELETE'])
+def delete_vacaciones(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Vacaciones WHERE idVacaciones = ?", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# 🔹 Eliminar Permiso
+@app.route('/api/permisos/<int:id>', methods=['DELETE'])
+def delete_permiso(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Permiso WHERE idPermiso = ?", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# 🔹 Eliminar Acta Administrativa
+@app.route('/api/actas/<int:id>', methods=['DELETE'])
+def delete_acta(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM ActaAdministrativa WHERE IdActa = ?", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# 🔹 Eliminar Incapacidad
+@app.route('/api/incapacidades/<int:id>', methods=['DELETE'])
+def delete_incapacidad(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Incapacidad WHERE idIncapacidad = ?", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/api/es_admin/<int:idUsuario>', methods=['GET'])
 def es_admin(idUsuario):
     try:
