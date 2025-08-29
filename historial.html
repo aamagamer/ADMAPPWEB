@@ -26,14 +26,43 @@
 
     <div class="main-container">
 
-         <!-- 🔹 Botón global de descarga -->
-    <button onclick="cargarTodasLasPestanasYExportar()" 
-        class="btn-exportar-todo" 
-        style="background-color:#28a745; color:white; padding:10px 18px; 
-               border:none; border-radius:6px; cursor:pointer; 
-               font-size:15px; display:flex; align-items:center; gap:6px;">
-    <i class="fas fa-download"></i> Descargar TODO
-</button>
+        <!-- 🔹 Filtro de fechas global para exportación -->
+        <div class="filtro-exportacion-global" style="background-color:#f8f9fa; padding:15px; margin-bottom:20px; border-radius:8px; border:1px solid #dee2e6;">
+            <h3 style="margin:0 0 10px 0; color:#495057; font-size:16px;">
+                <i class="fas fa-filter"></i> Filtro Global para Exportación
+            </h3>
+            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                <div>
+                    <label for="fecha-global-inicio" style="display:block; margin-bottom:5px; font-weight:500;">Desde:</label>
+                    <input type="date" id="fecha-global-inicio" class="filtro-fecha" style="padding:8px; border:1px solid #ced4da; border-radius:4px;">
+                </div>
+                <div>
+                    <label for="fecha-global-fin" style="display:block; margin-bottom:5px; font-weight:500;">Hasta:</label>
+                    <input type="date" id="fecha-global-fin" class="filtro-fecha" style="padding:8px; border:1px solid #ced4da; border-radius:4px;">
+                </div>
+                <div style="align-self:end;">
+                    <button onclick="cargarTodasLasPestanasYExportar()" 
+                        class="btn-exportar-todo" 
+                        style="background-color:#28a745; color:white; padding:12px 20px; 
+                               border:none; border-radius:6px; cursor:pointer; 
+                               font-size:15px; display:flex; align-items:center; gap:8px; font-weight:500;">
+                        <i class="fas fa-download"></i> Descargar TODO
+                    </button>
+                </div>
+                <div style="align-self:end;">
+                    <button onclick="limpiarFiltroGlobal()" 
+                        class="btn-limpiar-global" 
+                        style="background-color:#6c757d; color:white; padding:12px 16px; 
+                               border:none; border-radius:6px; cursor:pointer; 
+                               font-size:14px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-eraser"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+            <div style="margin-top:10px; font-size:13px; color:#6c757d;">
+                <i class="fas fa-info-circle"></i> El filtro de fechas se aplicará a todos los datos antes de la exportación. Deja vacío para exportar todos los registros.
+            </div>
+        </div>
 
         <!-- Tabs/Pestañas -->
         <div class="tabs">
@@ -252,6 +281,64 @@ function mostrarError(mensaje) {
     alert(mensaje);
 }
 
+// Función para limpiar el filtro global
+function limpiarFiltroGlobal() {
+    document.getElementById('fecha-global-inicio').value = '';
+    document.getElementById('fecha-global-fin').value = '';
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Filtro limpiado',
+        text: 'El filtro global de fechas ha sido limpiado',
+        timer: 1500,
+        showConfirmButton: false
+    });
+}
+
+// Función mejorada para aplicar filtro de fechas global en exportación
+function aplicarFiltroFechasGlobal(datos, camposFecha) {
+    const fechaGlobalInicio = document.getElementById('fecha-global-inicio').value;
+    const fechaGlobalFin = document.getElementById('fecha-global-fin').value;
+    
+    // Si no hay filtro global, retornar todos los datos
+    if (!fechaGlobalInicio && !fechaGlobalFin) {
+        return datos;
+    }
+    
+    console.log(`Aplicando filtro global: ${fechaGlobalInicio} - ${fechaGlobalFin}`);
+    
+    return datos.filter(row => {
+        // Buscar una fecha válida en los campos especificados
+        for (let campo of camposFecha) {
+            const fechaValor = row[campo];
+            if (!fechaValor) continue;
+            
+            const fechaFila = parsearFecha(fechaValor);
+            if (!fechaFila) continue;
+            
+            // Aplicar filtro
+            const inicio = fechaGlobalInicio ? parsearFecha(fechaGlobalInicio) : null;
+            const fin = fechaGlobalFin ? parsearFecha(fechaGlobalFin) : null;
+            
+            let cumpleFiltro = true;
+            
+            if (inicio && fin) {
+                cumpleFiltro = fechaFila >= inicio && fechaFila <= fin;
+            } else if (inicio) {
+                cumpleFiltro = fechaFila >= inicio;
+            } else if (fin) {
+                cumpleFiltro = fechaFila <= fin;
+            }
+            
+            if (cumpleFiltro) {
+                return true; // Si al menos un campo de fecha cumple el filtro
+            }
+        }
+        
+        return false; // Ningún campo de fecha cumple el filtro
+    });
+}
+
 // Confirmación única con SweetAlert2
 function confirmarEliminacion(tipo, id, callback) {
   Swal.fire({
@@ -367,8 +454,6 @@ function eliminarIncapacidad(id) {
     })
     .catch(() => swalErr('Error', 'Error al eliminar la incapacidad'));
 }
-
-
 
 // Función mejorada para parsear fechas correctamente
 function parsearFecha(fechaString) {
@@ -1125,15 +1210,39 @@ function loadIncapacidades() {
         });
 }
 
+// Función mejorada de exportación con filtro de fechas global
 function exportarTodo() {
-    console.log('Iniciando exportación completa...');
+    console.log('Iniciando exportación completa con filtro de fechas...');
+    
+    const fechaGlobalInicio = document.getElementById('fecha-global-inicio').value;
+    const fechaGlobalFin = document.getElementById('fecha-global-fin').value;
+    
+    // Mostrar información del filtro aplicado
+    if (fechaGlobalInicio || fechaGlobalFin) {
+        const rangoTexto = fechaGlobalInicio && fechaGlobalFin 
+            ? `${fechaGlobalInicio} al ${fechaGlobalFin}`
+            : fechaGlobalInicio 
+                ? `desde ${fechaGlobalInicio}`
+                : `hasta ${fechaGlobalFin}`;
+        
+        console.log(`Aplicando filtro de fechas: ${rangoTexto}`);
+        
+        Swal.fire({
+            icon: 'info',
+            title: 'Aplicando filtro de fechas',
+            text: `Exportando datos ${rangoTexto}`,
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
     
     // Crear un nuevo libro
     let wb = XLSX.utils.book_new();
     let totalHojas = 0;
+    let totalRegistrosFiltrados = 0;
 
-    // Función auxiliar para procesar cada tabla
-    function procesarTabla(tabla, nombreHoja, nombreTabla) {
+    // Función auxiliar para procesar cada tabla con filtro
+    function procesarTablaConFiltro(tabla, nombreHoja, nombreTabla, camposFecha) {
         try {
             console.log(`Procesando ${nombreTabla}...`);
             
@@ -1144,8 +1253,14 @@ function exportarTodo() {
             }
 
             // Obtener todos los datos (sin filtros aplicados para obtener todo)
-            const datos = tabla.rows().data().toArray();
+            let datos = tabla.rows().data().toArray();
             console.log(`${nombreTabla} - Total de filas encontradas:`, datos.length);
+
+            // Aplicar filtro de fechas global si está configurado
+            if (fechaGlobalInicio || fechaGlobalFin) {
+                datos = aplicarFiltroFechasGlobal(datos, camposFecha);
+                console.log(`${nombreTabla} - Después del filtro de fechas:`, datos.length);
+            }
 
             if (datos.length > 0) {
                 // Procesar los datos para que sean más legibles en Excel
@@ -1184,10 +1299,11 @@ function exportarTodo() {
                 ajustarColumnas(ws, datosProcessados);
                 XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
                 totalHojas++;
+                totalRegistrosFiltrados += datos.length;
                 console.log(`✓ ${nombreTabla} exportada correctamente con ${datos.length} filas`);
                 return true;
             } else {
-                console.warn(`${nombreTabla} no tiene datos para exportar`);
+                console.warn(`${nombreTabla} no tiene datos para exportar después del filtro`);
                 return false;
             }
         } catch (error) {
@@ -1196,19 +1312,24 @@ function exportarTodo() {
         }
     }
 
-    // Procesar cada tabla
-    procesarTabla(window.reportesTable, "Reportes", "Reportes");
-    procesarTabla(window.vacacionesTable, "Vacaciones", "Vacaciones");
-    procesarTabla(window.permisosTable, "Permisos", "Permisos");
-    procesarTabla(window.actasTable, "Actas_Administrativas", "Actas Administrativas");
-    procesarTabla(window.incapacidadesTable, "Incapacidades", "Incapacidades");
+    // Procesar cada tabla con sus respectivos campos de fecha
+    procesarTablaConFiltro(window.reportesTable, "Reportes", "Reportes", ['FechaReporte']);
+    procesarTablaConFiltro(window.vacacionesTable, "Vacaciones", "Vacaciones", ['FechaSalida', 'FechaRegreso']);
+    procesarTablaConFiltro(window.permisosTable, "Permisos", "Permisos", ['DiaSolicitado']);
+    procesarTablaConFiltro(window.actasTable, "Actas_Administrativas", "Actas Administrativas", ['FechaActa']);
+    procesarTablaConFiltro(window.incapacidadesTable, "Incapacidades", "Incapacidades", ['fechaInicio', 'fechaFinal']);
 
-    console.log(`Total de hojas creadas: ${totalHojas}`);
+    console.log(`Total de hojas creadas: ${totalHojas}, Total de registros: ${totalRegistrosFiltrados}`);
 
     // Verificar si se crearon hojas
     if (totalHojas === 0) {
-        alert("No hay datos para exportar. Asegúrate de que las pestañas tengan información cargada.");
-        console.error("No se encontraron datos en ninguna tabla");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Sin datos para exportar',
+            text: 'No hay datos que coincidan con el filtro de fechas aplicado o las pestañas no tienen información cargada.',
+            confirmButtonText: 'Entendido'
+        });
+        console.error("No se encontraron datos en ninguna tabla después del filtro");
         return;
     }
 
@@ -1216,7 +1337,21 @@ function exportarTodo() {
         // Generar nombre de archivo con fecha y hora
         const ahora = new Date();
         const timestamp = ahora.toISOString().slice(0, 19).replace(/:/g, '-');
-        const nombreArchivo = `Historial_Completo_${timestamp}.xlsx`;
+        
+        // Incluir información del filtro en el nombre del archivo
+        let sufijo = '';
+        if (fechaGlobalInicio || fechaGlobalFin) {
+            sufijo = '_Filtrado';
+            if (fechaGlobalInicio && fechaGlobalFin) {
+                sufijo += `_${fechaGlobalInicio}_${fechaGlobalFin}`;
+            } else if (fechaGlobalInicio) {
+                sufijo += `_desde_${fechaGlobalInicio}`;
+            } else if (fechaGlobalFin) {
+                sufijo += `_hasta_${fechaGlobalFin}`;
+            }
+        }
+        
+        const nombreArchivo = `Historial_Completo${sufijo}_${timestamp}.xlsx`;
         
         // Descargar Excel
         XLSX.writeFile(wb, nombreArchivo);
@@ -1224,7 +1359,12 @@ function exportarTodo() {
         
     } catch (error) {
         console.error("Error al generar el archivo Excel:", error);
-        alert("Error al generar el archivo Excel. Revisa la consola para más detalles.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en la exportación',
+            text: 'Error al generar el archivo Excel. Revisa la consola para más detalles.',
+            confirmButtonText: 'Entendido'
+        });
     }
 }
 
@@ -1259,13 +1399,22 @@ function ajustarColumnas(ws, data) {
 function cargarTodasLasPestanasYExportar() {
     console.log('Cargando todas las pestañas antes de exportar...');
     
+    // Mostrar loading
+    Swal.fire({
+        title: 'Preparando exportación...',
+        text: 'Cargando datos de todas las pestañas',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
     const promesas = [];
     
     // Cargar datos de todas las pestañas si no están cargados
     if (!window.reportesLoaded) {
         promesas.push(new Promise(resolve => {
             loadReportes();
-            // Esperar un poco para que se carguen los datos
             setTimeout(resolve, 1000);
         }));
     }
@@ -1300,6 +1449,7 @@ function cargarTodasLasPestanasYExportar() {
     
     // Si no hay promesas, exportar directamente
     if (promesas.length === 0) {
+        Swal.close();
         exportarTodo();
         return;
     }
@@ -1307,12 +1457,18 @@ function cargarTodasLasPestanasYExportar() {
     // Esperar a que se carguen todos los datos
     Promise.all(promesas).then(() => {
         console.log('Todas las pestañas cargadas, iniciando exportación...');
+        Swal.close();
         setTimeout(() => {
             exportarTodo();
         }, 500);
     }).catch(error => {
         console.error('Error al cargar las pestañas:', error);
-        alert('Error al cargar los datos. Inténtalo nuevamente.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al cargar los datos. Inténtalo nuevamente.',
+            confirmButtonText: 'Entendido'
+        });
     });
 }
     </script>
