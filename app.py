@@ -2835,21 +2835,31 @@ def get_reportes():
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT r.idReporte, u.Nombres, u.Paterno, u.Materno,
-                   r.Observaciones, a.TipoAsunto, r.FechaReporte
+            SELECT 
+                r.idReporte,
+                u.idUsuario,
+                u.Nombres,
+                u.Paterno,
+                u.Materno,
+                r.Observaciones,
+                a.TipoAsunto,
+                r.FechaReporte
             FROM Reporte r
             INNER JOIN Usuario u ON u.idUsuario = r.Usuario_idUsuario
-            INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto
+            INNER JOIN Asunto a ON a.idAsunto = r.Asunto_idAsunto where r.Estado is null
         """)
         
         reportes = []
         for row in cursor.fetchall():
             reportes.append({
-                'id': row[0],
-                'empleado': f"{row[1]} {row[2]} {row[3]}",
-                'observaciones': row[4] or '',
-                'tipo_asunto': row[5] or '',
-                'fecha': row[6].isoformat() if row[6] else ''
+                'idReporte': row[0],
+                'idUsuario': row[1],
+                'Nombres': row[2],
+                'Paterno': row[3],
+                'Materno': row[4],
+                'Observaciones': row[5] or '',
+                'Asunto': row[6] or '',
+                'FechaReporte': row[7].strftime('%Y-%m-%d') if row[7] else None
             })
         
         cursor.close()
@@ -2859,6 +2869,7 @@ def get_reportes():
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
 
 @app.route('/api/vacaciones')
 def get_vacaciones():

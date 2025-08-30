@@ -8,6 +8,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="icon" href="Media/favicon.ico" />
     <link rel="stylesheet" href="css/verReportes.css" />
     <script src="js/verReportes.js"></script>
@@ -100,6 +101,32 @@
       .limpiar-filtros-btn:hover {
         background-color: #545b62;
       }
+      .pdf-reporte-btn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pdf-reporte-btn:hover {
+  background: linear-gradient(135deg, #218838, #1ba085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.pdf-reporte-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
       @media (max-width: 768px) {
         .filtros-row {

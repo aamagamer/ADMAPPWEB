@@ -25,6 +25,229 @@ function esActiva(fechaFinalStr) {
   return fechaFinalLocal >= hoyLocal;
 }
 
+// Función para formatear fechas de manera más legible
+function formatearFecha(fechaStr) {
+  const [anio, mes, dia] = fechaStr.split("-");
+  const fecha = new Date(anio, mes - 1, dia);
+  
+  const opciones = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    timeZone: 'America/Mexico_City'
+  };
+  
+  return fecha.toLocaleDateString('es-MX', opciones);
+}
+
+// Función para calcular días de incapacidad
+function calcularDiasIncapacidad(fechaInicio, fechaFinal) {
+  const inicio = new Date(fechaInicio);
+  const final = new Date(fechaFinal);
+  const diferencia = final.getTime() - inicio.getTime();
+  return Math.ceil(diferencia / (1000 * 3600 * 24)) + 1; // +1 para incluir ambos días
+}
+
+// Función para exportar a PDF una incapacidad específica
+async function exportarIncapacidadPDF(incapacidadData) {
+  try {
+    // Mostrar loading
+    Swal.fire({
+      title: "Generando PDF...",
+      text: "Preparando documento de incapacidad",
+      icon: "info",
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Obtener datos adicionales del empleado si es necesario
+    const response = await fetch(`/api/empleado/${incapacidadData.idUsuario}`);
+    const empleadoData = await response.json();
+
+    // Crear el contenido del PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Configuración de márgenes y dimensiones
+    const margenIzq = 20;
+    const margenDer = 20;
+    const anchoPagina = 210; // A4 width in mm
+    const anchoUtil = anchoPagina - margenIzq - margenDer;
+    
+    // Colores
+    const colorPrimario = [0, 102, 204]; // Azul corporativo
+    const colorSecundario = [102, 102, 102]; // Gris
+    const colorTexto = [33, 37, 41]; // Negro suave
+
+    // HEADER - Logo y título de la empresa
+    doc.setFillColor(...colorPrimario);
+    doc.rect(0, 0, anchoPagina, 25, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REPORTE DE INCAPACIDAD', anchoPagina / 2, 16, { align: 'center' });
+
+    // Línea decorativa
+    doc.setDrawColor(...colorPrimario);
+    doc.setLineWidth(2);
+    doc.line(margenIzq, 30, anchoPagina - margenDer, 30);
+
+    let yPosition = 45;
+
+    // TÍTULO DEL DOCUMENTO
+    doc.setTextColor(...colorTexto);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONSTANCIA DE INCAPACIDAD LABORAL', margenIzq, yPosition);
+    yPosition += 15;
+
+    // INFORMACIÓN DEL EMPLEADO
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margenIzq, yPosition, anchoUtil, 8, 'F');
+    
+    doc.setTextColor(...colorPrimario);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DATOS DEL EMPLEADO', margenIzq + 2, yPosition + 5);
+    yPosition += 15;
+
+    doc.setTextColor(...colorTexto);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+
+    // Datos del empleado en dos columnas
+    const datosEmpleado = [
+      [`Nombre completo: ${incapacidadData.nombres} ${incapacidadData.paterno} ${incapacidadData.materno}`],
+      [`ID de empleado: ${incapacidadData.idUsuario}`],
+      [`Puesto: ${empleadoData.Puesto || 'No especificado'}`],
+      [`Fecha de ingreso: ${empleadoData.FechaIngreso ? formatearFecha(empleadoData.FechaIngreso) : 'No disponible'}`]
+    ];
+
+    datosEmpleado.forEach(([texto]) => {
+      doc.text(texto, margenIzq, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 10;
+
+    // INFORMACIÓN DE LA INCAPACIDAD
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margenIzq, yPosition, anchoUtil, 8, 'F');
+    
+    doc.setTextColor(...colorPrimario);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DETALLES DE LA INCAPACIDAD', margenIzq + 2, yPosition + 5);
+    yPosition += 15;
+
+    doc.setTextColor(...colorTexto);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+
+    const diasIncapacidad = calcularDiasIncapacidad(incapacidadData.fechaInicio, incapacidadData.fechaFinal);
+    const fechaInicioFormateada = formatearFecha(incapacidadData.fechaInicio);
+    const fechaFinalFormateada = formatearFecha(incapacidadData.fechaFinal);
+
+    const datosIncapacidad = [
+      `Tipo de incapacidad: ${incapacidadData.tipo}`,
+      `Fecha de inicio: ${fechaInicioFormateada}`,
+      `Fecha de término: ${fechaFinalFormateada}`,
+      `Duración total: ${diasIncapacidad} día${diasIncapacidad !== 1 ? 's' : ''}`,
+      `Estado: ${esActiva(incapacidadData.fechaFinal) ? 'ACTIVA' : 'FINALIZADA'}`
+    ];
+
+    datosIncapacidad.forEach((texto) => {
+      doc.text(texto, margenIzq, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 10;
+
+    // OBSERVACIONES
+    if (incapacidadData.observaciones && incapacidadData.observaciones.trim()) {
+      doc.setFillColor(245, 245, 245);
+      doc.rect(margenIzq, yPosition, anchoUtil, 8, 'F');
+      
+      doc.setTextColor(...colorPrimario);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('OBSERVACIONES MÉDICAS', margenIzq + 2, yPosition + 5);
+      yPosition += 15;
+
+      doc.setTextColor(...colorTexto);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+
+      // Dividir observaciones largas en líneas
+      const observaciones = incapacidadData.observaciones;
+      const lineasObservaciones = doc.splitTextToSize(observaciones, anchoUtil - 10);
+      
+      lineasObservaciones.forEach((linea) => {
+        doc.text(linea, margenIzq, yPosition);
+        yPosition += 5;
+      });
+
+      yPosition += 10;
+    }
+
+    // INFORMACIÓN ADICIONAL
+    yPosition += 20;
+    doc.setFillColor(250, 250, 250);
+    doc.rect(margenIzq, yPosition, anchoUtil, 25, 'F');
+    
+    doc.setTextColor(...colorSecundario);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    
+    const fechaGeneracion = new Date().toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Mexico_City'
+    });
+
+    doc.text(`Documento generado el: ${fechaGeneracion}`, margenIzq + 2, yPosition + 8);
+    doc.text('Este documento es una constancia interna de registro de incapacidad laboral.', margenIzq + 2, yPosition + 15);
+    doc.text('Para efectos oficiales, consulte con el departamento de Recursos Humanos.', margenIzq + 2, yPosition + 20);
+
+    // FOOTER
+    const totalPaginas = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.setTextColor(...colorSecundario);
+    doc.text(`Página 1 de ${totalPaginas}`, anchoPagina - margenDer, 285, { align: 'right' });
+
+    // Generar nombre del archivo
+    const nombreArchivo = `Incapacidad_${incapacidadData.nombres}_${incapacidadData.paterno}_${incapacidadData.fechaInicio}.pdf`;
+
+    // Guardar el PDF
+    doc.save(nombreArchivo);
+
+    // Cerrar loading y mostrar éxito
+    Swal.fire({
+      title: "¡PDF Generado!",
+      text: "El documento de incapacidad se ha descargado correctamente.",
+      icon: "success",
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+  } catch (error) {
+    console.error("Error al generar PDF:", error);
+    Swal.fire({
+      title: "Error al generar PDF",
+      text: "No se pudo generar el documento. Por favor, intenta nuevamente.",
+      icon: "error",
+      confirmButtonText: "Entendido"
+    });
+  }
+}
+
 async function cargarIncapacidades() {
   const nombreFiltro = document.getElementById("filtro-nombre").value.toLowerCase();
   const estadoFiltro = document.getElementById("filtro-estado").value;
@@ -64,7 +287,7 @@ async function cargarIncapacidades() {
         const card = document.createElement("div");
         card.classList.add("reporte-card");
         card.setAttribute("data-idusuario", item.idUsuario);
-        card.setAttribute("data-idincapacidad", item.idIncapacidad); // 👈 ID específico de la incapacidad
+        card.setAttribute("data-idincapacidad", item.idIncapacidad);
 
         card.innerHTML = `
           <div class="reporte-titulo tipo-incapacidad">${item.tipo}</div>
@@ -81,9 +304,15 @@ async function cargarIncapacidades() {
             <span class="reporte-etiqueta">Observaciones:</span> ${item.observaciones || 'Sin observaciones'}
           </div>
           <div class="reporte-acciones">
+            <button class="pdf-reporte-btn" title="Exportar a PDF">📄</button>
             <button class="delete-reporte-btn" title="Marcar como enterado">&times;</button>
           </div>
         `;
+
+        // Evento para el botón de exportar PDF
+        card.querySelector(".pdf-reporte-btn").addEventListener("click", () => {
+          exportarIncapacidadPDF(item);
+        });
 
         // Evento para el botón de marcar como enterado
         card.querySelector(".delete-reporte-btn").addEventListener("click", () => {
@@ -197,39 +426,3 @@ async function cargarIncapacidades() {
   }
 }
 
-async function exportarExcelDesdeVista() {
-  try {
-    
-
-    const response = await fetch('/api/incapacidadesExcel');
-    
-    if (!response.ok) {
-      throw new Error(`Error del servidor: ${response.status}`);
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    
-    // Generar nombre con fecha actual
-    const fecha = new Date().toISOString().split('T')[0];
-    a.download = `Incapacidades_${fecha}.xlsx`;
-    
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-    
-
-  } catch (error) {
-    console.error("Error al exportar Excel:", error);
-    Swal.fire({
-      title: "Error en la descarga",
-      text: "No se pudo descargar el archivo Excel. Por favor, intenta nuevamente.",
-      icon: "error",
-      confirmButtonText: "Entendido"
-    });
-  }
-}

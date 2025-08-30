@@ -12,9 +12,39 @@
     <script src="js/utils.js"></script>
     <script src="js/verIncapacidades.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="icon" href="Media/favicon.ico" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/fonts/helvetica.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   </head>
+  <style>
+    .pdf-reporte-btn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pdf-reporte-btn:hover {
+  background: linear-gradient(135deg, #218838, #1ba085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.pdf-reporte-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+  </style>
   <body>
     <header>
       <div class="header-container">
@@ -76,19 +106,7 @@
             <option value="activas">Activas</option>
             <option value="inactivas">Finalizadas</option>
           </select>
-          <button
-            onclick="exportarExcelDesdeVista()"
-            class="back-button"
-            style="
-              position: relative;
-              left: 0;
-              top: 0;
-              transform: none;
-              background-color: #27ae60;
-            "
-          >
-            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
-          </button>
+         
         </div>
 
         <div class="info-container" id="incapacidades-list"></div>
