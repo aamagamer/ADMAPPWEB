@@ -1,187 +1,345 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal de Recursos Humanos</title>
-    <link rel="stylesheet" href="css/admin.css" />
-    <link rel="stylesheet" href="css/index.css" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <link rel="icon" href="Media/favicon.ico" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal de Recursos Humanos</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/index.css" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+  <link rel="icon" href="Media/favicon.ico" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-  </head>
-  <body>
-    <header>
-      <div class="header-container">
-        <a href="#" class="back-button" onclick="logout()">
-          <i class="bi bi-arrow-left"></i>
-          Cerrar Sesión
-        </a>
-        <img src="Media/logo.png" alt="Logo" class="logo" />
-        <h1>Portal De Recursos Humanos</h1>
-      </div>
-    </header>
-
-    <div class="welcome-section">
-      <div class="welcome-message">
-        ¡Hola <span id="employee-name">Juan Pérez</span>!
-      </div>
-      <p>¿Qué deseas hacer hoy?</p>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <a href="#" class="back-button" onclick="logout()">
+        <i class="bi bi-arrow-left"></i>
+        Cerrar Sesión
+      </a>
+      <img src="Media/logo.png" alt="Logo" class="logo" />
+      <h1>Portal De Recursos Humanos</h1>
     </div>
+  </header>
 
-    <div class="content-wrapper">
-      <div class="employee-table-container">
-        <h2>
-          Empleados Registrados
-          <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">
-            Agregar empleado +
-          </button>
+ <!-- Saludo nombre empleado llenado dinamicamente -->
+  <div class="welcome-section">
+    <div class="welcome-message">
+      ¡Hola <span id="employee-name"></span>!
+    </div>
+    <p>¿Qué deseas hacer hoy?</p>
+  </div>
 
-          <button
-            class="add-employee-btn"
-            onclick="abrirModalExportarExcel()"
-            style="margin-left: 2px"
-          >
-            Exportar Excel +
-          </button>
-        </h2>
+  <div class="content-wrapper">
+    <div class="employee-table-container">
+      <h2>
+        Empleados Registrados
+        <button class="add-employee-btn" onclick="abrirModalAltaEmpleado()">
+          Agregar empleado +
+        </button>
 
-        <div
-          style="
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 10px;
-          "
+        <button
+          class="add-employee-btn"
+          onclick="abrirModalExportarExcel()"
+          style="margin-left: 2px"
         >
-          <select
-            id="filtro-estado"
-            style="
-              padding: 8px 12px;
-              border-radius: 6px;
-              font-family: Arial, sans-serif;
-              font-size: 1rem;
-              border: 1.5px solid #bbb;
-              background-color: #fff;
-              cursor: pointer;
-              outline: none;
-              transition: border-color 0.3s ease;
-              margin-right: 450px;
-            "
+          Exportar Excel +
+        </button>
+      </h2>
+
+      <div
+  style="
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+  "
+>
+  <!-- Filtro por Estado -->
+  <select
+    id="filtro-estado"
+    onchange="aplicarFiltros()"
+    style="
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      border: 1.5px solid #bbb;
+      background-color: #fff;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.3s ease;
+    "
+  >
+   <!-- Filtros de actividad de empleado -->
+    <option value="activos">Activos</option>
+    <option value="inactivos">Inactivos</option>
+    <option value="todos">Todos</option>
+  </select>
+
+  <!-- Filtro por Área -->
+  <select
+    id="filtro-area"
+    onchange="aplicarFiltros()"
+    style="
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      border: 1.5px solid #bbb;
+      background-color: #fff;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.3s ease;
+      margin-right: 350px;
+    "
+  >
+    <option value="">Todas las áreas</option>
+    <!-- Las opciones se llenarán dinámicamente -->
+  </select>
+ <!-- Input de busqueda -->
+  <input
+    type="text"
+    id="busquedaEmpleado"
+    oninput="buscarEmpleado()"
+    placeholder="Buscar por ID o nombre"
+    style="
+      padding: 8px;
+      width: 250px;
+      margin-right: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    "
+  />
+  <button
+    onclick="buscarEmpleado()"
+    style="
+      background-color: #2c3e50;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    "
+  >
+    <i class="bi bi-search"></i>
+  </button>
+</div>
+ <!-- Acciones -->
+      <table class="employee-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Nombre</th>
+            <th>Puesto</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="empleados-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Botón dropdown con todas las opciones -->
+    <div class="options-container">
+      <div class="dropdown-container">
+        <button class="dropdown-button" onclick="toggleDropdown()">
+  <span>Menú</span>
+  <span id="menu-notificacion" class="notification-badge" style="display: none">0</span>
+  <i class="bi bi-chevron-down dropdown-arrow"></i>
+</button>
+
+        <div class="dropdown-content" id="dropdownContent">
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('evaluarSoli.html')"
           >
-            <option value="activos">Activos</option>
-            <option value="inactivos">Inactivos</option>
-            <option value="todos">Todos</option>
-          </select>
-          <input
-            type="text"
-            id="busquedaEmpleado"
-            oninput="buscarEmpleado()"
-            placeholder="Buscar por ID o nombre"
-            style="
-              padding: 8px;
-              width: 250px;
-              margin-right: 8px;
-              border-radius: 4px;
-              border: 1px solid #ccc;
-            "
-          />
-          <button
-            onclick="buscarEmpleado()"
-            style="
-              background-color: #2c3e50;
-              color: white;
-              padding: 8px 12px;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-            "
+            <i class="bi bi-search dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">
+                Solicitudes
+                <span
+            id="dropdown-notificacion-solicitudes"
+            class="notification-badge"
+            style="display: none"
+            >0</span>
+              </div>
+              <div class="dropdown-item-description">
+                Evalúa las solicitudes de tus empleados
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('verSolicitudes.html')"
           >
-            <i class="bi bi-search"></i>
-          </button>
+            <i class="bi bi-eye dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Ver Solicitudes</div>
+              <div class="dropdown-item-description">
+                Mira el historial de las solicitudes evaluadas
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('incapacidad.html')"
+          >
+            <i class="bi bi-hospital dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Incapacidades</div>
+              <div class="dropdown-item-description">Autorizaciones</div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('verIncapacidades.html')"
+          >
+            <i class="bi bi-hospital dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Ver Incapacidades</div>
+              <div class="dropdown-item-description">
+                Consulta que empleados están en una incapacidad
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="dropdown-item" onclick="abrirModalVerDiasFestivos()">
+            <i class="bi bi-calendar dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Asuetos</div>
+              <div class="dropdown-item-description">
+                Ve los días festivos previamente agregados
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown-item" onclick="abrirModalMes()">
+            <i class="bi bi-calendar-plus dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Aniversario Laboral</div>
+              <div class="dropdown-item-description">
+                Ver aniversarios laborales por mes.
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('reporte.html')"
+          >
+            <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Reportes</div>
+              <div class="dropdown-item-description">Genera un reporte</div>
+            </div>
+          </div>
+
+          <div class="dropdown-item" onclick="navigateToOption('verReportes.html')">
+  <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
+  <div class="dropdown-item-content">
+    <div class="dropdown-item-title">
+      Ver Reportes
+      <span 
+        id="dropdown-notificacion-reportes"
+        class="notification-badge"
+        style="display: none">0</span>
+    </div>
+    <div class="dropdown-item-description">
+      Visualiza los reportes generados
+    </div>
+  </div>
+</div>
+
+
+           <div
+            class="dropdown-item"
+            onclick="navigateToOption('acta.html')"
+          >
+            <i class="bi bi-bar-chart-line dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Generar Acta Administrativa</div>
+              <div class="dropdown-item-description">
+                Da de alta actas administrativas a tus empleados
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('vacante.html')"
+          >
+            <i class="bi bi-pin-map dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Vacante</div>
+              <div class="dropdown-item-description">Administra</div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('verVacantes.html')"
+          >
+            <i class="bi bi-pencil dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Ver Vacantes</div>
+              <div class="dropdown-item-description">
+                Administra las vacantes solicitadas por tus compañeros
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('historial.html')"
+          >
+            <i class="bi bi-clock dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Historial</div>
+              <div class="dropdown-item-description">
+                Consulta todos los reportes, permisos y vacaciones.
+              </div>
+            </div>
+          </div>
+
+          
+          
+
+          <div
+            class="dropdown-item"
+            onclick="navigateToOption('stats.html')"
+          >
+            <i class="bi bi-pencil dropdown-item-icon"></i>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-title">Ver Gráficas</div>
+              <div class="dropdown-item-description">
+                Administra las estadísticas
+              </div>
+            </div>
+          </div>
         </div>
-
-        <table class="employee-table">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Nombre</th>
-              <th>Puesto</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="empleados-body"></tbody>
-        </table>
-      </div>
-      <div class="options-container">
-        <a href="evaluarSoli.html" class="option-button">
-          <span id="notificacion-solicitudes" class="badge-notificacion"
-            >0</span
-          >
-          <i class="bi bi-search" style="font-size: 24px"></i>
-          <h2>Solicitudes</h2>
-          <p>Evalúa las solicitudes de tus empleados</p>
-        </a>
-
-        <a href="verSolicitudes.html" class="option-button">
-          <i class="bi bi-search" style="font-size: 24px"></i>
-          <h2>Ver Solicitudes</h2>
-          <p>Mira el historial de las solicitudes evaluadas.</p>
-        </a>
-
-        <a href="incapacidad.html" class="option-button">
-          <i class="bi bi-hospital" style="font-size: 24px"></i>
-          <h2>Incapacidades</h2>
-          <p>Autorizaciones</p>
-        </a>
-
-        <a href="verIncapacidades.html" class="option-button">
-          <i class="bi bi-hospital" style="font-size: 24px"></i>
-          <h2>Ver Incapacidades</h2>
-          <p>Consulta que empleados están en una incapacidad</p>
-        </a>
-
-        
-
-        <a href="reporte.html" class="option-button">
-          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
-          <h2>Reportes</h2>
-          <p>Genera un reporte</p>
-        </a>
-
-        <a href="verReportes.html" class="option-button">
-          <i class="bi bi-bar-chart-line" style="font-size: 24px"></i>
-          <h2>Ver reportes</h2>
-          <p>Visualiza los reportes generados</p>
-        </a>
-
-        <a href="vacante.html" class="option-button">
-          <i class="bi bi-pin-map" style="font-size: 24px"></i>
-          <h2>Vacante</h2>
-          <p>Administra</p>
-        </a>
-
-        <a href="verVacantes.html" class="option-button">
-          <i class="bi bi-pencil" style="font-size: 24px"></i>
-          <h2>Ver Vacantes</h2>
-          <p>Administra las vacantes solicitadas por tus compañeros</p>
-        </a>
       </div>
     </div>
 
+    <!-- Todos los modales existentes se mantienen igual -->
     <!-- Modal para ver detalles del empleado -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
@@ -190,6 +348,17 @@
         <div id="modal-body"></div>
       </div>
     </div>
+
+    <!-- Modal de datos generales  -->
+<div id="modal-generales" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalGenerales()">&times;</span>
+    <h2>Datos Generales del Empleado</h2>
+    <div id="modal-generales-body" class="modal-body-estilo"></div>
+  </div>
+</div>
+
+
 
     <!-- Modal para dar de alta empleado -->
     <div id="add-employee-modal" class="modal hidden">
@@ -200,13 +369,13 @@
           <!-- Campo 1 -->
           <div class="form-group">
             <label for="idUsuario">ID Usuario:</label>
-            <input type="number" id="idUsuario" name="idUsuario" required />
+            <input type="number" id="idUsuario" name="idUsuario"  />
           </div>
 
           <!-- Campo 2 (Combobox) -->
           <div class="form-group">
             <label for="tipoRol">Tipo de Rol:</label>
-            <select id="tipoRol" name="tipoRol" required>
+            <select id="tipoRol" name="tipoRol" >
               <option value="">Cargando roles...</option>
             </select>
           </div>
@@ -231,13 +400,13 @@
           <!-- Campo 4 -->
           <div class="form-group">
             <label for="nombres">Nombres:</label>
-            <input type="text" id="nombres" name="nombres" required />
+            <input type="text" id="nombres" name="nombres"  />
           </div>
 
           <!-- Campo 5 -->
           <div class="form-group">
             <label for="paterno">Apellido Paterno:</label>
-            <input type="text" id="paterno" name="paterno" required />
+            <input type="text" id="paterno" name="paterno"  />
           </div>
 
           <!-- Campo 6 -->
@@ -253,62 +422,104 @@
               type="date"
               id="fechaNacimiento"
               name="fechaNacimiento"
-              required
+              
             />
           </div>
 
           <!-- Campo 8 -->
           <div class="form-group">
             <label for="direccion">Dirección:</label>
-            <input type="text" id="direccion" name="direccion" required />
+            <input type="text" id="direccion" name="direccion"  />
           </div>
 
           <!-- Campo 9 -->
           <div class="form-group">
-            <label for="codigoPostal">Código Postal:</label>
-            <input type="text" id="codigoPostal" name="codigoPostal" required />
-          </div>
+  <label for="codigoPostal">Código Postal:</label>
+  <input
+    type="text"
+    id="codigoPostal"
+    placeholder="Ej. 12345"
+    name="codigoPostal"
+    maxlength="5"
+    title="Por favor ingrese exactamente 5 dígitos numéricos"
+   
+  />
+</div>
 
           <!-- Campo 10 -->
           <div class="form-group">
             <label for="correo">Correo Electrónico:</label>
-            <input type="email" id="correo" name="correo" required />
+            <input type="email" id="correo" name="correo"  />
           </div>
 
           <!-- Campo 11 -->
           <div class="form-group">
             <label for="nss">Número de Seguro Social (NSS):</label>
-            <input type="text" id="nss" name="nss" required />
+            <input
+              type="text"
+              id="nss"
+              name="nss"
+              placeholder="Ej. 54-14-96-2319-8"
+             
+            />
           </div>
 
           <!-- Campo 12 -->
           <div class="form-group">
             <label for="telefono">Teléfono:</label>
-            <input type="tel" id="telefono" name="telefono" required />
+            <input
+              type="tel"
+              id="telefono"
+              name="telefono"
+              placeholder="Ej. 8441234567"
+              title="Por favor ingrese 10 dígitos seguidos."
+              
+            />
+            
           </div>
 
           <!-- Campo 13 -->
           <div class="form-group">
             <label for="fechaIngreso">Fecha de Ingreso:</label>
-            <input type="date" id="fechaIngreso" name="fechaIngreso" required />
+            <input
+              type="date"
+              id="fechaIngreso"
+              name="fechaIngreso"
+              
+            />
           </div>
 
           <!-- Campo 14 -->
           <div class="form-group">
             <label for="rfc">RFC:</label>
-            <input type="text" id="rfc" name="rfc" required />
+            <input
+              type="text"
+              id="rfc"
+              name="rfc"
+              placeholder="Ej. OACD123456789"
+              maxlength="13"
+            
+            />
           </div>
 
           <!-- Campo 15 -->
           <div class="form-group">
             <label for="curp">CURP:</label>
-            <input type="text" id="curp" name="curp" required />
+            <input
+              type="text"
+              id="curp"
+              name="curp"
+              placeholder="Ej. GARC850701HDFRNS09"
+              title="Por favor ingrese 18 caracteres alfanuméricos"
+              maxlength="18"
+            />
+          
           </div>
 
           <!-- Campo 16 -->
           <div class="form-group">
             <label for="puesto">Puesto:</label>
-            <input type="text" id="puesto" name="puesto" required />
+            <input type="text" id="puesto" name="puesto"  />
           </div>
 
           <!-- Campo 17 -->
@@ -320,7 +531,7 @@
               type="text"
               id="nombreContactoEmergencia"
               name="nombreContactoEmergencia"
-              required
+             
             />
           </div>
 
@@ -331,20 +542,26 @@
               type="tel"
               id="telefonoEmergencia"
               name="telefonoEmergencia"
-              required
+              title="Por favor ingrese 1o dígitos sin espacios."
+             
             />
           </div>
 
           <!-- Campo 19 -->
           <div class="form-group">
             <label for="parentesco">Parentesco:</label>
-            <input type="text" id="parentesco" name="parentesco" required />
+            <input type="text" id="parentesco" name="parentesco"  />
           </div>
 
           <!-- Campo 20 -->
           <div class="form-group">
             <label for="contraseña">Contraseña:</label>
-            <input type="password" id="contraseña" name="contraseña" required />
+            <input
+              type="password"
+              id="contraseña"
+              name="contraseña"
+              
+            />
           </div>
 
           <!-- Campo 21 -->
@@ -354,7 +571,7 @@
               type="password"
               id="confirmarContraseña"
               name="confirmarContraseña"
-              required
+              
             />
           </div>
 
@@ -365,7 +582,8 @@
               type="number"
               id="sueldoDiario"
               name="SueldoDiario"
-              required
+              step="0.01"
+             
             />
           </div>
 
@@ -376,14 +594,33 @@
               type="number"
               id="sueldoSemanal"
               name="SueldoSemanal"
-              required
+              step="0.01"
+             
             />
           </div>
 
           <!-- Campo Bono Semanal -->
           <div class="form-group">
             <label for="bonoSemanal">Bono Semanal:</label>
-            <input type="number" id="bonoSemanal" name="BonoSemanal" required />
+            <input
+              type="number"
+              id="bonoSemanal"
+              name="BonoSemanal"
+              step="0.01"
+           
+            />
+          </div>
+
+          <!-- Campo Sueldo Mensual -->
+          <div class="form-group">
+            <label for="Mensual">Sueldo Mensual:</label>
+            <input
+              type="number"
+              id="Mensual"
+              name="Mensual"
+              step="0.01"
+              
+            />
           </div>
 
           <!-- Campo Vacaciones Disponibles -->
@@ -393,7 +630,25 @@
               type="number"
               id="diasDisponibles"
               name="diasDisponibles"
-              required
+              
+            />
+          </div>
+
+          <!-- Campo Empresa que tiene acceso -->
+          <div class="form-group">
+            <label for="Empresa">Empresa a que tiene acceso:</label>
+            <select id="Empresa" name="Empresa" >
+              <option value="">Cargando empresas...</option>
+            </select>
+          </div>
+
+          <!-- Campo Numero de Acceso a la empresa -->
+          <div class="form-group">
+            <label for="Acceso">Número de acceso a la empresa:</label>
+            <input
+              type="number"
+              id="Acceso"
+              name="Acceso"
             />
           </div>
 
@@ -612,6 +867,7 @@
               type="number"
               id="edit-sueldoDiario"
               name="SueldoDiario"
+              step="0.01"
               required
             />
           </div>
@@ -623,6 +879,7 @@
               type="number"
               id="edit-sueldoSemanal"
               name="SueldoSemanal"
+              step="0.01"
               required
             />
           </div>
@@ -634,6 +891,19 @@
               type="number"
               id="edit-bonoSemanal"
               name="BonoSemanal"
+              step="0.01"
+              required
+            />
+          </div>
+
+          <!-- Sueldo Mensual -->
+          <div class="form-group">
+            <label for="edit-Mensual">Sueldo Mensual:</label>
+            <input
+              type="number"
+              id="edit-Mensual"
+              name="Mensual"
+              step="0.01"
               required
             />
           </div>
@@ -667,6 +937,24 @@
               type="text"
               id="edit-diasDisponibles"
               name="diasDisponibles"
+            />
+          </div>
+
+          <!-- Empresa Acceso -->
+          <div class="form-group">
+            <label for="edit-empresa">Empresa a que tiene acceso:</label>
+            <select id="edit-empresa" name="empresa">
+              <option value="">Cargando empresas...</option>
+            </select>
+          </div>
+
+          <!-- Numero de acceso -->
+          <div class="form-group">
+            <label for="edit-acceso">Número de acceso a la empresa:</label>
+            <input
+              type="text"
+              id="edit-acceso"
+              name="acceso"
             />
           </div>
 
@@ -727,6 +1015,38 @@
       </div>
     </div>
 
+    <!-- Modal para ver días festivos -->
+<div id="ver-dias-festivos-modal" class="modal hidden">
+<div class="modal-content add-employee-modal">
+  <span class="close" onclick="cerrarModalVerDiasFestivos()">&times;</span>
+  <h2>Días Festivos</h2>
+
+  <!-- Selector de año -->
+  <div class="form-group">
+    <label for="anioFestivo">Selecciona un año:</label>
+    <select id="anioFestivo" onchange="cargarDiasFestivos()">
+      <!-- Se llenará dinámicamente -->
+    </select>
+  </div>
+
+  <!-- Lista de días festivos -->
+  <div id="listaDiasFestivos" class="dias-festivos-lista">
+    <!-- Aquí se mostrarán los días -->
+  </div>
+
+  <div class="form-actions">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      onclick="cerrarModalVerDiasFestivos()"
+    >
+      Cerrar
+    </button>
+  </div>
+</div>
+</div>
+
+
     <!-- Modal para agregar área -->
     <div id="add-area-modal" class="modal hidden">
       <div class="modal-content add-employee-modal">
@@ -759,61 +1079,103 @@
       </div>
     </div>
 
+    <!-- Modal para agregar Empresa -->
+<div id="add-empresa-modal" class="modal hidden">
+  <div class="modal-content add-employee-modal">
+    <span class="close" onclick="cerrarModalAgregarEmpresa()">&times;</span>
+    <h2>Agregar Empresa colaboradora</h2>
+    <form id="empresa-form" class="add-employee-form">
+      <div class="form-group">
+        <label for="nombreEmpresa">Nombre de la empresa:</label>
+        <input
+          type="text"
+          id="nombreEmpresa"
+          name="nombreEmpresa"
+          required
+          placeholder="Ej. Stellantis"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalAgregarEmpresa()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Agregar Empresa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+    
     <!-- Modal para exportar a Excel (actualizado) -->
-    <div id="export-excel-modal" class="modal hidden">
-      <div class="modal-content add-employee-modal">
-        <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
+<div id="export-excel-modal" class="modal hidden">
+  <div class="modal-content add-employee-modal">
+    <span class="close" onclick="cerrarModalExportarExcel()">&times;</span>
 
-        <!-- Paso 1: Selección de campos -->
-        <div id="paso-campos">
-          <h2>Exportar datos (1/2)</h2>
-          <p>Selecciona los campos que deseas incluir en el reporte:</p>
-          <div id="export-fields-container" class="fields-grid"></div>
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalExportarExcel()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="mostrarPasoEmpleados()"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
+    <!-- Paso 1: Selección de campos -->
+    <div id="paso-campos">
+      <h2>Exportar datos (1/2)</h2>
+      <p>Selecciona los campos que deseas incluir en el reporte:</p>
 
-        <!-- Paso 2: Selección de empleados -->
-        <div id="paso-empleados" class="hidden">
-          <h2>Exportar datos (2/2)</h2>
-          <p>Selecciona los empleados a incluir en el reporte:</p>
-          <div style="margin-bottom: 10px">
-           
-          </div>
-          <div id="export-employees-container" class="fields-grid"></div>
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="mostrarPasoCampos()"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="exportarExcel()"
-            >
-              Generar Excel
-            </button>
-          </div>
-        </div>
+      <!-- Botones debajo del texto -->
+      <div class="export-nav-buttons" style="display: flex; gap: 10px; margin: 10px 0;">
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('generales', this)">Datos generales</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('baja', this)">Baja</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('sueldo', this)">Sueldo</button>
+  <button class="btn btn-outline-primary" type="button" onclick="seleccionarCamposPorCategoria('vacaciones', this)">Vacaciones</button>
+</div>
+
+
+
+      <div id="export-fields-container" class="fields-grid"></div>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalExportarExcel()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="mostrarPasoEmpleados()"
+        >
+          Siguiente
+        </button>
       </div>
     </div>
+
+    <!-- Paso 2: Selección de empleados -->
+    <div id="paso-empleados" class="hidden">
+      <h2>Exportar datos (2/2)</h2>
+      <p>Selecciona los empleados a incluir en el reporte:</p>
+      <div style="margin-bottom: 10px"></div>
+      <div id="export-employees-container" class="fields-grid"></div>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="mostrarPasoCampos()"
+        >
+          Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="exportarExcel()"
+        >
+          Generar Excel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <div id="modal-confirmacion" class="modal-confirmacion hidden">
       <div class="modal-contenido">
@@ -825,1271 +1187,115 @@
       </div>
     </div>
 
-    <div id="modal-exito" class="modal-exito hidden">
-      <div class="modal-contenido-exito">
-        <p>Actualización correcta</p>
-        <button id="btn-cerrar-exito" class="btn btn-primary">Aceptar</button>
-      </div>
+    <!-- Modal de Empleados por Mes de Ingreso -->
+<div id="modal-mes-ingreso" class="modal-confirmacion" style="display: none;"
+
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); display: flex;
+            justify-content: center; align-items: center; z-index: 9999;">
+  
+  <div class="modal-contenido"
+       style="background-color: #fff; padding: 24px; border-radius: 10px;
+              width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+    
+    <h3 style="margin-top: 0; font-size: 20px; color: #2c3e50; text-align: center;">
+      Empleados por Mes de Ingreso
+    </h3>
+
+    <label for="filtro-mes" style="display: block; margin: 16px 0 8px; font-weight: bold; color: #333;">
+      Selecciona un mes:
+    </label>
+
+    <select id="filtro-mes" class="form-control"
+            style="width: 100%; padding: 8px 10px; font-size: 14px;
+                   border: 1px solid #ccc; border-radius: 5px;">
+      <option value="1">Enero</option>
+      <option value="2">Febrero</option>
+      <option value="3">Marzo</option>
+      <option value="4">Abril</option>
+      <option value="5">Mayo</option>
+      <option value="6">Junio</option>
+      <option value="7">Julio</option>
+      <option value="8">Agosto</option>
+      <option value="9">Septiembre</option>
+      <option value="10">Octubre</option>
+      <option value="11">Noviembre</option>
+      <option value="12">Diciembre</option>
+    </select>
+
+    <div id="resultado-empleados"
+         style="margin-top: 1rem; max-height: 250px; overflow-y: auto;
+                padding: 10px; background-color: #f9f9f9; border: 1px solid #eee;
+                border-radius: 5px; font-size: 14px;">
+      <!-- Resultados aquí -->
     </div>
 
-    <div id="modal-baja-empleado" class="modal hidden">
-      <div class="modal-content">
-        <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
-        <h2>Dar de Baja Empleado</h2>
+    <div class="modal-botones"
+         style="margin-top: 20px; text-align: right;">
+      <button id="cerrar-modal-mes" class="btn"
+              style="padding: 8px 16px; background-color: #007bff;
+                     border: none; color: #fff; border-radius: 5px;
+                     cursor: pointer; transition: background-color 0.3s;">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
 
-        <div style="margin-bottom: 15px">
-          <p>
-            Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
-          </p>
-          <p>ID: <strong id="id-empleado-baja"></strong></p>
-        </div>
 
-        <form id="form-baja-empleado">
-          <input type="hidden" id="baja-idUsuario" />
+    
+<div id="modal-baja-empleado" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalBajaEmpleado()">&times;</span>
+    <h2>Dar de Baja Empleado</h2>
 
-          <div class="form-group">
-            <label for="baja-fecha">Fecha de Baja:</label>
-            <input type="date" id="baja-fecha" name="fechaBaja" required />
-          </div>
-
-          <div class="form-group">
-            <label for="baja-comentario">Motivo de la baja:</label>
-            <textarea
-              id="baja-comentario"
-              name="comentarioSalida"
-              rows="4"
-              required
-              class="estilo-textarea"
-            ></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="cerrarModalBajaEmpleado()"
-            >
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-danger">Confirmar Baja</button>
-          </div>
-        </form>
-      </div>
+    <div style="margin-bottom: 15px">
+      <p>
+        Empleado: <strong id="nombre-empleado-baja"></strong> <br /><br />
+      </p>
+      <p>ID: <strong id="id-empleado-baja"></strong></p>
     </div>
 
-
-<script>
-  // ===== VARIABLES GLOBALES =====
-let empleadosVisibles = []
-let camposSeleccionados = []
-let empleadosSeleccionados = []
-
-// Campos disponibles para exportación
-const camposExportacion = [
-  { id: "idUsuario", nombre: "ID Usuario" },
-  { id: "TipoRol", nombre: "Tipo de Rol" },
-  { id: "Areas", nombre: "Área" },
-  { id: "Nombres", nombre: "Nombres" },
-  { id: "Paterno", nombre: "Apellido Paterno" },
-  { id: "Materno", nombre: "Apellido Materno" },
-  { id: "FechaNacimiento", nombre: "Fecha Nacimiento" },
-  { id: "Direccion", nombre: "Dirección" },
-  { id: "CodigoPostal", nombre: "Código Postal" },
-  { id: "Correo", nombre: "Correo Electrónico" },
-  { id: "NSS", nombre: "Número de Seguro Social" },
-  { id: "Telefono", nombre: "Teléfono" },
-  { id: "FechaIngreso", nombre: "Fecha Ingreso" },
-  { id: "RFC", nombre: "RFC" },
-  { id: "Curp", nombre: "CURP" },
-  { id: "Puesto", nombre: "Puesto" },
-  { id: "NombreContactoEmergencia", nombre: "Contacto Emergencia" },
-  { id: "TelefonoEmergencia", nombre: "Teléfono Emergencia" },
-  { id: "Parentesco", nombre: "Parentesco" },
-  { id: "FechaBaja", nombre: "Fecha Baja" },
-  { id: "ComentarioSalida", nombre: "Comentario Salida" },
-  { id: "clave", nombre: "Clave" },
-  { id: "Estado", nombre: "Estado" },
-  { id: "SueldoDiario", nombre: "Sueldo Diario" },
-  { id: "SueldoSemanal", nombre: "Sueldo Semanal" },
-  { id: "BonoSemanal", nombre: "Bono Semanal" },
-  { id: "Vacaciones", nombre: "Vacaciones" },
-  { id: "DiasDisponibles", nombre: "Dias Disponibles" },
-]
-
-// ===== FUNCIONES DE UTILIDAD =====
-function toggleAreas(context = "") {
-  const prefix = context ? context + "-" : ""
-  const contenedor = document.getElementById(`${prefix}checkbox-areas`)
-  const boton = document.getElementById(`${prefix}toggle-areas`)
-
-  if (!contenedor || !boton) return
-
-  if (contenedor.classList.contains("abierto")) {
-    contenedor.classList.remove("abierto")
-    boton.textContent = "Mostrar Áreas ▼"
-  } else {
-    contenedor.classList.add("abierto")
-    boton.textContent = "Ocultar Áreas ▲"
-  }
-}
-
-// Verificar si el usuario está logueado
-function verificarSesion() {
-  const idUsuario = localStorage.getItem("idUsuario")
-  if (!idUsuario) {
-    window.location.href = "index.html"
-  }
-  return idUsuario
-}
-
-// Función para cargar notificaciones
-async function cargarNotificaciones() {
-  try {
-    const idUsuario = localStorage.getItem("idUsuario")
-    if (!idUsuario) {
-      console.error("No se encontró idUsuario en localStorage")
-      return
-    }
-
-    const response = await fetch(`/api/totalSolicitudes/${idUsuario}`)
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`)
-    }
-
-    const data = await response.json()
-    console.log("Datos de notificaciones:", data)
-
-    const badge = document.getElementById("notificacion-solicitudes")
-    if (!badge) {
-      console.warn("Elemento badge no encontrado")
-      return
-    }
-
-    if (data.total > 0) {
-      badge.textContent = data.total
-      badge.style.display = "inline-block"
-    } else {
-      badge.style.display = "none"
-    }
-  } catch (error) {
-    console.error("Error al cargar notificaciones:", error)
-  }
-}
-
-function cargarNombreUsuario(idUsuario) {
-  fetch("/api/usuario/nombre", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ idUsuario: idUsuario }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Error al obtener el nombre del usuario")
-      }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.error) {
-        console.error(data.error)
-        document.getElementById("employee-name").textContent = "Administrador"
-      } else {
-        let nombreCompleto = data.nombres || ""
-        if (data.paterno) nombreCompleto += ` ${data.paterno}`
-        if (data.materno) nombreCompleto += ` ${data.materno}`
-
-        document.getElementById("employee-name").textContent = nombreCompleto.trim() || "Administrador"
-      }
-    })
-    .catch((error) => {
-      console.error("Error al cargar nombre:", error)
-      document.getElementById("employee-name").textContent = "Administrador"
-    })
-}
-
-function cargarEmpleadosPorEstado() {
-  const estadoSeleccionado = document.getElementById("filtro-estado").value
-  const termino = document.getElementById("busquedaEmpleado").value.toLowerCase()
-
-  fetch(`/api/empleados?estado=${estadoSeleccionado}`)
-    .then((response) => response.json())
-    .then((data) => {
-      const empleadosFiltrados = data.filter(
-        (emp) =>
-          emp.id.toString().includes(termino) ||
-          emp.nombre.toLowerCase().includes(termino)
-      )
-
-      empleadosVisibles = empleadosFiltrados
-
-      const tbody = document.getElementById("empleados-body")
-      tbody.innerHTML = ""
-
-      if (empleadosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">No se encontraron empleados</td></tr>`
-        return
-      }
-
-      empleadosFiltrados.forEach((emp) => {
-        console.log("Empleado:", emp)
-        const esAdmin = emp.rolId === 2 || emp.Rol_idRol === 2
-
-        const row = document.createElement("tr")
-        row.innerHTML = `
-          <td>${emp.id}</td>
-          <td>${emp.nombre}</td>
-          <td>${emp.puesto}</td>
-          <td>
-            <button class="action-btn" onclick="verEmpleado(${emp.id})">
-              <i class="bi bi-eye"></i>
-            </button>
-            <button class="action-btn" onclick="editarEmpleado(${emp.id})" ${esAdmin ? "disabled title='No permitido'" : ""}>
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="action-btn" onclick="abrirModalBajaEmpleado(${emp.id})" ${esAdmin ? "disabled title='No permitido'" : ""}>
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>
-        `
-        tbody.appendChild(row)
-      })
-    })
-    .catch((error) => {
-      console.error("Error al cargar empleados:", error)
-    })
-}
-
-
-
-function buscarEmpleado() {
-  cargarEmpleadosPorEstado()
-}
-
-function verEmpleado(id) {
-  document.body.classList.add("no-scroll")
-  fetch(`/api/empleado/${id}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("Error al cargar datos del empleado")
-      return res.json()
-    })
-    .then((data) => {
-      
-
-      
-      const modalBody = document.getElementById("modal-body")
-
-      const renderField = (label, value) => {
-        const texto =
-          value === null || value === undefined || value === "" || value === "null" ? "Sin información" : value
-        return `<p><strong>${label}:</strong> ${texto}</p>`
-      }
-
-      const areasTexto =
-        data.Areas && data.Areas.length > 0 ? data.Areas.map((area) => area.NombreArea).join(", ") : "Sin información"
-
-      modalBody.innerHTML = `
-        ${renderField("ID", data.idUsuario)}
-        ${renderField("Rol", data.TipoRol)}
-        ${renderField("Áreas", areasTexto)}
-        ${renderField("Nombre Completo", `${data.Nombres} ${data.Paterno} ${data.Materno}`)}
-        ${renderField("Fecha Nacimiento", data.FechaNacimiento)}
-        ${renderField("Dirección", data.Direccion)}
-        ${renderField("Código Postal", data.CodigoPostal)}
-        ${renderField("Correo", data.Correo)}
-        ${renderField("NSS", data.NSS)}
-        ${renderField("Teléfono", data.Telefono)}
-        ${renderField("Fecha Ingreso", data.FechaIngreso)}
-        ${renderField("RFC", data.RFC)}
-        ${renderField("CURP", data.Curp)}
-        ${renderField("Puesto", data.Puesto)}
-        ${renderField("Contacto Emergencia", data.NombreContactoEmergencia)}
-        ${renderField("Teléfono Emergencia", data.TelefonoEmergencia)}
-        ${renderField("Parentesco", data.Parentesco)}
-        ${renderField("Fecha Baja", data.FechaBaja)}
-        ${renderField("Comentario Salida", data.ComentarioSalida)}
-        ${renderField("Clave", data.Rol_idRol === 2 ? "********" : data.clave)}
-        ${renderField("Estado", data.Estado)}
-        ${renderField("Sueldo Diario", data.SueldoDiario)}
-        ${renderField("Sueldo Semanal", data.SueldoSemanal)}
-        ${renderField("Bono Semanal", data.BonoSemanal)}
-        ${renderField("Vacaciones", data.Vacaciones)}
-        ${renderField("Vacaciones disponibles", data.DiasDisponibles)}
-      `
-
-      document.getElementById("modal").classList.remove("hidden")
-    })
-    .catch((error) => {
-      console.error("Error:", error)
-      alert("Error al cargar los datos del empleado")
-    })
-}
-
-function cerrarModal() {
-  document.getElementById("modal").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-}
-
-function abrirModalAltaEmpleado() {
-  document.getElementById("add-employee-modal").classList.remove("hidden")
-  document.body.classList.add("no-scroll")
-
-  // Llenar roles
-  fetch("/api/roles")
-    .then((res) => res.json())
-    .then((data) => {
-      const selectRol = document.getElementById("tipoRol")
-      selectRol.innerHTML = '<option value="">Seleccione un rol</option>'
-      data.forEach((rol) => {
-        const option = document.createElement("option")
-        option.value = rol.idRol
-        option.textContent = rol.TipoRol
-        selectRol.appendChild(option)
-      })
-    })
-
-  // Llenar áreas como checkboxes
-  fetch("/api/areas")
-    .then((res) => res.json())
-    .then((data) => {
-      const container = document.getElementById("checkbox-areas")
-      container.innerHTML = ""
-
-      data.forEach((area) => {
-        const item = document.createElement("div")
-        item.className = "area-item"
-
-        const label = document.createElement("label")
-        label.textContent = area.NombreArea
-        label.className = "area-label"
-
-        const checkbox = document.createElement("input")
-        checkbox.type = "checkbox"
-        checkbox.name = "areas"
-        checkbox.value = area.idArea
-        checkbox.className = "area-checkbox"
-
-        item.appendChild(label)
-        item.appendChild(checkbox)
-
-        container.appendChild(item)
-      })
-    })
-}
-
-function cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
-  fetch("/api/areas")
-    .then((res) => res.json())
-    .then((areas) => {
-      const container = document.getElementById("edit-checkbox-areas")
-      container.innerHTML = ""
-
-      areas.forEach((area) => {
-        const wrapper = document.createElement("div")
-        wrapper.className = "area-item"
-
-        const checkbox = document.createElement("input")
-        checkbox.type = "checkbox"
-        checkbox.name = "areas"
-        checkbox.value = area.idArea
-        checkbox.id = `area-${area.idArea}`
-        checkbox.checked = areasSeleccionadas.includes(area.idArea)
-        checkbox.className = "area-checkbox"
-
-        const label = document.createElement("label")
-        label.htmlFor = checkbox.id
-        label.className = "area-label"
-        label.textContent = area.NombreArea
-
-        wrapper.appendChild(label)
-        wrapper.appendChild(checkbox)
-
-        container.appendChild(wrapper)
-      })
-    })
-}
-
-function cerrarModalAltaEmpleado() {
-  document.getElementById("add-employee-modal").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-}
-
-function formatoFechaParaInput(fecha) {
-  if (!fecha) return ""
-
-  if (typeof fecha === "string" && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    return fecha
-  }
-
-  const date = new Date(fecha)
-  const offset = date.getTimezoneOffset()
-  date.setMinutes(date.getMinutes() + offset)
-
-  return date.toISOString().split("T")[0]
-}
-
-function editarEmpleado(id) {
-  document.getElementById("edit-employee-modal").classList.remove("hidden")
-  document.body.classList.add("no-scroll")
-
-  fetch(`/api/empleado/${id}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("Error al obtener datos del empleado")
-      return res.json()
-    })
-    .then((data) => {
-      Promise.all([fetch("/api/roles").then((res) => res.json()), fetch("/api/areas").then((res) => res.json())]).then(
-        ([roles, areas]) => {
-          const selectRol = document.getElementById("edit-tipoRol")
-
-          selectRol.innerHTML = '<option value="">Seleccione un rol</option>'
-          roles.forEach((rol) => {
-            const option = document.createElement("option")
-            option.value = rol.idRol
-            option.textContent = rol.TipoRol
-            selectRol.appendChild(option)
-          })
-
-          // Llenar campos del formulario
-          document.getElementById("edit-idUsuario").value = data.idUsuario || ""
-          document.getElementById("edit-tipoRol").value = data.Rol_idRol || ""
-          document.getElementById("edit-nombres").value = data.Nombres || ""
-          document.getElementById("edit-paterno").value = data.Paterno || ""
-          document.getElementById("edit-materno").value = data.Materno || ""
-          document.getElementById("edit-fechaNacimiento").value = formatoFechaParaInput(data.FechaNacimiento)
-          document.getElementById("edit-direccion").value = data.Direccion || ""
-          document.getElementById("edit-codigoPostal").value = data.CodigoPostal || ""
-          document.getElementById("edit-correo").value = data.Correo || ""
-          document.getElementById("edit-nss").value = data.NSS || ""
-          document.getElementById("edit-telefono").value = data.Telefono || ""
-          document.getElementById("edit-rfc").value = data.RFC || ""
-          document.getElementById("edit-curp").value = data.Curp || ""
-          document.getElementById("edit-puesto").value = data.Puesto || ""
-          document.getElementById("edit-nombreContactoEmergencia").value = data.NombreContactoEmergencia || ""
-          document.getElementById("edit-telefonoEmergencia").value = data.TelefonoEmergencia || ""
-          document.getElementById("edit-parentesco").value = data.Parentesco || ""
-          document.getElementById("edit-contraseña").value = data.clave || ""
-          document.getElementById("edit-confirmarContraseña").value = data.clave || ""
-          document.getElementById("edit-sueldoDiario").value = data.SueldoDiario || ""
-          document.getElementById("edit-sueldoSemanal").value = data.SueldoSemanal || ""
-          document.getElementById("edit-bonoSemanal").value = data.BonoSemanal || ""
-          document.getElementById("edit-fechaBaja").value = formatoFechaParaInput(data.FechaBaja)
-          document.getElementById("edit-comentarioSalida").value = data.ComentarioSalida || ""
-
-          const fechaIngresoInput = document.getElementById("edit-fechaIngreso")
-          fechaIngresoInput.value = formatoFechaParaInput(data.FechaIngreso)
-
-          const campoVacaciones = document.getElementById("edit-vacaciones")
-          campoVacaciones.value =
-            data.Vacaciones != null ? data.Vacaciones : calcularDiasVacaciones(fechaIngresoInput.value)
-
-          document.getElementById("edit-diasDisponibles").value = data.DiasDisponibles || 0
-
-          const idsDeAreas = (data.Areas || []).map((area) => area.idArea)
-          cargarAreasParaEditar(data.idUsuario, idsDeAreas)
-
-          fechaIngresoInput.addEventListener("change", function () {
-            const nuevaFecha = this.value
-            const dias = calcularDiasVacaciones(nuevaFecha)
-            document.getElementById("edit-vacaciones").value = dias
-          })
-        },
-      )
-    })
-    .catch((error) => {
-      console.error("Error al cargar datos del empleado:", error)
-      alert("No se pudieron cargar los datos del empleado.")
-    })
-}
-
-function cerrarModalEditarEmpleado() {
-  document.getElementById("edit-employee-modal").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-}
-
-function abrirModalExportarExcel() {
-  document.getElementById("export-excel-modal").classList.remove("hidden")
-  mostrarPasoCampos()
-  document.body.classList.add("no-scroll")
-}
-
-function mostrarPasoCampos() {
-  document.getElementById("paso-empleados").classList.remove("visible")
-  document.getElementById("paso-campos").classList.remove("oculto")
-
-  const container = document.getElementById("export-fields-container")
-  container.innerHTML = ""
-  container.style.display = "grid"
-  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))"
-  container.style.gap = "12px"
-  container.style.padding = "12px"
-
-  camposExportacion.forEach((campo) => {
-    const div = document.createElement("div")
-    div.style.display = "flex"
-    div.style.alignItems = "center"
-    div.style.gap = "10px"
-    div.style.padding = "8px"
-    div.style.borderRadius = "6px"
-    div.style.backgroundColor = "#f8f9fa"
-    div.style.transition = "all 0.2s ease"
-
-    div.onmouseenter = () => {
-      div.style.backgroundColor = "#e9ecef"
-      div.style.transform = "translateY(-2px)"
-    }
-    div.onmouseleave = () => {
-      div.style.backgroundColor = "#f8f9fa"
-      div.style.transform = "none"
-    }
-
-    const checkbox = document.createElement("input")
-    checkbox.type = "checkbox"
-    checkbox.id = `export-${campo.id}`
-    checkbox.value = campo.id
-    checkbox.checked = true
-    checkbox.style.width = "18px"
-    checkbox.style.height = "18px"
-    checkbox.style.cursor = "pointer"
-    checkbox.style.accentColor = "#4dabf7"
-
-    const label = document.createElement("label")
-    label.htmlFor = `export-${campo.id}`
-    label.textContent = campo.nombre
-    label.style.cursor = "pointer"
-    label.style.fontSize = "14px"
-    label.style.userSelect = "none"
-    label.style.color = "#495057"
-
-    div.appendChild(checkbox)
-    div.appendChild(label)
-    container.appendChild(div)
-  })
-}
-
-function mostrarPasoEmpleados() {
-  const checkboxes = document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked')
-  camposSeleccionados = Array.from(checkboxes).map((cb) => cb.value)
-
-  if (camposSeleccionados.length === 0) {
-    Swal.fire({
-            icon: "warning",
-            title: "Campos requeridos",
-            text: "Por favor selecciona al menos un campo para exportar",
-            confirmButtonColor: "#3085d6",
-            confirmButtonText: "Aceptar",
-          });
-          return;
-  }
-
-  document.getElementById("paso-campos").classList.add("oculto")
-  document.getElementById("paso-empleados").classList.add("visible")
-
-  const container = document.getElementById("export-employees-container")
-  container.innerHTML = ""
-  container.style.display = "grid"
-  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))"
-  container.style.gap = "12px"
-  container.style.padding = "16px"
-  container.style.maxHeight = "400px"
-  container.style.overflowY = "auto"
-
-  if (empleadosVisibles.length === 0) {
-    container.innerHTML = `
-      <div style="
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 20px;
-        color: #6c757d;
-        font-size: 16px;
-      ">
-        <i class="fas fa-users-slash" style="font-size: 24px; margin-bottom: 8px;"></i>
-        <p>No hay empleados para exportar</p>
+    <form id="form-baja-empleado">
+      <input type="hidden" id="baja-idUsuario" />
+
+      <div class="form-group">
+        <label for="baja-fecha">Fecha de Baja:</label>
+        <input type="date" id="baja-fecha" name="fechaBaja" required />
       </div>
-    `
-    return
-  }
 
-  // Añadir select all/none
-  const selectAllDiv = document.createElement("div")
-  selectAllDiv.style.gridColumn = "1 / -1"
-  selectAllDiv.style.display = "flex"
-  selectAllDiv.style.gap = "12px"
-  selectAllDiv.style.marginBottom = "8px"
-
-  const selectAllBtn = document.createElement("button")
-  selectAllBtn.textContent = "Seleccionar todos"
-  selectAllBtn.style.padding = "6px 12px"
-  selectAllBtn.style.background = "#174da3"
-  selectAllBtn.style.color = "white"
-  selectAllBtn.style.border = "none"
-  selectAllBtn.style.borderRadius = "4px"
-  selectAllBtn.style.cursor = "pointer"
-
-  const deselectAllBtn = document.createElement("button")
-  deselectAllBtn.textContent = "Quitar todos"
-  deselectAllBtn.style.padding = "6px 12px"
-  deselectAllBtn.style.background = "#f1f3f5"
-  deselectAllBtn.style.color = "#495057"
-  deselectAllBtn.style.border = "1px solid #dee2e6"
-  deselectAllBtn.style.borderRadius = "4px"
-  deselectAllBtn.style.cursor = "pointer"
-
-  selectAllBtn.onclick = () => {
-    document.querySelectorAll(".empleado-checkbox").forEach((cb) => (cb.checked = true))
-    updateEmployeeCounter()
-  }
-
-  deselectAllBtn.onclick = () => {
-    document.querySelectorAll(".empleado-checkbox").forEach((cb) => (cb.checked = false))
-    updateEmployeeCounter()
-  }
-
-  selectAllDiv.appendChild(selectAllBtn)
-  selectAllDiv.appendChild(deselectAllBtn)
-  container.appendChild(selectAllDiv)
-
-  empleadosVisibles.forEach((emp) => {
-    const div = document.createElement("div")
-    div.style.display = "flex"
-    div.style.alignItems = "center"
-    div.style.gap = "12px"
-    div.style.padding = "10px"
-    div.style.borderRadius = "6px"
-    div.style.backgroundColor = "#f8f9fa"
-    div.style.transition = "all 0.2s ease"
-
-    div.onmouseenter = () => {
-      div.style.backgroundColor = "#e9ecef"
-    }
-    div.onmouseleave = () => {
-      div.style.backgroundColor = "#f8f9fa"
-    }
-
-    const checkbox = document.createElement("input")
-    checkbox.type = "checkbox"
-    checkbox.className = "empleado-checkbox"
-    checkbox.value = emp.id
-    checkbox.checked = true
-    checkbox.style.width = "18px"
-    checkbox.style.height = "18px"
-    checkbox.style.cursor = "pointer"
-    checkbox.style.accentColor = "#4dabf7"
-
-    const label = document.createElement("label")
-    label.textContent = `${emp.id} - ${emp.nombre}`
-    label.style.cursor = "pointer"
-    label.style.fontSize = "14px"
-    label.style.userSelect = "none"
-    label.style.color = "#495057"
-    label.style.flex = "1"
-    label.style.overflow = "hidden"
-    label.style.textOverflow = "ellipsis"
-    label.style.whiteSpace = "nowrap"
-
-    div.appendChild(checkbox)
-    div.appendChild(label)
-    container.appendChild(div)
-  })
-
-  // Añadir contador de seleccionados
-  const counterDiv = document.createElement("div")
-  counterDiv.style.gridColumn = "1 / -1"
-  counterDiv.style.textAlign = "right"
-  counterDiv.style.fontSize = "14px"
-  counterDiv.style.color = "#6c757d"
-  counterDiv.id = "employee-counter"
-  container.appendChild(counterDiv)
-  updateEmployeeCounter()
-
-  // Actualizar contador cuando cambien los checkboxes
-  container.addEventListener("change", updateEmployeeCounter)
-
-  function updateEmployeeCounter() {
-    const total = empleadosVisibles.length
-    const selected = document.querySelectorAll(".empleado-checkbox:checked").length
-    const counter = document.getElementById("employee-counter")
-    if (counter) {
-      counter.textContent = `${selected} de ${total} empleados seleccionados`
-    }
-  }
-}
-
-function exportarExcel() {
-  const camposSeleccionados = Array.from(
-    document.querySelectorAll('#export-fields-container input[type="checkbox"]:checked'),
-  ).map((cb) => cb.value)
-
-  const checkboxes = document.querySelectorAll('#export-employees-container input[type="checkbox"]:checked')
-  const empleadosSeleccionados = Array.from(checkboxes).map((cb) => cb.value)
-
-  if (empleadosSeleccionados.length === 0 || camposSeleccionados.length === 0) {
-    Swal.fire({
-            icon: "warning",
-            title: "Selección incompleta",
-            text: "Por favor selecciona al menos un empleado y al menos un campo para exportar",
-            confirmButtonColor: "#3085d6",
-            confirmButtonText: "Aceptar",
-          });
-          return;
-  }
-
-  const exportBtn = document.querySelector("#paso-empleados .btn-primary")
-  const originalText = exportBtn.textContent
-  exportBtn.textContent = "Generando..."
-  exportBtn.disabled = true
-
-  const promises = empleadosSeleccionados.map((id) => fetch(`/api/empleado/${id}`).then((res) => res.json()))
-
-  Promise.all(promises)
-    .then((empleadosCompletos) => {
-      const datosExcel = empleadosCompletos.map((empleado) => {
-        const fila = {}
-
-        camposSeleccionados.forEach((campo) => {
-  if (campo === "Areas" && Array.isArray(empleado.Areas)) {
-    fila[campo] = empleado.Areas.map((a) => a.NombreArea).join(", ")
-  } else if (campo === "clave" && empleado.Rol_idRol === 2) {
-    fila[campo] = "********"  // 🔐 censura clave de admins
-  } else {
-    fila[campo] = empleado[campo] !== undefined ? empleado[campo] : ""
-  }
-})
-
-
-        return fila
-      })
-
-      // Crear hoja Excel
-      const XLSX = window.XLSX // Declare XLSX variable
-      const worksheet = XLSX.utils.json_to_sheet(datosExcel, {
-        header: camposSeleccionados,
-      })
-
-      // Aplicar estilo al encabezado
-      const range = XLSX.utils.decode_range(worksheet["!ref"])
-      for (let C = range.s.c; C <= range.e.c; ++C) {
-        const cell_address = XLSX.utils.encode_cell({ r: 0, c: C })
-        if (!worksheet[cell_address]) continue
-
-        worksheet[cell_address].s = {
-          fill: {
-            patternType: "solid",
-            fgColor: { rgb: "FFFF00" },
-          },
-          font: {
-            bold: true,
-          },
-          alignment: {
-            horizontal: "center",
-          },
-        }
-      }
-
-      // Ajustar ancho de columnas automáticamente
-      worksheet["!cols"] = camposSeleccionados.map((campo) => {
-        const maxLength = Math.max(
-          campo.length,
-          ...datosExcel.map((row) => (row[campo] ? row[campo].toString().length : 0)),
-        )
-        return { wch: maxLength + 2 }
-      })
-
-      // Crear libro y descargar
-      const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Empleados")
-
-      XLSX.writeFile(workbook, "empleados_exportados.xlsx")
-    })
-    .catch((error) => {
-      console.error("Error al exportar a Excel:", error)
-      alert("Ocurrió un error al generar el archivo Excel: " + error.message)
-    })
-    .finally(() => {
-      exportBtn.textContent = originalText
-      exportBtn.disabled = false
-      cerrarModalExportarExcel()
-    })
-}
-
-function cerrarModalExportarExcel() {
-  document.getElementById("export-excel-modal").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-  camposSeleccionados = []
-  empleadosSeleccionados = []
-}
-
-function mostrarModalConfirmacion({
-  texto,
-  textoBotonConfirmar = "Confirmar",
-  claseBotonConfirmar = "btn-danger",
-  onConfirmar,
-  onCancelar,
-}) {
-  const modal = document.getElementById("modal-confirmacion")
-  const modalTexto = document.getElementById("modal-texto")
-  const btnConfirmar = document.getElementById("modal-confirmar")
-  const btnCancelar = document.getElementById("modal-cancelar")
-
-  modalTexto.textContent = texto
-
-  btnConfirmar.textContent = textoBotonConfirmar
-  btnConfirmar.className = "btn " + claseBotonConfirmar
-
-  modal.classList.remove("hidden")
-
-  btnConfirmar.onclick = null
-  btnCancelar.onclick = null
-
-  btnConfirmar.onclick = () => {
-    if (typeof onConfirmar === "function") onConfirmar()
-    modal.classList.add("hidden")
-  }
-
-  btnCancelar.onclick = () => {
-    if (typeof onCancelar === "function") onCancelar()
-    modal.classList.add("hidden")
-  }
-}
-
-function mostrarModalExito() {
-  const modal = document.getElementById("modal-exito")
-  const btnCerrar = document.getElementById("btn-cerrar-exito")
-
-  modal.classList.remove("hidden")
-
-  btnCerrar.onclick = () => {
-    modal.classList.add("hidden")
-  }
-}
-
-function calcularDiasVacaciones(fechaIngreso) {
-  const hoy = new Date()
-  const ingreso = new Date(fechaIngreso)
-
-  hoy.setHours(0, 0, 0, 0)
-  ingreso.setHours(0, 0, 0, 0)
-
-  let años = hoy.getFullYear() - ingreso.getFullYear()
-  const mesActual = hoy.getMonth()
-  const diaActual = hoy.getDate()
-  const mesIngreso = ingreso.getMonth()
-  const diaIngreso = ingreso.getDate()
-
-  if (mesActual < mesIngreso || (mesActual === mesIngreso && diaActual < diaIngreso)) {
-    años--
-  }
-
-  // Tabla LFT
-  if (años < 1) return 0
-  if (años === 1) return 12
-  if (años === 2) return 14
-  if (años === 3) return 16
-  if (años === 4) return 18
-  if (años === 5) return 20
-  if (años >= 6 && años <= 10) return 22
-  if (años >= 11 && años <= 15) return 24
-  if (años >= 16 && años <= 20) return 26
-  if (años >= 21 && años <= 25) return 28
-  return 30
-}
-
-function abrirModalAgregarFestivo() {
-  document.getElementById("add-holiday-modal").classList.remove("hidden")
-  document.body.classList.add("no-scroll")
-  const today = new Date().toISOString().split("T")[0]
-  document.getElementById("fechaFestivo").value = today
-}
-
-function cerrarModalAgregarFestivo() {
-  document.getElementById("add-holiday-modal").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-}
-
-function abrirModalBajaEmpleado(idUsuario) {
-  document.body.classList.add("no-scroll")
-  fetch(`/api/empleado/${idUsuario}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("No se encontró el empleado")
-      return res.json()
-    })
-    .then((empleado) => {
-      document.getElementById("nombre-empleado-baja").textContent =
-        `${empleado.Nombres} ${empleado.Paterno} ${empleado.Materno}`
-      document.getElementById("id-empleado-baja").textContent = idUsuario
-      document.getElementById("baja-idUsuario").value = idUsuario
-
-      document.getElementById("modal-baja-empleado").classList.remove("hidden")
-    })
-    .catch((err) => {
-      console.error("Error al cargar empleado:", err)
-      alert("No se pudo abrir el modal de baja.")
-    })
-}
-
-function cerrarModalBajaEmpleado() {
-  document.getElementById("modal-baja-empleado").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-}
-
-function abrirModalAgregarArea() {
-  document.getElementById("add-area-modal").classList.remove("hidden")
-  document.body.classList.add("no-scroll")
-}
-
-function cerrarModalAgregarArea() {
-  document.getElementById("add-area-modal").classList.add("hidden")
-  document.body.classList.remove("no-scroll")
-}
-
-// ===== INICIALIZACIÓN =====
-document.addEventListener("DOMContentLoaded", () => {
-  const idUsuario = verificarSesion()
-  cargarNotificaciones()
-  setInterval(cargarNotificaciones, 1200000)
-
-  if (idUsuario) {
-    cargarNombreUsuario(idUsuario)
-  }
-
-  // Event listeners
-  const filtroEstado = document.getElementById("filtro-estado")
-  const busquedaEmpleado = document.getElementById("busquedaEmpleado")
-
-  if (filtroEstado) {
-    filtroEstado.addEventListener("change", cargarEmpleadosPorEstado)
-  }
-
-  if (busquedaEmpleado) {
-    busquedaEmpleado.addEventListener("input", buscarEmpleado)
-  }
-
-  // Carga inicial
-  cargarEmpleadosPorEstado()
-
-  // Event listeners para formularios
-  const employeeForm = document.getElementById("employee-form")
-  if (employeeForm) {
-    employeeForm.addEventListener("submit", function (e) {
-      e.preventDefault()
-
-      const fechaIngreso = document.getElementById("fechaIngreso").value
-      const diasVacaciones = calcularDiasVacaciones(fechaIngreso)
-
-      const contraseña = document.getElementById("contraseña").value
-      const confirmarContraseña = document.getElementById("confirmarContraseña").value
-
-      if (contraseña !== confirmarContraseña) {
-        Swal.fire({
-                icon: "warning",
-                title: "Contraseñas no coinciden",
-                text: "Por favor, asegúrate de que ambas contraseñas sean iguales.",
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Aceptar",
-              });
-              return;
-      }
-
-      const formData = new FormData(this)
-      const empleadoData = {}
-
-      formData.forEach((value, key) => {
-        empleadoData[key] = value
-      })
-
-      const areasSeleccionadas = Array.from(document.querySelectorAll('input[name="areas"]:checked')).map((cb) =>
-        Number.parseInt(cb.value),
-      )
-
-      if (areasSeleccionadas.length === 0) {
-         Swal.fire({
-                icon: "warning",
-                title: "Área requerida",
-                text: "Debes seleccionar al menos un área.",
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Aceptar",
-              });
-              return;
-      }
-
-      empleadoData.areas = areasSeleccionadas
-      empleadoData.rol_id = empleadoData.tipoRol
-      delete empleadoData.tipoRol
-      delete empleadoData.nombreArea
-
-      empleadoData.Vacaciones = diasVacaciones
-
-      // Convertir a número
-      empleadoData.idUsuario = Number(empleadoData.idUsuario)
-      empleadoData.nss = Number(empleadoData.nss)
-      empleadoData.telefono = Number(empleadoData.telefono)
-      empleadoData.telefonoEmergencia = Number(empleadoData.telefonoEmergencia)
-      empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario)
-      empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal)
-      empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal)
-      empleadoData.Vacaciones = Number(empleadoData.Vacaciones)
-      empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles)
-
-      // Validaciones finales
-      if (
-        isNaN(empleadoData.idUsuario) ||
-        isNaN(empleadoData.nss) ||
-        isNaN(empleadoData.telefono) ||
-        isNaN(empleadoData.telefonoEmergencia) ||
-        isNaN(empleadoData.SueldoDiario) ||
-        isNaN(empleadoData.SueldoSemanal) ||
-        isNaN(empleadoData.BonoSemanal)
-      ) {
-        Swal.fire({
-                icon: "warning",
-                title: "Valores inválidos",
-                text: "Por favor, ingresa valores numéricos válidos en los campos requeridos.",
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Aceptar",
-              });
-              return;
-      }
-
-      // Enviar al backend
-      fetch("/api/empleado", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(empleadoData),
-      })
-        .then((res) => {
-          if (!res.ok)
-            return res.json().then((data) => {
-              throw new Error(data.error || "Error al guardar el empleado")
-            })
-          return res.json()
-        })
-        .then((data) => {
-           Swal.fire({
-                  icon: "success",
-                  title: "Empleado dado de alta",
-                  text: data.mensaje,
-                  confirmButtonColor: "#3085d6",
-                  confirmButtonText: "Aceptar",
-                }).then(() => {
-                  cerrarModalAltaEmpleado();
-                  location.reload();
-                });
-              })
-        .catch((error) => {
-          console.error("Error al insertar:", error)
-          alert("Hubo un error al guardar el empleado: " + error.message)
-        })
-    })
-  }
-
-  const editEmployeeForm = document.getElementById("edit-employee-form")
-  if (editEmployeeForm) {
-    editEmployeeForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-
-      const contraseña = document.getElementById("edit-contraseña").value
-      const confirmar = document.getElementById("edit-confirmarContraseña").value
-
-      if (contraseña !== confirmar) {
-        Swal.fire({
-                icon: "warning",
-                title: "Contraseñas no coinciden",
-                text: "Por favor, asegúrate de que ambas contraseñas sean iguales.",
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Aceptar",
-              });
-              return;
-      }
-
-      const empleadoData = {
-        idUsuario: Number(document.getElementById("edit-idUsuario").value),
-        rol_id: document.getElementById("edit-tipoRol").value,
-        nombres: document.getElementById("edit-nombres").value,
-        paterno: document.getElementById("edit-paterno").value,
-        materno: document.getElementById("edit-materno").value,
-        fechaNacimiento: document.getElementById("edit-fechaNacimiento").value,
-        direccion: document.getElementById("edit-direccion").value,
-        codigoPostal: document.getElementById("edit-codigoPostal").value,
-        correo: document.getElementById("edit-correo").value,
-        nss: Number(document.getElementById("edit-nss").value),
-        telefono: Number(document.getElementById("edit-telefono").value),
-        fechaIngreso: document.getElementById("edit-fechaIngreso").value,
-        rfc: document.getElementById("edit-rfc").value,
-        curp: document.getElementById("edit-curp").value,
-        puesto: document.getElementById("edit-puesto").value,
-        nombreContactoEmergencia: document.getElementById("edit-nombreContactoEmergencia").value,
-        telefonoEmergencia: Number(document.getElementById("edit-telefonoEmergencia").value),
-        parentesco: document.getElementById("edit-parentesco").value,
-        contraseña: contraseña,
-        SueldoDiario: Number(document.getElementById("edit-sueldoDiario").value),
-        SueldoSemanal: Number(document.getElementById("edit-sueldoSemanal").value),
-        BonoSemanal: Number(document.getElementById("edit-bonoSemanal").value),
-        fechaBaja: document.getElementById("edit-fechaBaja").value || null,
-        comentarioSalida: document.getElementById("edit-comentarioSalida").value || null,
-        Vacaciones: Number(document.getElementById("edit-vacaciones").value) || 0,
-        diasDisponibles: Number(document.getElementById("edit-diasDisponibles").value) || 0,
-      }
-
-      const checkboxes = document.querySelectorAll("#edit-checkbox-areas input[name='areas']:checked")
-      const areasSeleccionadas = Array.from(checkboxes).map((cb) => Number.parseInt(cb.value))
-      empleadoData.areas = areasSeleccionadas
-
-      fetch(`/api/empleado/${empleadoData.idUsuario}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(empleadoData),
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Error al actualizar el empleado")
-          return res.json()
-        })
-        .then((data) => {
-          Swal.fire({
-                  icon: "success",
-                  title: "Empleado actualizado",
-                  text: data.mensaje,
-                  confirmButtonColor: "#3085d6",
-                  confirmButtonText: "Aceptar",
-                }).then(() => {
-                  cerrarModalEditarEmpleado();
-                  location.reload();
-                });
-              })
-        .catch((err) => {
-          console.error("Error:", err)
-          alert("Hubo un error al actualizar: " + err.message)
-        })
-    })
-  }
-
-  const formBajaEmpleado = document.getElementById("form-baja-empleado")
-  if (formBajaEmpleado) {
-    formBajaEmpleado.addEventListener("submit", function (e) {
-      e.preventDefault()
-
-      const idUsuario = document.getElementById("baja-idUsuario").value
-      const fechaBaja = document.getElementById("baja-fecha").value
-      const comentarioSalida = document.getElementById("baja-comentario").value
-
-      if (!fechaBaja || !comentarioSalida) {
-        alert("Todos los campos son obligatorios")
-        return
-      }
-
-      const body = {
-        fechaBaja,
-        comentarioSalida,
-      }
-
-      const submitBtn = this.querySelector('button[type="submit"]')
-      const originalText = submitBtn.textContent
-      submitBtn.disabled = true
-      submitBtn.textContent = "Procesando..."
-
-      fetch(`/api/empleado/baja/${idUsuario}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      })
-        .then(async (res) => {
-          let data = null
-          try {
-            data = await res.json()
-          } catch (_) {}
-
-          if (!res.ok || !data) {
-            throw new Error(data?.error || "Error al dar de baja al empleado")
-          }
-          return data
-        })
-        .then((data) => {
-         Swal.fire({
-                  icon: "success",
-                  title: "Empleado dado de baja correctamente",
-                  confirmButtonColor: "#3085d6",
-                  confirmButtonText: "Aceptar",
-                }).then(() => {
-                  cerrarModalBajaEmpleado();
-                  location.reload();
-                });
-              })
-        .catch((err) => {
-          console.error("Error al dar de baja:", err)
-          alert("Hubo un error al procesar la baja: " + err.message)
-        })
-        .finally(() => {
-          submitBtn.disabled = false
-          submitBtn.textContent = originalText
-        })
-    })
-  }
-
-  const areaForm = document.getElementById("area-form")
-  if (areaForm) {
-    areaForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-
-      const nombreArea = document.getElementById("nombreArea").value
-
-      fetch("/api/agregarArea", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ Area: nombreArea }),
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Error al guardar el área")
-          return response.json()
-        })
-        .then((data) => {
-          cerrarModalAgregarArea()
-          document.getElementById("area-form").reset()
-        })
-        .catch((error) => {
-          console.error("Error:", error)
-          alert("Error al guardar el área: " + error.message)
-        })
-    })
-  }
-
-  const holidayForm = document.getElementById("holiday-form")
-  if (holidayForm) {
-    holidayForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-
-      const fecha = document.getElementById("fechaFestivo").value
-      const descripcion = document.getElementById("descripcionFestivo").value
-      const anio = new Date(fecha).getFullYear()
-
-      fetch("/api/diafestivo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fecha: fecha,
-          descripcion: descripcion,
-          anio: anio,
-        }),
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Error al guardar el día festivo")
-          return response.json()
-        })
-        .then((data) => {
-          cerrarModalAgregarFestivo()
-        })
-        .catch((error) => {
-          console.error("Error:", error)
-          alert("Error al guardar el día festivo: " + error.message)
-        })
-    })
-  }
-})
-
-</script>
+      <!-- Combobox para RazonBaja -->
+      <div class="form-group">
+        <label for="baja-razon">Razón de Baja:</label>
+        <select id="baja-razon" name="idRazonBaja" required>
+          <option value="">Seleccione una razón</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="baja-comentario">Comentarios sobre la baja:</label>
+        <textarea
+          id="baja-comentario"
+          name="comentarioSalida"
+          rows="4"
+          required
+          class="estilo-textarea"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="cerrarModalBajaEmpleado()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-danger">Confirmar Baja</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src = "js/rh.js"></script>
   </body>
 </html>
