@@ -1211,6 +1211,7 @@ function loadIncapacidades() {
 }
 
 // Función mejorada de exportación con filtro de fechas global
+// Función mejorada de exportación con orden correcto y diseño atractivo
 function exportarTodo() {
     console.log('Iniciando exportación completa con filtro de fechas...');
     
@@ -1241,45 +1242,124 @@ function exportarTodo() {
     let totalHojas = 0;
     let totalRegistrosFiltrados = 0;
 
-    // Función auxiliar para procesar cada tabla con filtro
-    function procesarTablaConFiltro(tabla, nombreHoja, nombreTabla, camposFecha) {
+    // Configuraciones de columnas para cada tabla (orden correcto y nombres legibles)
+    const configuracionesTablas = {
+        reportes: {
+            columnas: [
+                { key: 'idReporte', header: 'ID Reporte', width: 12 },
+                { key: 'Nombres', header: 'Nombres', width: 20 },
+                { key: 'Paterno', header: 'Apellido Paterno', width: 20 },
+                { key: 'Materno', header: 'Apellido Materno', width: 20 },
+                { key: 'TipoAsunto', header: 'Tipo de Asunto', width: 25 },
+                { key: 'Observaciones', header: 'Observaciones', width: 40 },
+                { key: 'FechaReporte', header: 'Fecha del Reporte', width: 18 }
+            ],
+            camposFecha: ['FechaReporte']
+        },
+        vacaciones: {
+            columnas: [
+                { key: 'idVacaciones', header: 'ID Vacación', width: 12 },
+                { key: 'Nombres', header: 'Nombres', width: 20 },
+                { key: 'Paterno', header: 'Apellido Paterno', width: 20 },
+                { key: 'Materno', header: 'Apellido Materno', width: 20 },
+                { key: 'EstadoSolicitud', header: 'Estado', width: 15 },
+                { key: 'DiasSolicitados', header: 'Días Solicitados', width: 15 },
+                { key: 'FechaSalida', header: 'Fecha de Salida', width: 18 },
+                { key: 'FechaRegreso', header: 'Fecha de Regreso', width: 18 }
+            ],
+            camposFecha: ['FechaSalida', 'FechaRegreso']
+        },
+        permisos: {
+            columnas: [
+                { key: 'idPermiso', header: 'ID Permiso', width: 12 },
+                { key: 'Nombres', header: 'Nombres', width: 20 },
+                { key: 'Paterno', header: 'Apellido Paterno', width: 20 },
+                { key: 'Materno', header: 'Apellido Materno', width: 20 },
+                { key: 'EstadoSolicitud', header: 'Estado', width: 15 },
+                { key: 'DiaSolicitado', header: 'Día Solicitado', width: 18 },
+                { key: 'HoraInicio', header: 'Hora Inicio', width: 12 },
+                { key: 'HoraFin', header: 'Hora Fin', width: 12 },
+                { key: 'Razon', header: 'Razón', width: 30 },
+                { key: 'TipoCompensacion', header: 'Tipo Compensación', width: 20 }
+            ],
+            camposFecha: ['DiaSolicitado']
+        },
+        actas: {
+            columnas: [
+                { key: 'nombres', header: 'Nombres', width: 20 },
+                { key: 'paterno', header: 'Apellido Paterno', width: 20 },
+                { key: 'materno', header: 'Apellido Materno', width: 20 },
+                { key: 'TipoAsunto', header: 'Tipo de Asunto', width: 25 },
+                { key: 'FechaActa', header: 'Fecha del Acta', width: 18 },
+                { key: 'Comentario', header: 'Comentario', width: 40 }
+            ],
+            camposFecha: ['FechaActa']
+        },
+        incapacidades: {
+            columnas: [
+                { key: 'idIncapacidad', header: 'ID Incapacidad', width: 15 },
+                { key: 'nombres', header: 'Nombres', width: 20 },
+                { key: 'paterno', header: 'Apellido Paterno', width: 20 },
+                { key: 'materno', header: 'Apellido Materno', width: 20 },
+                { key: 'tipo', header: 'Tipo de Incapacidad', width: 25 },
+                { key: 'fechaInicio', header: 'Fecha Inicio', width: 18 },
+                { key: 'fechaFinal', header: 'Fecha Final', width: 18 },
+                { key: 'diasCalculados', header: 'Días Totales', width: 15 },
+                { key: 'observaciones', header: 'Observaciones', width: 40 }
+            ],
+            camposFecha: ['fechaInicio', 'fechaFinal']
+        }
+    };
+
+    // Función auxiliar para procesar cada tabla con orden correcto
+    function procesarTablaConFiltroOrdenado(tabla, nombreHoja, nombreTabla, configuracion) {
         try {
             console.log(`Procesando ${nombreTabla}...`);
             
-            // Verificar que la tabla existe
             if (!tabla) {
                 console.warn(`La tabla ${nombreTabla} no está inicializada`);
                 return false;
             }
 
-            // Obtener todos los datos (sin filtros aplicados para obtener todo)
             let datos = tabla.rows().data().toArray();
             console.log(`${nombreTabla} - Total de filas encontradas:`, datos.length);
 
-            // Aplicar filtro de fechas global si está configurado
+            // Aplicar filtro de fechas global
             if (fechaGlobalInicio || fechaGlobalFin) {
-                datos = aplicarFiltroFechasGlobal(datos, camposFecha);
+                datos = aplicarFiltroFechasGlobal(datos, configuracion.camposFecha);
                 console.log(`${nombreTabla} - Después del filtro de fechas:`, datos.length);
             }
 
             if (datos.length > 0) {
-                // Procesar los datos para que sean más legibles en Excel
-                const datosProcessados = datos.map(row => {
-                    const nuevaFila = {};
+                // Procesar y ordenar los datos según la configuración
+                const datosOrdenados = datos.map(row => {
+                    const filaOrdenada = {};
                     
-                    // Procesar cada propiedad del objeto
-                    Object.keys(row).forEach(key => {
-                        let valor = row[key];
+                    // Agregar campos en el orden especificado
+                    configuracion.columnas.forEach(col => {
+                        let valor = row[col.key];
                         
                         // Formatear fechas
-                        if (key.toLowerCase().includes('fecha') && valor) {
+                        if (col.key.toLowerCase().includes('fecha') && valor) {
                             try {
                                 const fecha = new Date(valor);
                                 if (!isNaN(fecha.getTime())) {
                                     valor = fecha.toLocaleDateString('es-ES');
                                 }
                             } catch (e) {
-                                console.warn(`Error al formatear fecha en ${key}:`, valor);
+                                console.warn(`Error al formatear fecha en ${col.key}:`, valor);
+                            }
+                        }
+                        
+                        // Calcular días para incapacidades
+                        if (col.key === 'diasCalculados' && row.fechaInicio && row.fechaFinal) {
+                            try {
+                                const inicio = new Date(row.fechaInicio);
+                                const final = new Date(row.fechaFinal);
+                                const diferencia = Math.ceil((final - inicio) / (1000 * 60 * 60 * 24)) + 1;
+                                valor = diferencia;
+                            } catch (e) {
+                                valor = '';
                             }
                         }
                         
@@ -1288,15 +1368,19 @@ function exportarTodo() {
                             valor = '';
                         }
                         
-                        nuevaFila[key] = valor;
+                        filaOrdenada[col.header] = valor;
                     });
                     
-                    return nuevaFila;
+                    return filaOrdenada;
                 });
 
-                // Crear la hoja de cálculo
-                let ws = XLSX.utils.json_to_sheet(datosProcessados);
-                ajustarColumnas(ws, datosProcessados);
+                // Crear la hoja con el orden correcto
+                const headers = configuracion.columnas.map(col => col.header);
+                const ws = XLSX.utils.json_to_sheet(datosOrdenados, { header: headers });
+                
+                // Aplicar diseño atractivo
+                aplicarDisenoAtractivo(ws, configuracion, datosOrdenados.length);
+                
                 XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
                 totalHojas++;
                 totalRegistrosFiltrados += datos.length;
@@ -1312,12 +1396,12 @@ function exportarTodo() {
         }
     }
 
-    // Procesar cada tabla con sus respectivos campos de fecha
-    procesarTablaConFiltro(window.reportesTable, "Reportes", "Reportes", ['FechaReporte']);
-    procesarTablaConFiltro(window.vacacionesTable, "Vacaciones", "Vacaciones", ['FechaSalida', 'FechaRegreso']);
-    procesarTablaConFiltro(window.permisosTable, "Permisos", "Permisos", ['DiaSolicitado']);
-    procesarTablaConFiltro(window.actasTable, "Actas_Administrativas", "Actas Administrativas", ['FechaActa']);
-    procesarTablaConFiltro(window.incapacidadesTable, "Incapacidades", "Incapacidades", ['fechaInicio', 'fechaFinal']);
+    // Procesar cada tabla con su configuración específica
+    procesarTablaConFiltroOrdenado(window.reportesTable, "Reportes", "Reportes", configuracionesTablas.reportes);
+    procesarTablaConFiltroOrdenado(window.vacacionesTable, "Vacaciones", "Vacaciones", configuracionesTablas.vacaciones);
+    procesarTablaConFiltroOrdenado(window.permisosTable, "Permisos", "Permisos", configuracionesTablas.permisos);
+    procesarTablaConFiltroOrdenado(window.actasTable, "Actas_Administrativas", "Actas Administrativas", configuracionesTablas.actas);
+    procesarTablaConFiltroOrdenado(window.incapacidadesTable, "Incapacidades", "Incapacidades", configuracionesTablas.incapacidades);
 
     console.log(`Total de hojas creadas: ${totalHojas}, Total de registros: ${totalRegistrosFiltrados}`);
 
@@ -1338,7 +1422,6 @@ function exportarTodo() {
         const ahora = new Date();
         const timestamp = ahora.toISOString().slice(0, 19).replace(/:/g, '-');
         
-        // Incluir información del filtro en el nombre del archivo
         let sufijo = '';
         if (fechaGlobalInicio || fechaGlobalFin) {
             sufijo = '_Filtrado';
@@ -1357,6 +1440,21 @@ function exportarTodo() {
         XLSX.writeFile(wb, nombreArchivo);
         console.log(`✓ Archivo exportado correctamente: ${nombreArchivo}`);
         
+        // Mostrar confirmación
+        Swal.fire({
+            icon: 'success',
+            title: 'Exportación completada',
+            html: `
+                <div style="text-align: left; margin-top: 15px;">
+                    <strong>Archivo:</strong> ${nombreArchivo}<br>
+                    <strong>Hojas creadas:</strong> ${totalHojas}<br>
+                    <strong>Total registros:</strong> ${totalRegistrosFiltrados}
+                    ${(fechaGlobalInicio || fechaGlobalFin) ? '<br><strong>Filtro aplicado:</strong> Sí' : ''}
+                </div>
+            `,
+            confirmButtonText: 'Perfecto'
+        });
+        
     } catch (error) {
         console.error("Error al generar el archivo Excel:", error);
         Swal.fire({
@@ -1365,6 +1463,81 @@ function exportarTodo() {
             text: 'Error al generar el archivo Excel. Revisa la consola para más detalles.',
             confirmButtonText: 'Entendido'
         });
+    }
+}
+
+// Función para aplicar diseño atractivo a la hoja de Excel
+function aplicarDisenoAtractivo(ws, configuracion, totalFilas) {
+    try {
+        // Configurar anchos de columna
+        ws['!cols'] = configuracion.columnas.map(col => ({ wch: col.width }));
+        
+        // Obtener el rango de la hoja
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        
+        // Crear estilos para las celdas (esto es limitado en xlsx, pero podemos hacer algunos ajustes)
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                if (!ws[cellAddress]) continue;
+                
+                const cell = ws[cellAddress];
+                
+                // Configurar formato para encabezados (primera fila)
+                if (R === 0) {
+                    cell.s = {
+                        font: { bold: true, color: { rgb: "FFFFFF" } },
+                        fill: { fgColor: { rgb: "366092" } },
+                        alignment: { horizontal: "center", vertical: "center" },
+                        border: {
+                            top: { style: "thin", color: { rgb: "000000" } },
+                            bottom: { style: "thin", color: { rgb: "000000" } },
+                            left: { style: "thin", color: { rgb: "000000" } },
+                            right: { style: "thin", color: { rgb: "000000" } }
+                        }
+                    };
+                }
+                // Configurar formato para filas de datos
+                else {
+                    // Alternar colores de fila para mejor legibilidad
+                    const fillColor = R % 2 === 0 ? "F8F9FA" : "FFFFFF";
+                    
+                    cell.s = {
+                        fill: { fgColor: { rgb: fillColor } },
+                        alignment: { horizontal: "left", vertical: "top", wrapText: true },
+                        border: {
+                            top: { style: "thin", color: { rgb: "E0E0E0" } },
+                            bottom: { style: "thin", color: { rgb: "E0E0E0" } },
+                            left: { style: "thin", color: { rgb: "E0E0E0" } },
+                            right: { style: "thin", color: { rgb: "E0E0E0" } }
+                        }
+                    };
+                    
+                    // Formato especial para números
+                    if (typeof cell.v === 'number' && !cellAddress.includes('Fecha')) {
+                        cell.s.alignment.horizontal = "center";
+                    }
+                    
+                    // Formato especial para fechas
+                    if (cellAddress.includes('Fecha') || cell.v?.toString().includes('/')) {
+                        cell.s.alignment.horizontal = "center";
+                        cell.s.numFmt = "dd/mm/yyyy";
+                    }
+                }
+            }
+        }
+        
+        // Configurar propiedades de la hoja
+        ws['!margins'] = { left: 0.5, right: 0.5, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 };
+        ws['!autofilter'] = { ref: ws['!ref'] }; // Agregar filtros automáticos
+        
+        // Congelar la primera fila (encabezados)
+        ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+        
+    } catch (error) {
+        console.warn("Error al aplicar diseño atractivo:", error);
+        // Si hay error en el diseño, al menos configurar anchos básicos
+        ws['!cols'] = configuracion.columnas.map(col => ({ wch: Math.min(col.width, 50) }));
     }
 }
 
