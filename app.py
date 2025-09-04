@@ -743,10 +743,9 @@ def obtener_empleado(id):
 
         # Consulta principal del usuario
         cursor.execute("""
-            SELECT u.*, r.TipoRol, a.NombreAcceso
+            SELECT u.*, r.TipoRol
             FROM Usuario u
             LEFT JOIN Rol r ON u.Rol_idRol = r.idRol
-            LEFT JOIN Acceso a on u.Acceso_idAcceso = a.idAcceso
             WHERE u.idUsuario = ?
         """, id)
 
@@ -757,13 +756,12 @@ def obtener_empleado(id):
         columns = [col[0] for col in cursor.description]
         usuario = dict(zip(columns, row))
 
-        # 👉 Formatear las fechas: solo día-mes-año
+        # 👉 Formatear las fechas a yyyy-mm-dd
         for key, value in usuario.items():
             if isinstance(value, (date, datetime)):
-                usuario[key] = value.strftime("%Y-%m-%d")  # o "%d/%m/%Y" si prefieres ese formato
+                usuario[key] = value.strftime("%Y-%m-%d")
 
         # Consulta de áreas
-
         cursor.execute("""
             SELECT a.idArea, a.NombreArea
             FROM Usuario_Area ua
@@ -783,6 +781,7 @@ def obtener_empleado(id):
 
 
 
+
 @app.route('/api/empleado/<int:id>', methods=['PUT'])
 def actualizar_empleado(id):
     data = request.get_json()
@@ -795,7 +794,7 @@ def actualizar_empleado(id):
         if not cursor.fetchone():
             return jsonify({"error": "Empleado no encontrado"}), 404
 
-        # Actualizar datos del usuario (sin Area_idArea porque ya no existe)
+        # Actualizar datos del usuario
         cursor.execute("""
             UPDATE Usuario SET
                 Rol_idRol = ?, Nombres = ?, Paterno = ?, Materno = ?,
@@ -803,7 +802,7 @@ def actualizar_empleado(id):
                 FechaIngreso = ?, RFC = ?, Curp = ?, Puesto = ?, NombreContactoEmergencia = ?,
                 TelefonoEmergencia = ?, Parentesco = ?, clave = ?,
                 SueldoDiario = ?, SueldoSemanal = ?, BonoSemanal = ?, Mensual = ?, Vacaciones = ?, DiasDisponibles = ?,
-                Acceso_idAcceso = ?, NumeroAcceso = ?
+                Empresa = ?
             WHERE idUsuario = ?
         """, (
             data['rol_id'],
@@ -830,8 +829,7 @@ def actualizar_empleado(id):
             float(data['Mensual']),
             int(data['Vacaciones']),
             int(data['diasDisponibles']),
-            data['Acceso_idAcceso'],
-            data['NumeroAcceso'],
+            data['Empresa'],  # 👈 ahora solo este campo
             id
         ))
 
@@ -850,9 +848,11 @@ def actualizar_empleado(id):
         return jsonify({"mensaje": "Empleado actualizado correctamente"}), 200
 
     except Exception as e:
+        print(f"Error al actualizar empleado: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
 
 
 @app.route('/api/empleado', methods=['POST'])
@@ -860,10 +860,13 @@ def agregar_empleado():
     data = request.get_json()
     try:
         # Validaciones básicas
-        required_fields = ['idUsuario', 'rol_id', 'nombres', 'paterno', 'fechaNacimiento', 
-                          'direccion', 'codigoPostal', 'correo', 'nss', 'telefono', 
-                          'fechaIngreso', 'rfc', 'curp', 'puesto', 'nombreContactoEmergencia',
-                          'telefonoEmergencia', 'parentesco', 'contraseña']
+        required_fields = [
+            'idUsuario', 'rol_id', 'nombres', 'paterno', 'fechaNacimiento',
+            'direccion', 'codigoPostal', 'correo', 'nss', 'telefono',
+            'fechaIngreso', 'rfc', 'curp', 'puesto',
+            'nombreContactoEmergencia', 'telefonoEmergencia',
+            'parentesco', 'contraseña'
+        ]
         
         for field in required_fields:
             if field not in data or not data[field]:
@@ -872,34 +875,18 @@ def agregar_empleado():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # 🔧 CORRECCIÓN: Los nombres de los parámetros deben coincidir
-        # Frontend envía: "Empresa" (ID de la empresa) y "Acceso" (número de acceso)
-        # Backend necesita: Acceso_idAcceso y NombreAcceso (o NumeroAcceso)
-        
-        # Manejar los campos opcionales de empresa/acceso
-        acceso_id = None
-        numero_acceso = None
-        
-        # Si se proporcionó una empresa
-        if data.get('Empresa') and data['Empresa'] != '':
-            acceso_id = int(data['Empresa'])  # Este es el ID de la tabla Acceso
-        
-        # Si se proporcionó número de acceso
-        if data.get('Acceso') and data['Acceso'].strip() != '':
-            numero_acceso = data['Acceso'].strip()
-
-        # Insertar en Usuario
+        # Insertar en Usuario (ya con Empresa en lugar de Acceso/Numero)
         cursor.execute("""
             INSERT INTO Usuario (
                 idUsuario, Rol_idRol, Nombres, Paterno, Materno,
                 FechaNacimiento, Direccion, CodigoPostal, Correo, NSS, Telefono,
                 FechaIngreso, RFC, Curp, Puesto, NombreContactoEmergencia,
                 TelefonoEmergencia, Parentesco, FechaBaja, ComentarioSalida,
-                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Mensual, 
-                Vacaciones, DiasDisponibles, Acceso_idAcceso, NumeroAcceso
+                clave, Estado, SueldoDiario, SueldoSemanal, BonoSemanal, Mensual,
+                Vacaciones, DiasDisponibles, Empresa
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL,
-                    ?, 'Activo', ?, ?, ?, ?, ?, ?, ?, ?)
+                    ?, 'Activo', ?, ?, ?, ?, ?, ?, ?)
         """, (
             int(data['idUsuario']),
             int(data['rol_id']),
@@ -926,8 +913,7 @@ def agregar_empleado():
             float(data.get('Mensual', 0)),
             int(data.get('Vacaciones', 0)),
             int(data.get('diasDisponibles', 0)),
-            acceso_id,       
-            numero_acceso     
+            data.get('Empresa', None)  # 👈 Aquí va directamente el textarea
         ))
 
         # Manejar áreas
@@ -937,14 +923,14 @@ def agregar_empleado():
 
         # Insertar en tabla intermedia Usuario_Area
         for id_area in area_ids:
-            # Verificar que el área existe
             cursor.execute("SELECT 1 FROM Area WHERE idArea = ?", (int(id_area),))
             if not cursor.fetchone():
                 return jsonify({"error": f"Área con ID {id_area} no existe"}), 400
             
-            # Insertar relación
-            cursor.execute("INSERT INTO Usuario_Area (idUsuario, idArea) VALUES (?, ?)",
-                           (int(data['idUsuario']), int(id_area)))
+            cursor.execute(
+                "INSERT INTO Usuario_Area (idUsuario, idArea) VALUES (?, ?)",
+                (int(data['idUsuario']), int(id_area))
+            )
 
         conn.commit()
         return jsonify({"mensaje": "Empleado insertado correctamente"}), 201
@@ -954,11 +940,12 @@ def agregar_empleado():
     except ValueError as e:
         return jsonify({"error": f"Error en formato de datos: {str(e)}"}), 400
     except Exception as e:
-        print(f"Error inesperado: {str(e)}")  # Para debug
+        print(f"Error inesperado: {str(e)}")
         return jsonify({"error": f"Error interno: {str(e)}"}), 500
     finally:
         if 'conn' in locals():
             conn.close()
+
 
 
 

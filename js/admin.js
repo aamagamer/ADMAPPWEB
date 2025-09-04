@@ -51,8 +51,7 @@ const camposExportacion = [
   { id: "Mensual", nombre: "Sueldo Mensual" },
   { id: "Vacaciones", nombre: "Vacaciones" },
   { id: "DiasDisponibles", nombre: "Dias Disponibles" },
-  { id: "NombreAcceso", nombre: "Empresa que tiene acceso" },
-  { id: "NumeroAcceso", nombre: "Número de Acceso" },
+  { id: "EmpresaAcceso", nombre: "Empresa y Número de Acceso" },
 ];
 
 // ===== UTILIDADES =====
@@ -199,8 +198,7 @@ const Validaciones = {
         nombre: "Vacaciones Disponibles",
         obligatorio: true,
       },
-      { id: "Empresa", nombre: "Empresa Acceso", obligatorio: false },
-      { id: "Acceso", nombre: "Numero de Acceso", obligatorio: false },
+      { id: "empresaAcceso", nombre: "Empresa y Acceso", obligatorio: false },
     ];
 
     // Limpiar estilos previos
@@ -466,92 +464,7 @@ const API = {
     }
   },
 
-  // Cargar empresas/accesos
-  async cargarEmpresas() {
-    try {
-      const response = await fetch("/api/acceso");
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
-      const accesos = await response.json();
-
-      const selectEmpresa = document.getElementById("Empresa");
-      if (!selectEmpresa) {
-        console.warn('No se encontró el select con id "Empresa"');
-        return;
-      }
-
-      // Limpiar el select
-      selectEmpresa.innerHTML = "";
-
-      // Agregar opción por defecto
-      const optionDefault = document.createElement("option");
-      optionDefault.value = "";
-      optionDefault.textContent = "Seleccione una empresa...";
-      selectEmpresa.appendChild(optionDefault);
-
-      // Agregar las opciones de empresas
-      accesos.forEach((acceso) => {
-        const option = document.createElement("option");
-        option.value = acceso.idAcceso;
-        option.textContent = acceso.NombreAcceso;
-        selectEmpresa.appendChild(option);
-      });
-
-      console.log("✅ Empresas cargadas correctamente");
-    } catch (error) {
-      console.error("❌ Error al cargar empresas:", error);
-
-      const selectEmpresa = document.getElementById("Empresa");
-      if (selectEmpresa) {
-        selectEmpresa.innerHTML =
-          '<option value="">Error al cargar empresas</option>';
-      }
-    }
-  },
-
-  // Cargar empresas para edición (si necesitas una versión específica para el modal de editar)
-  async cargarEmpresasParaEditar(empresaSeleccionada = null) {
-    try {
-      const response = await fetch("/api/acceso");
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
-      const accesos = await response.json();
-
-      const selectEmpresa = document.getElementById("edit-empresa");
-      if (!selectEmpresa) {
-        console.warn('No se encontró el select con id "edit-empresa"');
-        return;
-      }
-
-      // Limpiar el select
-      selectEmpresa.innerHTML = "";
-
-      // Agregar opción por defecto
-      const optionDefault = document.createElement("option");
-      optionDefault.value = "";
-      optionDefault.textContent = "Seleccione una empresa...";
-      selectEmpresa.appendChild(optionDefault);
-
-      // Agregar las opciones de empresas
-      accesos.forEach((acceso) => {
-        const option = document.createElement("option");
-        option.value = acceso.idAcceso;
-        option.textContent = acceso.NombreAcceso;
-        option.selected = empresaSeleccionada === acceso.idAcceso;
-        selectEmpresa.appendChild(option);
-      });
-
-      console.log("✅ Empresas para edición cargadas correctamente");
-    } catch (error) {
-      console.error("❌ Error al cargar empresas para edición:", error);
-
-      const selectEmpresa = document.getElementById("edit-empresa");
-      if (selectEmpresa) {
-        selectEmpresa.innerHTML =
-          '<option value="">Error al cargar empresas</option>';
-      }
-    }
-  },
+  
 
   // Cargar nombre de usuario
   async cargarNombreUsuario(idUsuario) {
@@ -844,8 +757,7 @@ const Empleados = {
         ${Modales.renderField("Sueldo Mensual", data.Mensual)}
         ${Modales.renderField("Vacaciones", data.Vacaciones)}
         ${Modales.renderField("Vacaciones disponibles", data.DiasDisponibles)}
-        ${Modales.renderField("Empresa con Acceso", data.NombreAcceso)}
-        ${Modales.renderField("Número de Acceso", data.NumeroAcceso)}
+        ${Modales.renderField("Empresa", data.Empresa)}
       `;
 
       Modales.toggle("modal", true);
@@ -891,8 +803,7 @@ const Empleados = {
       ${Modales.renderField("CURP", data.Curp)}
       ${Modales.renderField("Puesto", data.Puesto)}
       ${Modales.renderField("Cantidad de reportes", totalReportes)}
-      ${Modales.renderField("Empresa con Acceso", data.NombreAcceso)}
-      ${Modales.renderField("Número de Acceso", data.NumeroAcceso)}
+      ${Modales.renderField("Empresa", data.Empresa)}
     `;
 
       Modales.toggle("modal-generales", true);
@@ -902,90 +813,87 @@ const Empleados = {
     }
   },
   // Editar empleado
-  async editar(id) {
-    Modales.toggle("edit-employee-modal", true);
+async editar(id) {
+  Modales.toggle("edit-employee-modal", true);
 
-    try {
-      const [data, roles] = await Promise.all([
-        API.cargarEmpleado(id),
-        API.cargarRoles(),
-      ]);
+  try {
+    const [data, roles] = await Promise.all([
+      API.cargarEmpleado(id),
+      API.cargarRoles(),
+    ]);
 
-      // Llenar select de roles
-      const selectRol = document.getElementById("edit-tipoRol");
-      selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-      roles.forEach((rol) => {
-        const option = document.createElement("option");
-        option.value = rol.idRol;
-        option.textContent = rol.TipoRol;
-        selectRol.appendChild(option);
-      });
+    // Llenar select de roles
+    const selectRol = document.getElementById("edit-tipoRol");
+    selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
+    roles.forEach((rol) => {
+      const option = document.createElement("option");
+      option.value = rol.idRol;
+      option.textContent = rol.TipoRol;
+      selectRol.appendChild(option);
+    });
 
-      // Llenar campos del formulario
-      const campos = {
-        "edit-idUsuario": data.idUsuario || "",
-        "edit-tipoRol": data.Rol_idRol || "",
-        "edit-nombres": data.Nombres || "",
-        "edit-paterno": data.Paterno || "",
-        "edit-materno": data.Materno || "",
-        "edit-fechaNacimiento": Utils.formatoFechaParaInput(
-          data.FechaNacimiento
-        ),
-        "edit-direccion": data.Direccion || "",
-        "edit-codigoPostal": data.CodigoPostal || "",
-        "edit-correo": data.Correo || "",
-        "edit-nss": data.NSS || "",
-        "edit-telefono": data.Telefono || "",
-        "edit-rfc": data.RFC || "",
-        "edit-curp": data.Curp || "",
-        "edit-puesto": data.Puesto || "",
-        "edit-nombreContactoEmergencia": data.NombreContactoEmergencia || "",
-        "edit-telefonoEmergencia": data.TelefonoEmergencia || "",
-        "edit-parentesco": data.Parentesco || "",
-        "edit-contraseña": data.clave || "",
-        "edit-confirmarContraseña": data.clave || "",
-        "edit-sueldoDiario": data.SueldoDiario || "",
-        "edit-sueldoSemanal": data.SueldoSemanal || "",
-        "edit-bonoSemanal": data.BonoSemanal || "",
-        "edit-Mensual": data.Mensual || "",
-        "edit-fechaBaja": Utils.formatoFechaParaInput(data.FechaBaja),
-        "edit-comentarioSalida": data.ComentarioSalida || "",
-        "edit-fechaIngreso": Utils.formatoFechaParaInput(data.FechaIngreso),
-        "edit-vacaciones":
-          data.Vacaciones != null
-            ? data.Vacaciones
-            : Utils.calcularDiasVacaciones(
-                Utils.formatoFechaParaInput(data.FechaIngreso)
-              ),
-        "edit-diasDisponibles": data.DiasDisponibles || 0,
-        "edit-empresa": data.Acceso_idAcceso || "",
-        "edit-acceso": data.NumeroAcceso || "",
-      };
+    // Llenar campos del formulario
+    const campos = {
+      "edit-idUsuario": data.idUsuario || "",
+      "edit-tipoRol": data.Rol_idRol || "",
+      "edit-nombres": data.Nombres || "",
+      "edit-paterno": data.Paterno || "",
+      "edit-materno": data.Materno || "",
+      "edit-fechaNacimiento": Utils.formatoFechaParaInput(
+        data.FechaNacimiento
+      ),
+      "edit-direccion": data.Direccion || "",
+      "edit-codigoPostal": data.CodigoPostal || "",
+      "edit-correo": data.Correo || "",
+      "edit-nss": data.NSS || "",
+      "edit-telefono": data.Telefono || "",
+      "edit-rfc": data.RFC || "",
+      "edit-curp": data.Curp || "",
+      "edit-puesto": data.Puesto || "",
+      "edit-nombreContactoEmergencia": data.NombreContactoEmergencia || "",
+      "edit-telefonoEmergencia": data.TelefonoEmergencia || "",
+      "edit-parentesco": data.Parentesco || "",
+      "edit-contraseña": data.clave || "",
+      "edit-confirmarContraseña": data.clave || "",
+      "edit-sueldoDiario": data.SueldoDiario || "",
+      "edit-sueldoSemanal": data.SueldoSemanal || "",
+      "edit-bonoSemanal": data.BonoSemanal || "",
+      "edit-Mensual": data.Mensual || "",
+      "edit-fechaBaja": Utils.formatoFechaParaInput(data.FechaBaja),
+      "edit-comentarioSalida": data.ComentarioSalida || "",
+      "edit-fechaIngreso": Utils.formatoFechaParaInput(data.FechaIngreso),
+      "edit-vacaciones":
+        data.Vacaciones != null
+          ? data.Vacaciones
+          : Utils.calcularDiasVacaciones(
+              Utils.formatoFechaParaInput(data.FechaIngreso)
+            ),
+      "edit-diasDisponibles": data.DiasDisponibles || 0,
+      // ✅ CORRECCIÓN: Usar el campo Empresa en lugar de NombreAcceso/NumeroAcceso
+      "edit-empresaAcceso": data.Empresa || "",
+    };
 
-      Object.entries(campos).forEach(([id, valor]) => {
-        const elemento = document.getElementById(id);
-        if (elemento) elemento.value = valor;
-      });
+    Object.entries(campos).forEach(([id, valor]) => {
+      const elemento = document.getElementById(id);
+      if (elemento) elemento.value = valor;
+    });
 
-      //Cargar Empresas
-      await API.cargarEmpresasParaEditar(data.Acceso_idAcceso);
+    // Cargar áreas
+    const idsDeAreas = (data.Areas || []).map((area) => area.idArea);
+    await this.cargarAreasParaEditar(data.idUsuario, idsDeAreas);
 
-      // Cargar áreas
-      const idsDeAreas = (data.Areas || []).map((area) => area.idArea);
-      await this.cargarAreasParaEditar(data.idUsuario, idsDeAreas);
-
-      // Event listener para recalcular vacaciones
-      const fechaIngresoInput = document.getElementById("edit-fechaIngreso");
-      fechaIngresoInput.addEventListener("change", function () {
-        const nuevaFecha = this.value;
-        const dias = Utils.calcularDiasVacaciones(nuevaFecha);
-        document.getElementById("edit-vacaciones").value = dias;
-      });
-    } catch (error) {
-      console.error("Error al cargar datos del empleado:", error);
-      alert("No se pudieron cargar los datos del empleado.");
-    }
-  },
+    // Event listener para recalcular vacaciones
+    const fechaIngresoInput = document.getElementById("edit-fechaIngreso");
+    fechaIngresoInput.addEventListener("change", function () {
+      const nuevaFecha = this.value;
+      const dias = Utils.calcularDiasVacaciones(nuevaFecha);
+      document.getElementById("edit-vacaciones").value = dias;
+    });
+  } catch (error) {
+    console.error("Error al cargar datos del empleado:", error);
+    alert("No se pudieron cargar los datos del empleado.");
+  }
+},
 
   // Cargar áreas para editar
   async cargarAreasParaEditar(idUsuario, areasSeleccionadas) {
@@ -1915,7 +1823,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     API.cargarAreas(),
     API.cargarNotificacionesReportes(),
     Empleados.aplicarFiltros(),
-    API.cargarEmpresas(),
+   
   ]);
 
   // Configurar intervalos
@@ -1932,211 +1840,192 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ===== CONFIGURACIÓN DE EVENT LISTENERS =====
 function setupFormListeners() {
   // Formulario de alta de empleado
-  const employeeForm = document.getElementById("employee-form");
-  if (employeeForm) {
-    employeeForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
+// Formulario de alta de empleado
+const employeeForm = document.getElementById("employee-form");
+if (employeeForm) {
+  employeeForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-      if (!Validaciones.validarCampos()) return;
+    if (!Validaciones.validarCampos()) return;
 
-      const contraseña = document.getElementById("contraseña").value;
-      const confirmarContraseña = document.getElementById(
-        "confirmarContraseña"
-      ).value;
+    const contraseña = document.getElementById("contraseña").value;
+    const confirmarContraseña = document.getElementById("confirmarContraseña").value;
 
-      if (!Validaciones.validarContraseñas(contraseña, confirmarContraseña))
-        return;
+    if (!Validaciones.validarContraseñas(contraseña, confirmarContraseña)) return;
 
-      const fechaIngreso = document.getElementById("fechaIngreso").value;
-      const diasVacaciones = Utils.calcularDiasVacaciones(fechaIngreso);
+    const fechaIngreso = document.getElementById("fechaIngreso").value;
+    const diasVacaciones = Utils.calcularDiasVacaciones(fechaIngreso);
 
-      const formData = new FormData(this);
-      const empleadoData = {};
-      formData.forEach((value, key) => {
-        empleadoData[key] = value;
+    const formData = new FormData(this);
+    const empleadoData = {};
+    formData.forEach((value, key) => {
+      empleadoData[key] = value;
+    });
+
+    const areasSeleccionadas = Array.from(
+      document.querySelectorAll('input[name="areas"]:checked')
+    ).map((cb) => Number.parseInt(cb.value));
+
+    if (areasSeleccionadas.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Área requerida",
+        text: "Debes seleccionar al menos un área.",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+      });
+      return;
+    }
+
+    empleadoData.areas = areasSeleccionadas;
+    empleadoData.rol_id = empleadoData.tipoRol;
+    delete empleadoData.tipoRol;
+    empleadoData.Vacaciones = diasVacaciones;
+
+    // ✅ CORRECCIÓN: Procesar el campo empresaAcceso (nombre + número)
+    const empresaAccesoTexto = document.getElementById("empresaAcceso").value || "";
+    const lineas = empresaAccesoTexto.split('\n').map(linea => linea.trim()).filter(linea => linea !== "");
+    
+    if (lineas.length > 0) {
+      // Unir todas las líneas en un solo string separado por " - "
+      empleadoData.Empresa = lineas.join(' - ');
+    } else {
+      empleadoData.Empresa = null;
+    }
+
+    // Convertir otros campos a números
+    empleadoData.idUsuario = Number(empleadoData.idUsuario);
+    empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
+    empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
+    empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
+    empleadoData.Mensual = Number(empleadoData.Mensual);
+    empleadoData.Vacaciones = Number(empleadoData.Vacaciones);
+    empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles);
+
+    console.log("📤 Datos que se enviarán:", empleadoData);
+
+    try {
+      const response = await fetch("/api/empleado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(empleadoData),
       });
 
-      const areasSeleccionadas = Array.from(
-        document.querySelectorAll('input[name="areas"]:checked')
-      ).map((cb) => Number.parseInt(cb.value));
-
-      if (areasSeleccionadas.length === 0) {
-        Swal.fire({
-          icon: "warning",
-          title: "Área requerida",
-          text: "Debes seleccionar al menos un área.",
-          confirmButtonColor: "#3085d6",
-          confirmButtonText: "Aceptar",
-        });
-        return;
-      }
-
-      empleadoData.areas = areasSeleccionadas;
-      empleadoData.rol_id = empleadoData.tipoRol;
-      delete empleadoData.tipoRol;
-      empleadoData.Vacaciones = diasVacaciones;
-
-      // ✅ NUEVO: Manejar los campos de Empresa y Acceso
-      // Si no se seleccionó empresa, enviar null
-      if (!empleadoData.Empresa || empleadoData.Empresa === "") {
-        empleadoData.Empresa = null;
-      } else {
-        empleadoData.Empresa = Number(empleadoData.Empresa); // Convertir a número si existe
-      }
-
-      // Si no hay número de acceso, enviar cadena vacía o null
-      if (!empleadoData.Acceso || empleadoData.Acceso.trim() === "") {
-        empleadoData.Acceso = null; // o "" dependiendo de tu DB
-      }
-
-      // Convertir otros campos a números
-      empleadoData.idUsuario = Number(empleadoData.idUsuario);
-      empleadoData.SueldoDiario = Number(empleadoData.SueldoDiario);
-      empleadoData.SueldoSemanal = Number(empleadoData.SueldoSemanal);
-      empleadoData.BonoSemanal = Number(empleadoData.BonoSemanal);
-      empleadoData.Mensual = Number(empleadoData.Mensual); // ✅ AGREGADO
-      empleadoData.Vacaciones = Number(empleadoData.Vacaciones);
-      empleadoData.diasDisponibles = Number(empleadoData.diasDisponibles);
-
-      console.log("📤 Datos que se enviarán:", empleadoData); // Para debug
-
-      try {
-        const response = await fetch("/api/empleado", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(empleadoData),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          console.error("❌ Error del servidor:", data);
-          throw new Error(data.error || "Error al guardar el empleado");
-        }
-
+      if (!response.ok) {
         const data = await response.json();
-        Swal.fire({
-          icon: "success",
-          title: "Empleado dado de alta",
-          text: data.mensaje,
-          confirmButtonColor: "#3085d6",
-          confirmButtonText: "Aceptar",
-        }).then(() => {
-          Modales.toggle("add-employee-modal", false);
-          // Limpiar formulario
-          document.getElementById("employee-form").reset();
-          location.reload();
-        });
-      } catch (error) {
-        console.error("❌ Error al insertar:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error al dar de alta",
-          text:
-            error.message || "Verifica que el id del usuario no esté duplicado",
-          confirmButtonColor: "#d33",
-          confirmButtonText: "Aceptar",
-        });
+        console.error("❌ Error del servidor:", data);
+        throw new Error(data.error || "Error al guardar el empleado");
       }
-    });
-  }
 
-  // Formulario de edición de empleado
-  const editEmployeeForm = document.getElementById("edit-employee-form");
-  if (editEmployeeForm) {
-    editEmployeeForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+      const data = await response.json();
+      Swal.fire({
+        icon: "success",
+        title: "Empleado dado de alta",
+        text: data.mensaje,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+      }).then(() => {
+        Modales.toggle("add-employee-modal", false);
+        document.getElementById("employee-form").reset();
+        location.reload();
+      });
+    } catch (error) {
+      console.error("❌ Error al insertar:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error al dar de alta",
+        text: error.message || "Verifica que el id del usuario no esté duplicado",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  });
+}
 
-      if (!Validaciones.validarCampos("edit-")) return;
+ // Formulario de edición de empleado
+const editEmployeeForm = document.getElementById("edit-employee-form");
+if (editEmployeeForm) {
+  editEmployeeForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const contraseña = document.getElementById("edit-contraseña").value;
-      const confirmar = document.getElementById(
-        "edit-confirmarContraseña"
-      ).value;
+    if (!Validaciones.validarCampos("edit-")) return;
 
-      if (!Validaciones.validarContraseñas(contraseña, confirmar)) return;
+    const contraseña = document.getElementById("edit-contraseña").value;
+    const confirmar = document.getElementById("edit-confirmarContraseña").value;
 
-      const accesoValue = document.getElementById("edit-acceso").value.trim();
-const numeroAcceso = accesoValue === "" ? null : Number(accesoValue);
+    if (!Validaciones.validarContraseñas(contraseña, confirmar)) return;
 
-      const empleadoData = {
-        idUsuario: Number(document.getElementById("edit-idUsuario").value),
-        rol_id: document.getElementById("edit-tipoRol").value,
-        nombres: document.getElementById("edit-nombres").value,
-        paterno: document.getElementById("edit-paterno").value,
-        materno: document.getElementById("edit-materno").value,
-        fechaNacimiento: document.getElementById("edit-fechaNacimiento").value,
-        direccion: document.getElementById("edit-direccion").value,
-        codigoPostal: document.getElementById("edit-codigoPostal").value,
-        correo: document.getElementById("edit-correo").value,
-        nss: document.getElementById("edit-nss").value,
-        telefono: document.getElementById("edit-telefono").value,
-        fechaIngreso: document.getElementById("edit-fechaIngreso").value,
-        rfc: document.getElementById("edit-rfc").value,
-        curp: document.getElementById("edit-curp").value,
-        puesto: document.getElementById("edit-puesto").value,
-        nombreContactoEmergencia: document.getElementById(
-          "edit-nombreContactoEmergencia"
-        ).value,
-        telefonoEmergencia: document.getElementById("edit-telefonoEmergencia")
-          .value,
-        parentesco: document.getElementById("edit-parentesco").value,
-        contraseña: contraseña,
-        SueldoDiario: Number(
-          document.getElementById("edit-sueldoDiario").value
-        ),
-        SueldoSemanal: Number(
-          document.getElementById("edit-sueldoSemanal").value
-        ),
-        BonoSemanal: Number(document.getElementById("edit-bonoSemanal").value),
-        Mensual: Number(document.getElementById("edit-Mensual").value),
-        fechaBaja: document.getElementById("edit-fechaBaja").value || null,
-        comentarioSalida:
-          document.getElementById("edit-comentarioSalida").value || null,
-        Vacaciones:
-          Number(document.getElementById("edit-vacaciones").value) || 0,
-        diasDisponibles:
-          Number(document.getElementById("edit-diasDisponibles").value) || 0,
-        Acceso_idAcceso: document.getElementById("edit-empresa").value || null,
-        NumeroAcceso: Number(document.getElementById("edit-acceso").value) || "",
-      };
+    const empleadoData = {
+      idUsuario: Number(document.getElementById("edit-idUsuario").value),
+      rol_id: document.getElementById("edit-tipoRol").value,
+      nombres: document.getElementById("edit-nombres").value,
+      paterno: document.getElementById("edit-paterno").value,
+      materno: document.getElementById("edit-materno").value,
+      fechaNacimiento: document.getElementById("edit-fechaNacimiento").value,
+      direccion: document.getElementById("edit-direccion").value,
+      codigoPostal: document.getElementById("edit-codigoPostal").value,
+      correo: document.getElementById("edit-correo").value,
+      nss: document.getElementById("edit-nss").value,
+      telefono: document.getElementById("edit-telefono").value,
+      fechaIngreso: document.getElementById("edit-fechaIngreso").value,
+      rfc: document.getElementById("edit-rfc").value,
+      curp: document.getElementById("edit-curp").value,
+      puesto: document.getElementById("edit-puesto").value,
+      nombreContactoEmergencia: document.getElementById("edit-nombreContactoEmergencia").value,
+      telefonoEmergencia: document.getElementById("edit-telefonoEmergencia").value,
+      parentesco: document.getElementById("edit-parentesco").value,
+      contraseña: contraseña,
+      SueldoDiario: Number(document.getElementById("edit-sueldoDiario").value),
+      SueldoSemanal: Number(document.getElementById("edit-sueldoSemanal").value),
+      BonoSemanal: Number(document.getElementById("edit-bonoSemanal").value),
+      Mensual: Number(document.getElementById("edit-Mensual").value),
+      fechaBaja: document.getElementById("edit-fechaBaja").value || null,
+      comentarioSalida: document.getElementById("edit-comentarioSalida").value || null,
+      Vacaciones: Number(document.getElementById("edit-vacaciones").value) || 0,
+      diasDisponibles: Number(document.getElementById("edit-diasDisponibles").value) || 0,
+    };
 
-      const checkboxes = document.querySelectorAll(
-        "#edit-checkbox-areas input[name='areas']:checked"
-      );
-      const areasSeleccionadas = Array.from(checkboxes).map((cb) =>
-        Number.parseInt(cb.value)
-      );
-      empleadoData.areas = areasSeleccionadas;
+    // ✅ CORRECCIÓN: Procesar el campo empresaAcceso para edición
+    const editEmpresaAccesoTexto = document.getElementById("edit-empresaAcceso").value || "";
+    const editLineas = editEmpresaAccesoTexto.split('\n').map(linea => linea.trim()).filter(linea => linea !== "");
 
-      try {
-        const response = await fetch(
-          `/api/empleado/${empleadoData.idUsuario}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(empleadoData),
-          }
-        );
+    if (editLineas.length > 0) {
+      // Unir todas las líneas en un solo string separado por " - "
+      empleadoData.Empresa = editLineas.join(' - ');
+    } else {
+      empleadoData.Empresa = null;
+    }
 
-        if (!response.ok) throw new Error("Error al actualizar el empleado");
+    const checkboxes = document.querySelectorAll("#edit-checkbox-areas input[name='areas']:checked");
+    const areasSeleccionadas = Array.from(checkboxes).map((cb) => Number.parseInt(cb.value));
+    empleadoData.areas = areasSeleccionadas;
 
-        const data = await response.json();
-        Swal.fire({
-          icon: "success",
-          title: "Empleado actualizado",
-          text: data.mensaje,
-          confirmButtonColor: "#3085d6",
-          confirmButtonText: "Aceptar",
-        }).then(() => {
-          Modales.toggle("edit-employee-modal", false);
-          location.reload();
-        });
-      } catch (err) {
-        console.error("Error:", err);
-        alert("Hubo un error al actualizar: " + err.message);
-      }
-    });
-  }
+    try {
+      const response = await fetch(`/api/empleado/${empleadoData.idUsuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(empleadoData),
+      });
+
+      if (!response.ok) throw new Error("Error al actualizar el empleado");
+
+      const data = await response.json();
+      Swal.fire({
+        icon: "success",
+        title: "Empleado actualizado",
+        text: data.mensaje,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+      }).then(() => {
+        Modales.toggle("edit-employee-modal", false);
+        location.reload();
+      });
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Hubo un error al actualizar: " + err.message);
+    }
+  });
+}
 
   // Otros formularios...
   setupOtherForms();
@@ -2298,8 +2187,7 @@ function setupOtherForms() {
           document.getElementById("empresa-form").reset();
           
           // Recargar las empresas en los selects
-          API.cargarEmpresas();
-          API.cargarEmpresasParaEditar();
+          
         });
 
       } catch (error) {
