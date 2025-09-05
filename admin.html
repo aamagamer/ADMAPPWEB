@@ -660,16 +660,47 @@
 
 
          <!-- Campo Empresa y Número de Acceso -->
-<div class="form-group">
-  <label for="empresaAcceso">Empresa y Número de Acceso:</label>
+<!-- Campo Empresa y Número de Acceso con estilos inline -->
+<div style="margin-bottom: 20px;">
+  <label 
+    for="empresaAcceso" 
+    style="
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    "
+  >
+    Empresa y Número de Acceso:
+  </label>
   <textarea
     id="empresaAcceso"
     name="empresaAcceso"
     placeholder="Ingresa el nombre de la empresa y el número de acceso"
     rows="4"
-    cols="50"
+    style="
+      width: 100%;
+      min-height: 80px;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: #374151;
+      background-color: #ffffff;
+      resize: vertical;
+      transition: all 0.2s ease;
+      line-height: 1.5;
+      box-sizing: border-box;
+      outline: none;
+    "
+    onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
+    onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
+    onmouseover="this.style.borderColor='#d1d5db';"
+    onmouseout="if(this !== document.activeElement) this.style.borderColor='#e5e7eb';"
   ></textarea>
-  
 </div>
 
           <div class="form-actions">
@@ -962,15 +993,46 @@
 
          
 
-          <!-- Campo Empresa y Número de Acceso -->
-<div class="form-group">
-  <label for="edit-empresaAcceso">Empresa y Número de Acceso:</label>
+          <!-- Campo Empresa y Número de Acceso con estilos inline -->
+<div style="margin-bottom: 20px;">
+  <label 
+    for="edit-empresaAcceso" 
+    style="
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    "
+  >
+    Empresa y Número de Acceso:
+  </label>
   <textarea
     id="edit-empresaAcceso"
     name="empresaAcceso"
     placeholder="Ingresa el nombre de la empresa y el número de acceso"
     rows="4"
-    cols="50"
+    style="
+      width: 100%;
+      min-height: 80px;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: #374151;
+      background-color: #ffffff;
+      resize: vertical;
+      transition: all 0.2s ease;
+      line-height: 1.5;
+      box-sizing: border-box;
+      outline: none;
+    "
+    onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
+    onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
+    onmouseover="this.style.borderColor='#d1d5db';"
+    onmouseout="if(this !== document.activeElement) this.style.borderColor='#e5e7eb';"
   ></textarea>
 </div>
 
