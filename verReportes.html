@@ -15,123 +15,31 @@
     <script src="js/utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      .exportar-button {
-        background-color: #27ae60;
-        color: white;
-        border: none;
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin-bottom: 20px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .exportar-button:hover {
-        background-color: #219150;
-      }
-
-      .filtros-container {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border: 1px solid #dee2e6;
-      }
-
-      .filtros-titulo {
-        font-weight: bold;
-        margin-bottom: 15px;
-        color: #495057;
-        font-size: 1.1rem;
-      }
-
-      .filtro-group {
-        margin-bottom: 15px;
-      }
-
-      .filtro-group:last-child {
-        margin-bottom: 0;
-      }
-
-      .filtro-label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 500;
-        color: #6c757d;
-        font-size: 0.9rem;
-      }
-
-      .filtro-input, .filtro-select {
-        width: 100%;
-        padding: 10px;
-        font-size: 1rem;
-        border-radius: 6px;
-        border: 1px solid #ced4da;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-      }
-
-      .filtro-input:focus, .filtro-select:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-
-      .filtros-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-      }
-
-      .limpiar-filtros-btn {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin-top: 10px;
-      }
-
-      .limpiar-filtros-btn:hover {
-        background-color: #545b62;
-      }
       .pdf-reporte-btn {
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  width: 35px;
-  height: 35px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
 
-.pdf-reporte-btn:hover {
-  background: linear-gradient(135deg, #218838, #1ba085);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
+      .pdf-reporte-btn:hover {
+        background: linear-gradient(135deg, #218838, #1ba085);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
 
-.pdf-reporte-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-      @media (max-width: 768px) {
-        .filtros-row {
-          grid-template-columns: 1fr;
-        }
+      .pdf-reporte-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
     </style>
   </head>
@@ -150,83 +58,8 @@
     <div class="main-container">
       <div class="content-container">
         <h1 class="page-title">Ver Reportes</h1>
-
-        <!-- Contenedor de filtros mejorado -->
-        <div class="filtros-container">
-          
-          
-          <div class="filtro-group">
-            
-            <input
-              type="text"
-              id="filtro-empleado"
-              class="filtro-input"
-              placeholder="Ingresa el nombre del empleado..."
-            />
-          </div>
-
-          <div class="filtro-group">
-         
-            <select id="subject" class="filtro-select">
-              <option value="">Todos los asuntos</option>
-              <!-- Opciones se llenarán dinámicamente con JS -->
-            </select>
-          </div>
-
-          <div class="filtros-row">
-            <div class="filtro-group">
-              
-              <select id="filtro-anio" class="filtro-select">
-                <option value="">Todos los años</option>
-                <!-- Opciones se llenarán dinámicamente con JS -->
-              </select>
-            </div>
-
-            <div class="filtro-group">
-              
-              <select id="filtro-mes" class="filtro-select">
-                <option value="">Todos los meses</option>
-                <option value="01">Enero</option>
-                <option value="02">Febrero</option>
-                <option value="03">Marzo</option>
-                <option value="04">Abril</option>
-                <option value="05">Mayo</option>
-                <option value="06">Junio</option>
-                <option value="07">Julio</option>
-                <option value="08">Agosto</option>
-                <option value="09">Septiembre</option>
-                <option value="10">Octubre</option>
-                <option value="11">Noviembre</option>
-                <option value="12">Diciembre</option>
-              </select>
-            </div>
-          </div>
-
-          <button onclick="limpiarFiltros()" class="limpiar-filtros-btn">
-            <i class="bi bi-x-circle"></i> Limpiar filtros
-          </button>
-        </div>
-
-        <!-- Botón exportar Excel -->
-        <button onclick="exportarExcelDesdeVista()" class="exportar-button">
-          <i class="bi bi-file-earmark-excel"></i> Exportar Excel
-        </button>
-
         <div class="info-container" id="report-content"></div>
       </div>
     </div>
-
-    <script>
-      // Función para limpiar todos los filtros
-      function limpiarFiltros() {
-        document.getElementById("filtro-empleado").value = "";
-        document.getElementById("subject").value = "";
-        document.getElementById("filtro-anio").value = "";
-        document.getElementById("filtro-mes").value = "";
-        
-        // Disparar el evento de filtrado para mostrar todos los reportes
-        document.getElementById("filtro-empleado").dispatchEvent(new Event('input'));
-      }
-    </script>
   </body>
 </html>
