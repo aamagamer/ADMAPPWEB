@@ -51,7 +51,7 @@ const camposExportacion = [
   { id: "Mensual", nombre: "Sueldo Mensual" },
   { id: "Vacaciones", nombre: "Vacaciones" },
   { id: "DiasDisponibles", nombre: "Dias Disponibles" },
-  { id: "EmpresaAcceso", nombre: "Empresa y Número de Acceso" },
+  { id: "Empresa", nombre: "Empresa y Número de Acceso" },
 ];
 
 // ===== UTILIDADES =====
