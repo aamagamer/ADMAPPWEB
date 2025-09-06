@@ -54,14 +54,39 @@ function mostrarModal(modalId, mensaje, titulo = null) {
   }
 }
 
-// Funciones específicas de modales (sin cambios)
+// Funciones específicas de modales
 function mostrarAlarma(mensaje) {
   mostrarModal('alarmaModal', mensaje);
 }
 
-function mostrarAdvertenciaAnticipacion(horasRequeridas) {
-  const mensaje = `Debes solicitar el permiso con al menos ${horasRequeridas} horas de anticipación.`;
+function mostrarAdvertenciaAnticipacion(mensaje) {
   mostrarModal('anticipacionModal', mensaje);
+}
+
+// 🔹 Nueva función para calcular fecha límite según horas hábiles
+function calcularFechaLimite(fechaPermiso) {
+  const HORAS_REQUERIDAS = 14; // 4h + 10h
+  const INICIO_JORNADA = 8;
+  const FIN_JORNADA = 18;
+
+  let horasPendientes = HORAS_REQUERIDAS;
+  // CAMBIO PRINCIPAL: Iniciamos desde el inicio del día del permiso (8:00 AM)
+  let fechaLimite = new Date(fechaPermiso);
+  fechaLimite.setHours(INICIO_JORNADA, 0, 0, 0); // 8:00:00 AM del día del permiso
+
+  while (horasPendientes > 0) {
+    fechaLimite.setHours(fechaLimite.getHours() - 1);
+
+    const dia = fechaLimite.getDay(); // 0 = domingo, 6 = sábado
+    const hora = fechaLimite.getHours();
+
+    // Solo cuenta como hora hábil si es lunes a viernes y entre 8-18 horas
+    if (dia >= 1 && dia <= 5 && hora >= INICIO_JORNADA && hora < FIN_JORNADA) {
+      horasPendientes--;
+    }
+  }
+
+  return fechaLimite;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -92,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initDatePicker() {
     flatpickr("#fecha", {
-      minDate: new Date(Date.now() + 28 * 60 * 60 * 1000),
+      minDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // mínimo 1 día después
       dateFormat: "Y-m-d",
       locale: "es",
       disable: diasFestivos,
@@ -103,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Establecer fecha mínima
   const ahora = new Date();
-  const fechaMin = new Date(ahora.getTime() + 28 * 60 * 60 * 1000);
+  const fechaMin = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
   fechaMin.setHours(0, 0, 0, 0);
   elementos.fechaInput.min = formatDate(fechaMin);
 
@@ -127,12 +152,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Validar anticipación
+    // Validar anticipación laboral
     const fechaHoraPermiso = new Date(`${elementos.fechaInput.value}T${elementos.horaInicio.value}`);
-    const diferencia = fechaHoraPermiso.getTime() - new Date().getTime();
+    const fechaLimite = calcularFechaLimite(fechaHoraPermiso);
 
-    if (diferencia < 28 * 60 * 60 * 1000) {
-      mostrarAdvertenciaAnticipacion(28);
+    if (new Date() > fechaLimite) {
+      const fechaHumana = fechaLimite.toLocaleString("es-MX", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      mostrarAdvertenciaAnticipacion(`El permiso debe solicitarse antes de ${fechaHumana}`);
       return;
     }
 
@@ -165,7 +198,7 @@ function enviarSolicitud() {
     actividades: document.getElementById("actividades"),
     confirmModal: document.getElementById("confirm-modal"),
     tipoCompensacion: document.getElementById("tipo-compensacion"),
-    formulario: document.querySelector("form") // Añadimos el formulario a los elementos
+    formulario: document.querySelector("form")
   };
 
   const idUsuario = localStorage.getItem("idUsuario");
@@ -192,9 +225,8 @@ function enviarSolicitud() {
     .then((data) => {
       elementos.confirmModal.style.display = "none";
       if (data.mensaje) {
-        // Resetear el formulario después de enviar exitosamente
         elementos.formulario.reset();
-        //window.location.href = determinarPaginaRedireccion();
+        // window.location.href = determinarPaginaRedireccion();
       } else {
         mostrarAlarma("Error al registrar el permiso: " + (data.error || "desconocido"));
       }
@@ -205,7 +237,6 @@ function enviarSolicitud() {
       mostrarAlarma("Error de red al enviar la solicitud.");
     });
 }
-
 
 function cargarCompensaciones() {
   fetch("/api/compensaciones")
